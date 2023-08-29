@@ -168,4 +168,6 @@ class ZIMService {
   void onRoomStateChanged(_, ZIMRoomState state, ZIMRoomEvent event, Map extendedData, String roomID) {
     roomStateChangedStreamCtrl.add(ZIMServiceRoomStateChangedEvent(roomID, state, event, extendedData));
   }
+
+  void cancelInvitation({required String invitationID, required List<String> invitees}) {}
 }
