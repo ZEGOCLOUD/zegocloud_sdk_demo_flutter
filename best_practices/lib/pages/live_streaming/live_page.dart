@@ -485,7 +485,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
             CupertinoDialogAction(
               child: const Text('Agree'),
               onPressed: () {
-                liveStreamingManager.acceptPKBattleRequest(requestID, false);
+                liveStreamingManager.acceptPKBattleRequest(requestID);
                 Navigator.pop(context);
               },
             ),

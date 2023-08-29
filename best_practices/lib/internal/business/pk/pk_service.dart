@@ -156,11 +156,11 @@ class PKService {
         currentZegoUserRequest?.requestID ?? '');
   }
 
-  void acceptPKBattleRequest(String requestID, bool isEnd) {
+  void acceptPKBattleRequest(String requestID) {
     final requestData = <String, dynamic>{
       'room_id': ZEGOSDKManager().expressService.currentRoomID,
       'user_name': ZEGOSDKManager().currentUser?.userName,
-      'type': isEnd ? PKProtocolType.endPK : PKProtocolType.startPK,
+      'type': PKProtocolType.startPK,
     };
     ZEGOSDKManager()
         .zimService
@@ -170,16 +170,38 @@ class PKService {
             ..extendedData = jsonEncode(requestData),
         )
         .then((value) {
-      if (roomPKStateNoti.value != RoomPKState.isStartPK && !isEnd) {
-        willStartPK(
-          roomID: currentZegoUserRequest?.roomID ?? '',
-          userID: currentZegoUserRequest?.inviterID ?? '',
-          userName: currentZegoUserRequest?.inviterName ?? '',
-        );
-      }
+      willStartPK(
+        roomID: currentZegoUserRequest?.roomID ?? '',
+        userID: currentZegoUserRequest?.inviterID ?? '',
+        userName: currentZegoUserRequest?.inviterName ?? '',
+      );
     }).catchError((error) {
       debugPrint('acceptPK fail error:$error');
     });
+  }
+
+  void acceptResumePKRequest(String requestID) {
+    final requestData = <String, dynamic>{
+      'room_id': ZEGOSDKManager().expressService.currentRoomID,
+      'user_name': ZEGOSDKManager().currentUser?.userName,
+      'type': PKProtocolType.resume,
+    };
+
+    ZEGOSDKManager()
+        .zimService
+        .acceptUserRequest(
+          requestID,
+          config: ZIMUserRequestAcceptConfig()
+            ..extendedData = jsonEncode(requestData),
+        )
+        .then((value) => resumeMixerTask())
+        .catchError((error) {
+      debugPrint('acceptPK resume fail error:$error');
+    });
+  }
+
+  void responsePKEndRequest(String requestID) {
+    ZEGOSDKManager.instance.zimService.acceptUserRequest(requestID);
   }
 
   void rejectPKBattleRequest(String requestID) {
@@ -250,7 +272,15 @@ class PKService {
         currentZegoUserRequest = null;
         roomPKStateNoti.value = RoomPKState.isNoPK;
       }
-    }).catchError((error) {});
+    }).catchError((error) {
+      debugPrint('startMixStreamTask fail:$error');
+
+    });
+  }
+
+  void resumeMixerTask() {
+    ZEGOSDKManager.instance.expressService.stopMixerTask();
+    startMixStreamTask();
   }
 
   Future<ZegoMixerStartResult> startMixStreamTask({
@@ -383,7 +413,7 @@ class PKService {
             .add(IncomingPKRequestEvent(requestID: event.invitationID));
         break;
       case PKProtocolType.endPK:
-        acceptPKBattleRequest(event.invitationID, true);
+        responsePKEndRequest(event.invitationID);
         stopPK();
         break;
       case PKProtocolType.resume:
@@ -391,7 +421,7 @@ class PKService {
             !ZegoLiveStreamingManager.instance.isLocalUserHost()) {
           rejectPKBattleRequest(event.invitationID);
         } else {
-          acceptPKBattleRequest(event.invitationID, false);
+          acceptResumePKRequest(event.invitationID);
         }
         break;
     }
