@@ -274,7 +274,6 @@ class PKService {
       }
     }).catchError((error) {
       debugPrint('startMixStreamTask fail:$error');
-
     });
   }
 
@@ -401,7 +400,8 @@ class PKService {
       case PKProtocolType.startPK:
         if (roomPKStateNoti.value != RoomPKState.isNoPK ||
             currentZegoUserRequest != null ||
-            !ZegoLiveStreamingManager.instance.isLocalUserHost()) {
+            !ZegoLiveStreamingManager.instance.isLocalUserHost() ||
+            !ZegoLiveStreamingManager.instance.isLivingNotifier.value) {
           rejectPKBattleRequest(event.invitationID);
           return;
         }

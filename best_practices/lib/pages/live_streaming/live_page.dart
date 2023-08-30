@@ -471,6 +471,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
     showingPKDialog = true;
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
         return CupertinoAlertDialog(
           title: const Text('receive pk invitation'),
