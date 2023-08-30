@@ -35,6 +35,7 @@ class _ZegoPKBattleViewState extends State<ZegoPKBattleView> {
       ? ZEGOSDKManager().currentUser
       : ZegoLiveStreamingManager().hostNoti.value;
   ZegoSDKUser? get rightUser => ZegoLiveStreamingManager().pkUser;
+  bool isHeartBeatBrokenMuteAudio = false;
 
   final pkManager = ZegoLiveStreamingManager();
 
@@ -84,12 +85,20 @@ class _ZegoPKBattleViewState extends State<ZegoPKBattleView> {
             leftUserHeartBeatBrokenNotifier.value = true;
           } else if (id == (rightUser?.userID ?? '')) {
             rightUserHeartBeatBrokenNotifier.value = true;
+            if (pkManager.isLocalUserHost() &&
+                !pkManager.isMuteAnotherAudioNoti.value) {
+              isHeartBeatBrokenMuteAudio = true;
+              pkManager.muteAnotherHostAudio(isHeartBeatBrokenMuteAudio);
+            }
           }
           needDeleteIDs.add(id);
         } else {
-          // if (id == (rightUser?.userID ?? '')) {
-          //   pkManager.muteAnotherHostAudio(true);
-          // }
+          if (id == (rightUser?.userID ?? '')) {
+            if (pkManager.isLocalUserHost() && isHeartBeatBrokenMuteAudio) {
+              isHeartBeatBrokenMuteAudio = false;
+              pkManager.muteAnotherHostAudio(isHeartBeatBrokenMuteAudio);
+            }
+          }
         }
       });
       needDeleteIDs.forEach(heartBeatMap.remove);
@@ -102,6 +111,7 @@ class _ZegoPKBattleViewState extends State<ZegoPKBattleView> {
     final String senderID = seiMap['sender_id'];
     cameraStateMap[senderID] = seiMap['cam'];
     heartBeatMap[senderID] = DateTime.now();
+    debugPrint('****sei sendID:$senderID');
     if (senderID == (leftUser?.userID ?? '')) {
       leftUserHeartBeatBrokenNotifier.value = false;
       leftUser?.isCamerOnNotifier.value = seiMap['cam'];

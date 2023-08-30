@@ -163,8 +163,8 @@ class ZegoLiveStreamingManager {
     pkService!.cancelPKBattleRequest();
   }
 
-  void acceptPKBattleRequest(String requestID, bool isEnd) {
-    pkService!.acceptPKBattleRequest(requestID, isEnd);
+  void acceptPKBattleRequest(String requestID) {
+    pkService!.acceptPKBattleRequest(requestID);
   }
 
   void rejectPKBattleRequest(String requestID) {
