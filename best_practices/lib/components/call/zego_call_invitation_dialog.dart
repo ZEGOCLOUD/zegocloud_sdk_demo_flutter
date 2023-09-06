@@ -1,9 +1,9 @@
-import 'package:call_with_invitation/components/zego_accept_button.dart';
-import 'package:call_with_invitation/components/zego_defines.dart';
-import 'package:call_with_invitation/components/zego_reject_button.dart';
-import 'package:call_with_invitation/interal/zim/call_data_manager.dart';
-import 'package:call_with_invitation/interal/zim/zim_service_defines.dart';
 import 'package:flutter/material.dart';
+
+import '../../internal/business/call/call_data.dart';
+import 'zego_accept_button.dart';
+import 'zego_defines.dart';
+import 'zego_reject_button.dart';
 
 class ZegoCallInvitationDialog extends StatefulWidget {
   const ZegoCallInvitationDialog({
@@ -28,7 +28,7 @@ class ZegoCallInvitationDialogState extends State<ZegoCallInvitationDialog> {
     return LayoutBuilder(builder: (context, containers) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 24),
-        width: containers.maxWidth,
+        width: containers.maxWidth - 20,
         height: 100.0,
         decoration: BoxDecoration(
           color: const Color(0xff333333).withOpacity(0.8),
@@ -37,26 +37,35 @@ class ZegoCallInvitationDialogState extends State<ZegoCallInvitationDialog> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Column(
-              children: [
-                const SizedBox(
-                  height: 20,
+            Expanded(
+              flex: 2,
+              child: Container(
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  children: [
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    userNameText(),
+                    const SizedBox(height: 5),
+                    callTypeText(),
+                  ],
                 ),
-                userNameText(),
-                const SizedBox(height: 20),
-                callTypeText(),
-              ],
+              ),
             ),
-            const SizedBox(
-              width: 40,
+            const Expanded(
+              flex: 2,
+              child: SizedBox(
+                width: 100,
+              ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                rejectButton(),
-                const SizedBox(width: 40),
-                acceptButton(),
-              ],
+            Expanded(
+              flex: 2,
+              child: SizedBox(
+                child: Row(
+                  children: [rejectButton(), const SizedBox(width: 20), acceptButton()],
+                ),
+              ),
             ),
           ],
         ),
@@ -65,14 +74,22 @@ class ZegoCallInvitationDialogState extends State<ZegoCallInvitationDialog> {
   }
 
   Widget userNameText() {
-    return Text(
-      widget.invitationData.inviter.userName,
-      textAlign: TextAlign.left,
-      style: const TextStyle(
-        fontSize: 16,
-        color: Colors.white,
-        fontWeight: FontWeight.normal,
-        decoration: TextDecoration.none,
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: const BoxDecoration(
+        color: Colors.grey,
+        borderRadius: BorderRadius.all(Radius.circular(20)),
+      ),
+      child: Center(
+        child: SizedBox(
+            height: 20,
+            child: Text(
+              widget.invitationData.inviter.userName[0],
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  fontSize: 18, fontWeight: FontWeight.bold, decoration: TextDecoration.none, color: Colors.black),
+            )),
       ),
     );
   }
@@ -83,7 +100,7 @@ class ZegoCallInvitationDialogState extends State<ZegoCallInvitationDialog> {
       textAlign: TextAlign.left,
       style: const TextStyle(
         fontSize: 16,
-        color: Colors.white,
+        color: Colors.grey,
         fontWeight: FontWeight.normal,
         decoration: TextDecoration.none,
       ),

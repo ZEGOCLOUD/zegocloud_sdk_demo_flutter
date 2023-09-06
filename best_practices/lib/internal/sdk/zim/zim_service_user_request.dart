@@ -24,32 +24,27 @@ extension ZIMServiceInvitation on ZIMService {
   }
 
   void onUserRequestReceived(ZIM zim, ZIMCallInvitationReceivedInfo info, String invitationID) {
-    incomingUserRequestReceivedStreamCtrl
-        .add(IncomingUserRequestReceivedEvent(invitationID: invitationID, info: info));
+    incomingUserRequestReceivedStreamCtrl.add(IncomingUserRequestReceivedEvent(requestID: invitationID, info: info));
   }
 
   void onUserRequestCancelled(ZIM zim, ZIMCallInvitationCancelledInfo info, String invitationID) {
-    incomingUserRequestCancelledStreamCtrl
-        .add(IncomingUserRequestCancelledEvent(invitationID: invitationID, info: info));
+    incomingUserRequestCancelledStreamCtrl.add(IncomingUserRequestCancelledEvent(requestID: invitationID, info: info));
   }
 
   void onUserRequestTimeout(ZIM zim, ZIMCallInvitationTimeoutInfo info, String invitationID) {
-    incomingUserRequestTimeoutStreamCtrl
-        .add(IncomingUserRequestTimeoutEvent(info: info, invitationID: invitationID));
+    incomingUserRequestTimeoutStreamCtrl.add(IncomingUserRequestTimeoutEvent(info: info, requestID: invitationID));
   }
 
   void onUserRequestAccepted(ZIM zim, ZIMCallInvitationAcceptedInfo info, String invitationID) {
-    outgoingUserRequestAcceptedStreamCtrl
-        .add(OutgoingUserRequestAcceptedEvent(invitationID: invitationID, info: info));
+    outgoingUserRequestAcceptedStreamCtrl.add(OutgoingUserRequestAcceptedEvent(requestID: invitationID, info: info));
   }
 
   void onUserRequestRejected(ZIM zim, ZIMCallInvitationRejectedInfo info, String invitationID) {
-    outgoingUserRequestRejectedStreamCtrl
-        .add(OutgoingUserRequestRejectedEvent(invitationID: invitationID, info: info));
+    outgoingUserRequestRejectedStreamCtrl.add(OutgoingUserRequestRejectedEvent(requestID: invitationID, info: info));
   }
 
   void onUserRequestAnsweredTimeout(ZIM zim, List<String> invitees, String invitationID) {
     outgoingUserRequestTimeoutStreamCtrl
-        .add(OutgoingUserRequestTimeoutEvent(invitationID: invitationID, invitees: invitees));
+        .add(OutgoingUserRequestTimeoutEvent(requestID: invitationID, invitees: invitees));
   }
 }

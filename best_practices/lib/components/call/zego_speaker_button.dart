@@ -54,20 +54,14 @@ class _ZegoSpeakerButtonState extends State<ZegoSpeakerButton> {
               width: containerSize.width,
               height: containerSize.height,
               decoration: BoxDecoration(
-                color: speakerState
-                    ? Colors.white
-                    : const Color.fromARGB(255, 51, 52, 56).withOpacity(0.6),
+                color: speakerState ? Colors.white : const Color.fromARGB(255, 51, 52, 56).withOpacity(0.6),
                 shape: BoxShape.circle,
               ),
               child: SizedBox.fromSize(
                 size: sizeBoxSize,
                 child: speakerState
-                    ? const Image(
-                        image:
-                            AssetImage('assets/icons/toolbar_speaker_off.png'))
-                    : const Image(
-                        image: AssetImage(
-                            'assets/icons/toolbar_speaker_normal.png')),
+                    ? const Image(image: AssetImage('assets/icons/icon_speaker_off.png'))
+                    : const Image(image: AssetImage('assets/icons/icon_speaker_normal.png')),
               ),
             ),
           );
