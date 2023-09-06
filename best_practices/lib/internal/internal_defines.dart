@@ -163,68 +163,68 @@ class ZIMServiceReceiveRoomCustomSignalingEvent {
 }
 
 class IncomingUserRequestReceivedEvent {
-  final String invitationID;
+  final String requestID;
   final ZIMCallInvitationReceivedInfo info;
-  IncomingUserRequestReceivedEvent({required this.invitationID, required this.info});
+  IncomingUserRequestReceivedEvent({required this.requestID, required this.info});
 
   @override
   String toString() {
-    return 'IncomingUserRequestReceivedEvent{invitationID: $invitationID, info: $info}';
+    return 'IncomingUserRequestReceivedEvent{requestID: $requestID, info: $info}';
   }
 }
 
 class IncomingUserRequestCancelledEvent {
-  final String invitationID;
+  final String requestID;
   final ZIMCallInvitationCancelledInfo info;
-  IncomingUserRequestCancelledEvent({required this.invitationID, required this.info});
+  IncomingUserRequestCancelledEvent({required this.requestID, required this.info});
 
   @override
   String toString() {
-    return 'IncomingUserRequestCancelledEvent{invitationID: $invitationID, info: $info}';
+    return 'IncomingUserRequestCancelledEvent{requestID: $requestID, info: $info}';
   }
 }
 
 class OutgoingUserRequestAcceptedEvent {
-  final String invitationID;
+  final String requestID;
   final ZIMCallInvitationAcceptedInfo info;
-  OutgoingUserRequestAcceptedEvent({required this.invitationID, required this.info});
+  OutgoingUserRequestAcceptedEvent({required this.requestID, required this.info});
 
   @override
   String toString() {
-    return 'OutgoingUserRequestAcceptedEvent{invitationID: $invitationID, info: $info}';
+    return 'OutgoingUserRequestAcceptedEvent{requestID: $requestID, info: $info}';
   }
 }
 
 class OutgoingUserRequestRejectedEvent {
-  final String invitationID;
+  final String requestID;
   final ZIMCallInvitationRejectedInfo info;
-  OutgoingUserRequestRejectedEvent({required this.invitationID, required this.info});
+  OutgoingUserRequestRejectedEvent({required this.requestID, required this.info});
 
   @override
   String toString() {
-    return 'OutgoingUserRequestRejectedEvent{invitationID: $invitationID, info: $info}';
+    return 'OutgoingUserRequestRejectedEvent{requestID: $requestID, info: $info}';
   }
 }
 
 class IncomingUserRequestTimeoutEvent {
-  final String invitationID;
+  final String requestID;
   final ZIMCallInvitationTimeoutInfo info;
-  IncomingUserRequestTimeoutEvent({required this.info, required this.invitationID});
+  IncomingUserRequestTimeoutEvent({required this.info, required this.requestID});
 
   @override
   String toString() {
-    return 'IncomingUserRequestTimeoutEvent{invitationID: $invitationID, info.mode: ${info.mode.name}}';
+    return 'IncomingUserRequestTimeoutEvent{requestID: $requestID, info.mode: ${info.mode.name}}';
   }
 }
 
 class OutgoingUserRequestTimeoutEvent {
-  final String invitationID;
+  final String requestID;
   final List<String> invitees;
-  OutgoingUserRequestTimeoutEvent({required this.invitationID, required this.invitees});
+  OutgoingUserRequestTimeoutEvent({required this.requestID, required this.invitees});
 
   @override
   String toString() {
-    return 'OutgoingUserRequestTimeoutEvent{invitationID: $invitationID, invitees:$invitees}';
+    return 'OutgoingUserRequestTimeoutEvent{invitationID: $requestID, invitees:$invitees}';
   }
 }
 

@@ -4,9 +4,11 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../components/call/zego_call_service.dart';
 import '../live_audio_room_manager.dart';
 import '../utils/permission.dart';
 import '../utils/zegocloud_token.dart';
+import '../zego_call_manager.dart';
 import '../zego_sdk_key_center.dart';
 import '../zego_sdk_manager.dart';
 import 'home_page.dart';
@@ -78,6 +80,8 @@ class _LoginPageState extends State<LoginPage> {
                 onPressed: () async {
                   // init SDK
                   await ZEGOSDKManager.instance.init(SDKKeyCenter.appID, kIsWeb ? null : SDKKeyCenter.appSign);
+                  ZegoCallManager().addListener();
+                  ZegoCallService().initService();
                   String? token;
                   if (kIsWeb) {
                     // ! ** Warning: ZegoTokenUtils is only for use during testing. When your application goes live,
