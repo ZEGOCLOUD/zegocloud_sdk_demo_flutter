@@ -23,10 +23,8 @@ class _ZegoPKBattleViewState extends State<ZegoPKBattleView> {
 
   List<ZegoSDKUser?> get hosts => [leftUser, rightUser];
 
-  ValueNotifier<bool> leftUserHeartBeatBrokenNotifier =
-      ValueNotifier<bool>(false);
-  ValueNotifier<bool> rightUserHeartBeatBrokenNotifier =
-      ValueNotifier<bool>(false);
+  ValueNotifier<bool> leftUserHeartBeatBrokenNotifier = ValueNotifier<bool>(false);
+  ValueNotifier<bool> rightUserHeartBeatBrokenNotifier = ValueNotifier<bool>(false);
 
   ValueNotifier<bool> leftUserCameraStateNotifier = ValueNotifier(false);
   ValueNotifier<bool> rightUserCameraStateNotifier = ValueNotifier(false);
@@ -53,11 +51,7 @@ class _ZegoPKBattleViewState extends State<ZegoPKBattleView> {
     super.initState();
 
     subscriptions.addAll([
-      ZEGOSDKManager()
-          .expressService
-          .recvSEICtrl
-          .stream
-          .listen(onReceiveSEIEvent),
+      ZEGOSDKManager().expressService.recvSEICtrl.stream.listen(onReceiveSEIEvent),
     ]);
 
     if (!ZegoLiveStreamingManager().isLocalUserHost() && leftUser != null) {
@@ -67,8 +61,7 @@ class _ZegoPKBattleViewState extends State<ZegoPKBattleView> {
       heartBeatMap[rightUser!.userID] = DateTime.now();
     }
 
-    heartBeatTimer =
-        Timer.periodic(const Duration(milliseconds: 2500), (timer) {
+    heartBeatTimer = Timer.periodic(const Duration(milliseconds: 2500), (timer) {
       if (!mounted) return;
       cameraStateMap.forEach((key, value) {
         if (key == pkManager.pkUser?.userID) {
@@ -85,8 +78,7 @@ class _ZegoPKBattleViewState extends State<ZegoPKBattleView> {
             leftUserHeartBeatBrokenNotifier.value = true;
           } else if (id == (rightUser?.userID ?? '')) {
             rightUserHeartBeatBrokenNotifier.value = true;
-            if (pkManager.isLocalUserHost() &&
-                !pkManager.isMuteAnotherAudioNoti.value) {
+            if (pkManager.isLocalUserHost() && !pkManager.isMuteAnotherAudioNoti.value) {
               isHeartBeatBrokenMuteAudio = true;
               pkManager.muteAnotherHostAudio(isHeartBeatBrokenMuteAudio);
             }
@@ -111,7 +103,6 @@ class _ZegoPKBattleViewState extends State<ZegoPKBattleView> {
     final String senderID = seiMap['sender_id'];
     cameraStateMap[senderID] = seiMap['cam'];
     heartBeatMap[senderID] = DateTime.now();
-    debugPrint('****sei sendID:$senderID');
     if (senderID == (leftUser?.userID ?? '')) {
       leftUserHeartBeatBrokenNotifier.value = false;
       leftUser?.isCamerOnNotifier.value = seiMap['cam'];
@@ -131,9 +122,7 @@ class _ZegoPKBattleViewState extends State<ZegoPKBattleView> {
       if (ZegoLiveStreamingManager().isLocalUserHost()) {
         return Row(
           children: [
-            Expanded(
-                child: ZegoAudioVideoView(
-                    userInfo: ZEGOSDKManager().currentUser!)),
+            Expanded(child: ZegoAudioVideoView(userInfo: ZEGOSDKManager().currentUser!)),
             Expanded(child: Builder(builder: (context) {
               return ValueListenableBuilder(
                   valueListenable: rightUserHeartBeatBrokenNotifier,
@@ -143,8 +132,7 @@ class _ZegoPKBattleViewState extends State<ZegoPKBattleView> {
                     } else {
                       return Stack(
                         children: [
-                          ZegoAudioVideoView(
-                              userInfo: ZegoLiveStreamingManager().pkUser!),
+                          ZegoAudioVideoView(userInfo: ZegoLiveStreamingManager().pkUser!),
                           muteAnotherHostAudioButton(),
                         ],
                       );
@@ -188,9 +176,7 @@ class _ZegoPKBattleViewState extends State<ZegoPKBattleView> {
                     valueListenable: rightUserCameraStateNotifier,
                     builder: (context, bool rightCameraState, _) {
                       return ValueListenableBuilder(
-                          valueListenable: ZEGOSDKManager()
-                              .expressService
-                              .mixerStreamNotifier,
+                          valueListenable: ZEGOSDKManager().expressService.mixerStreamNotifier,
                           builder: (context, Widget? mixerView, _) {
                             if (mixerView == null) {
                               return const SizedBox.shrink();
@@ -201,14 +187,10 @@ class _ZegoPKBattleViewState extends State<ZegoPKBattleView> {
                                   begin: Alignment.centerLeft,
                                   end: Alignment.centerRight,
                                   colors: [
-                                    Colors.black
-                                        .withOpacity(leftCameraState ? 1 : 0),
-                                    Colors.black
-                                        .withOpacity(leftCameraState ? 1 : 0),
-                                    Colors.black
-                                        .withOpacity(rightCameraState ? 1 : 0),
-                                    Colors.black
-                                        .withOpacity(rightCameraState ? 1 : 0),
+                                    Colors.black.withOpacity(leftCameraState ? 1 : 0),
+                                    Colors.black.withOpacity(leftCameraState ? 1 : 0),
+                                    Colors.black.withOpacity(rightCameraState ? 1 : 0),
+                                    Colors.black.withOpacity(rightCameraState ? 1 : 0),
                                   ],
                                   stops: const [0, 0.5, 0.5, 1.0],
                                 ).createShader(bounds);
@@ -269,8 +251,7 @@ class _ZegoPKBattleViewState extends State<ZegoPKBattleView> {
                       child: Text(
                         user!.userName[0],
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       )),
                 ),
               ),
@@ -285,9 +266,7 @@ class _ZegoPKBattleViewState extends State<ZegoPKBattleView> {
     return Stack(
       children: [
         ValueListenableBuilder(
-          valueListenable: left
-              ? leftUserHeartBeatBrokenNotifier
-              : rightUserHeartBeatBrokenNotifier,
+          valueListenable: left ? leftUserHeartBeatBrokenNotifier : rightUserHeartBeatBrokenNotifier,
           builder: (context, bool heartBeatBroken, _) {
             if (heartBeatBroken) {
               return hostReconnecting(left: left);
@@ -315,9 +294,7 @@ class _ZegoPKBattleViewState extends State<ZegoPKBattleView> {
     return ValueListenableBuilder(
         valueListenable: pkManager.isMuteAnotherAudioNoti,
         builder: (context, bool isMute, _) {
-          final imagePath = isMute
-              ? 'assets/icons/icon_speaker_off.png'
-              : 'assets/icons/icon_speaker_normal.png';
+          final imagePath = isMute ? 'assets/icons/icon_speaker_off.png' : 'assets/icons/icon_speaker_normal.png';
           return IconButton(
               onPressed: () {
                 pkManager.muteAnotherHostAudio(!isMute);

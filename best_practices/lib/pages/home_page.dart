@@ -328,7 +328,7 @@ class _AudioRoomEntryState extends State<AudioRoomEntry> {
             SDKKeyCenter.appID, SDKKeyCenter.serverSecret, ZEGOSDKManager.instance.currentUser!.userID)
         : null;
     ZegoLiveAudioRoomManager.instance.initWithConfig(ZegoLiveAudioRoomLayoutConfig(), ZegoLiveRole.host);
-    ZEGOSDKManager.instance.loginRoom(roomIDController.text, ZegoScenario.HighQualityChatroom, token: token).then((value) {
+    ZEGOSDKManager.instance.loginRoom(roomIDController.text, ZegoScenario.HighQualityChatroom,token: token).then((value) {
       if (value.errorCode == 0) {
         Navigator.push(
           context,

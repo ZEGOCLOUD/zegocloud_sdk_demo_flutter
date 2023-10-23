@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
-import 'zego_defines.dart';
+import '../../internal/internal_defines.dart';
+
 
 /// switch cameras
 class ZegoSwitchCameraButton extends StatefulWidget {

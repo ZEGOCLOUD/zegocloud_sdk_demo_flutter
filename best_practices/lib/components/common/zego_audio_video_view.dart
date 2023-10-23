@@ -26,7 +26,11 @@ class _ZegoAudioVideoViewState extends State<ZegoAudioVideoView> {
       return videoView();
     } else {
       if (widget.userInfo.streamID != null) {
-        return coHostNomalView();
+        if (widget.userInfo.streamID!.endsWith('_host')) {
+          return backGroundView();
+        } else {
+          return coHostNomalView();
+        }
       } else {
         return Container();
       }
@@ -57,7 +61,8 @@ class _ZegoAudioVideoViewState extends State<ZegoAudioVideoView> {
                   child: Text(
                     widget.userInfo.userName[0],
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   )),
             ),
           ),
@@ -87,7 +92,8 @@ class _ZegoAudioVideoViewState extends State<ZegoAudioVideoView> {
                   child: Text(
                     widget.userInfo.userName[0],
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   )),
             ),
           ),

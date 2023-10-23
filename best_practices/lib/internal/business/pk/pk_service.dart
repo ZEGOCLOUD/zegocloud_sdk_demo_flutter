@@ -7,8 +7,7 @@ import '../../../zego_live_streaming_manager.dart';
 import '../../../zego_sdk_manager.dart';
 
 class PKService {
-  ValueNotifier<RoomPKState> roomPKStateNoti =
-      ValueNotifier(RoomPKState.isNoPK);
+  ValueNotifier<RoomPKState> roomPKStateNoti = ValueNotifier(RoomPKState.isNoPK);
   ValueNotifier<bool> isMuteAnotherAudioNoti = ValueNotifier(false);
   ValueNotifier<bool> onPKViewAvaliableNoti = ValueNotifier(false);
 
@@ -21,18 +20,12 @@ class PKService {
 
   List<StreamSubscription> subscriptions = [];
 
-  final incomingPKRequestStreamCtrl =
-      StreamController<IncomingPKRequestEvent>.broadcast();
-  final incomingPKRequestCancelStreamCtrl =
-      StreamController<IncomingPKRequestCancelledEvent>.broadcast();
-  final outgoingPKRequestRejectedStreamCtrl =
-      StreamController<OutgoingPKRequestRejectedEvent>.broadcast();
-  final outgoingPKRequestAcceptStreamCtrl =
-      StreamController<OutgoingPKRequestAcceptEvent>.broadcast();
-  final incomingPKRequestTimeoutStreamCtrl =
-      StreamController<IncomingPKRequestTimeoutEvent>.broadcast();
-  final outgoingPKRequestAnsweredTimeoutStreamCtrl =
-      StreamController<OutgoingPKRequestTimeoutEvent>.broadcast();
+  final incomingPKRequestStreamCtrl = StreamController<IncomingPKRequestEvent>.broadcast();
+  final incomingPKRequestCancelStreamCtrl = StreamController<IncomingPKRequestCancelledEvent>.broadcast();
+  final outgoingPKRequestRejectedStreamCtrl = StreamController<OutgoingPKRequestRejectedEvent>.broadcast();
+  final outgoingPKRequestAcceptStreamCtrl = StreamController<OutgoingPKRequestAcceptEvent>.broadcast();
+  final incomingPKRequestTimeoutStreamCtrl = StreamController<IncomingPKRequestTimeoutEvent>.broadcast();
+  final outgoingPKRequestAnsweredTimeoutStreamCtrl = StreamController<OutgoingPKRequestTimeoutEvent>.broadcast();
   final onPKStartStreamCtrl = StreamController.broadcast();
   final onPKEndStreamCtrl = StreamController.broadcast();
 
@@ -40,28 +33,17 @@ class PKService {
     final zimService = ZEGOSDKManager().zimService;
     final expressService = ZEGOSDKManager().expressService;
     subscriptions.addAll([
-      zimService.incomingUserRequestReceivedStreamCtrl.stream
-          .listen(onReceiveZegoUserRequest),
-      zimService.incomingUserRequestCancelledStreamCtrl.stream
-          .listen(onReceivePKCancel),
-      zimService.outgoingUserRequestAcceptedStreamCtrl.stream
-          .listen(onReceivePKAccept),
-      zimService.outgoingUserRequestRejectedStreamCtrl.stream
-          .listen(onReceivePKRejected),
-      zimService.incomingUserRequestTimeoutStreamCtrl.stream
-          .listen(onReceivePKTimeout),
-      zimService.outgoingUserRequestTimeoutStreamCtrl.stream
-          .listen(onReceivePKAnswerTimeout),
-      zimService.roomAttributeUpdateStreamCtrl.stream
-          .listen(onRoomAttributeUpdate),
-      zimService.roomAttributeBatchUpdatedStreamCtrl.stream
-          .listen(onRoomAttributeBatchUpdate),
-      expressService.recvAudioFirstFrameCtrl.stream
-          .listen(onReceiveAudioFirstFrame),
-      expressService.recvVideoFirstFrameCtrl.stream
-          .listen(onReceiveVideoFirstFrame),
-      expressService.mixerSoundLevelUpdateCtrl.stream
-          .listen(onMixerSoundLevelUpdate),
+      zimService.incomingUserRequestReceivedStreamCtrl.stream.listen(onReceiveZegoUserRequest),
+      zimService.incomingUserRequestCancelledStreamCtrl.stream.listen(onReceivePKCancel),
+      zimService.outgoingUserRequestAcceptedStreamCtrl.stream.listen(onReceivePKAccept),
+      zimService.outgoingUserRequestRejectedStreamCtrl.stream.listen(onReceivePKRejected),
+      zimService.incomingUserRequestTimeoutStreamCtrl.stream.listen(onReceivePKTimeout),
+      zimService.outgoingUserRequestTimeoutStreamCtrl.stream.listen(onReceivePKAnswerTimeout),
+      zimService.roomAttributeUpdateStreamCtrl.stream.listen(onRoomAttributeUpdate),
+      zimService.roomAttributeBatchUpdatedStreamCtrl.stream.listen(onRoomAttributeBatchUpdate),
+      expressService.recvAudioFirstFrameCtrl.stream.listen(onReceiveAudioFirstFrame),
+      expressService.recvVideoFirstFrameCtrl.stream.listen(onReceiveVideoFirstFrame),
+      expressService.mixerSoundLevelUpdateCtrl.stream.listen(onMixerSoundLevelUpdate),
     ]);
   }
 
@@ -71,8 +53,7 @@ class PKService {
     }
   }
 
-  Future<ZIMCallInvitationSentResult> sendPKBattlesStartRequest(
-      String userID) async {
+  Future<ZIMCallInvitationSentResult> sendPKBattlesStartRequest(String userID) async {
     final requestData = <String, dynamic>{
       'room_id': ZEGOSDKManager().expressService.currentRoomID,
       'user_name': ZEGOSDKManager().currentUser?.userName,
@@ -82,25 +63,21 @@ class PKService {
     roomPKStateNoti.value = RoomPKState.isRequestPK;
     final result = await ZEGOSDKManager().zimService.sendUserRequest(
       [userID],
-      config: ZIMUserRequestSendConfig()
-        ..extendedData = jsonEncode(requestData),
+      config: ZIMUserRequestSendConfig()..extendedData = jsonEncode(requestData),
     );
     if (result.info.errorInvitees.map((e) => e.userID).contains(userID)) {
       roomPKStateNoti.value = RoomPKState.isNoPK;
     } else {
       currentZegoUserRequest = ZegoUserRequest(result.callID);
-      currentZegoUserRequest!.roomID =
-          ZEGOSDKManager().expressService.currentRoomID;
+      currentZegoUserRequest!.roomID = ZEGOSDKManager().expressService.currentRoomID;
       currentZegoUserRequest!.inviterID = ZEGOSDKManager().currentUser?.userID;
-      currentZegoUserRequest!.inviterName =
-          ZEGOSDKManager().currentUser?.userName;
+      currentZegoUserRequest!.inviterName = ZEGOSDKManager().currentUser?.userName;
       currentZegoUserRequest!.invitee = [userID];
     }
     return result;
   }
 
-  Future<ZIMCallInvitationSentResult> sendPKBattleResumeRequest(
-      String userID) async {
+  Future<ZIMCallInvitationSentResult> sendPKBattleResumeRequest(String userID) async {
     final requestData = <String, dynamic>{
       'room_id': ZEGOSDKManager().expressService.currentRoomID,
       'user_name': ZEGOSDKManager().currentUser?.userName,
@@ -118,11 +95,9 @@ class PKService {
       clearData();
     } else {
       currentZegoUserRequest = ZegoUserRequest(result.callID);
-      currentZegoUserRequest!.roomID =
-          ZEGOSDKManager().expressService.currentRoomID;
+      currentZegoUserRequest!.roomID = ZEGOSDKManager().expressService.currentRoomID;
       currentZegoUserRequest!.inviterID = ZEGOSDKManager().currentUser?.userID;
-      currentZegoUserRequest!.inviterName =
-          ZEGOSDKManager().currentUser?.userName;
+      currentZegoUserRequest!.inviterName = ZEGOSDKManager().currentUser?.userName;
       currentZegoUserRequest!.invitee = [userID];
     }
     return result;
@@ -139,8 +114,7 @@ class PKService {
     };
     ZEGOSDKManager().zimService.sendUserRequest(
       [pkUser?.userID ?? ''],
-      config: ZIMUserRequestSendConfig()
-        ..extendedData = jsonEncode(requestData),
+      config: ZIMUserRequestSendConfig()..extendedData = jsonEncode(requestData),
     ).then((value) => null);
     currentZegoUserRequest = null;
     stopPK();
@@ -151,9 +125,9 @@ class PKService {
     if (currentZegoUserRequest == null) {
       return;
     }
-    ZEGOSDKManager().zimService.cancelUserRequest(
-        currentZegoUserRequest!.invitee,
-        currentZegoUserRequest?.requestID ?? '');
+    ZEGOSDKManager()
+        .zimService
+        .cancelUserRequest(currentZegoUserRequest!.invitee, currentZegoUserRequest?.requestID ?? '');
   }
 
   void acceptPKBattleRequest(String requestID) {
@@ -166,8 +140,7 @@ class PKService {
         .zimService
         .acceptUserRequest(
           requestID,
-          config: ZIMUserRequestAcceptConfig()
-            ..extendedData = jsonEncode(requestData),
+          config: ZIMUserRequestAcceptConfig()..extendedData = jsonEncode(requestData),
         )
         .then((value) {
       willStartPK(
@@ -191,8 +164,7 @@ class PKService {
         .zimService
         .acceptUserRequest(
           requestID,
-          config: ZIMUserRequestAcceptConfig()
-            ..extendedData = jsonEncode(requestData),
+          config: ZIMUserRequestAcceptConfig()..extendedData = jsonEncode(requestData),
         )
         .then((value) => resumeMixerTask())
         .catchError((error) {
@@ -227,15 +199,12 @@ class PKService {
     });
   }
 
-  void willStartPK(
-      {String roomID = '', String userID = '', String userName = ''}) {
+  void willStartPK({String roomID = '', String userID = '', String userName = ''}) {
     if (ZegoLiveStreamingManager.instance.isLocalUserHost()) {
       startPK(roomID, userID, userName);
     } else {
       roomPKStateNoti.value = RoomPKState.isStartPK;
-      ZEGOSDKManager()
-          .expressService
-          .startPlayingMixerStream(generateMixerStreamID());
+      ZEGOSDKManager().expressService.startPlayingMixerStream(generateMixerStreamID());
     }
     onPKStartStreamCtrl.add(null);
   }
@@ -263,9 +232,7 @@ class PKService {
         ZEGOSDKManager().zimService.setRoomAttributes(pkRoomAttribute);
         startSendSEI();
         if (ZegoLiveStreamingManager.instance.isLocalUserHost()) {
-          ZEGOSDKManager()
-              .expressService
-              .startPlayingAnotherHostStream(anotherHostStreamID(), pkUser!);
+          ZEGOSDKManager().expressService.startPlayingAnotherHostStream(anotherHostStreamID(), pkUser!);
         } else {}
       } else {
         pkUser = null;
@@ -284,11 +251,9 @@ class PKService {
 
   Future<ZegoMixerStartResult> startMixStreamTask({
     ZegoMixerInputContentType leftContentType = ZegoMixerInputContentType.Video,
-    ZegoMixerInputContentType rightContentType =
-        ZegoMixerInputContentType.Video,
+    ZegoMixerInputContentType rightContentType = ZegoMixerInputContentType.Video,
   }) async {
-    if (ZEGOSDKManager().expressService.currentRoomID.isEmpty ||
-        ZEGOSDKManager().currentUser?.userID == null) {
+    if (ZEGOSDKManager().expressService.currentRoomID.isEmpty || ZEGOSDKManager().currentUser?.userID == null) {
       return ZegoMixerStartResult(-1, {});
     }
 
@@ -297,8 +262,7 @@ class PKService {
     final rightStreamID = anotherHostStreamID();
 
     final taskID = generateMixerStreamID();
-    debugPrint(
-        'startMixerTask left:$leftStreamID right:$rightStreamID taskID:$taskID');
+    debugPrint('startMixerTask left:$leftStreamID right:$rightStreamID taskID:$taskID');
     final videoConfig = ZegoMixerVideoConfig.defaultConfig()
       ..width = 540 * 2
       ..height = 960
@@ -342,13 +306,8 @@ class PKService {
 
   void muteAnotherHostAudio(bool mute) {
     isMuteAnotherAudioNoti.value = mute;
-    startMixStreamTask(
-        rightContentType: mute
-            ? ZegoMixerInputContentType.VideoOnly
-            : ZegoMixerInputContentType.Video);
-    ZEGOSDKManager()
-        .expressService
-        .mutePlayStreamAudio(anotherHostStreamID(), mute);
+    startMixStreamTask(rightContentType: mute ? ZegoMixerInputContentType.VideoOnly : ZegoMixerInputContentType.Video);
+    ZEGOSDKManager().expressService.mutePlayStreamAudio(anotherHostStreamID(), mute);
   }
 
   void muteMainStream() {
@@ -374,11 +333,8 @@ class PKService {
 
   void clearData() {
     cleanPKState();
-    if (ZegoLiveStreamingManager.instance.isLocalUserHost() &&
-        pkRoomAttribute.keys.isNotEmpty) {
-      ZEGOSDKManager()
-          .zimService
-          .deleteRoomAttributes(pkRoomAttribute.keys.toList());
+    if (ZegoLiveStreamingManager.instance.isLocalUserHost() && pkRoomAttribute.keys.isNotEmpty) {
+      ZEGOSDKManager().zimService.deleteRoomAttributes(pkRoomAttribute.keys.toList());
     }
   }
 
@@ -393,8 +349,7 @@ class PKService {
   // zim listener
   void onReceiveZegoUserRequest(IncomingUserRequestReceivedEvent event) {
     final invitation = ZegoUserRequest(event.requestID);
-    final Map<String, dynamic> invitationMap =
-        jsonDecode(event.info.extendedData);
+    final Map<String, dynamic> invitationMap = jsonDecode(event.info.extendedData);
     final int type = invitationMap['type'];
     switch (type) {
       case PKProtocolType.startPK:
@@ -409,16 +364,14 @@ class PKService {
         invitation.inviterName = invitationMap['user_name'];
         invitation.inviterID = event.info.inviter;
         currentZegoUserRequest = invitation;
-        incomingPKRequestStreamCtrl
-            .add(IncomingPKRequestEvent(requestID: event.requestID));
+        incomingPKRequestStreamCtrl.add(IncomingPKRequestEvent(requestID: event.requestID));
         break;
       case PKProtocolType.endPK:
         responsePKEndRequest(event.requestID);
         stopPK();
         break;
       case PKProtocolType.resume:
-        if (roomPKStateNoti.value != RoomPKState.isStartPK ||
-            !ZegoLiveStreamingManager.instance.isLocalUserHost()) {
+        if (roomPKStateNoti.value != RoomPKState.isStartPK || !ZegoLiveStreamingManager.instance.isLocalUserHost()) {
           rejectPKBattleRequest(event.requestID);
         } else {
           acceptResumePKRequest(event.requestID);
@@ -429,23 +382,17 @@ class PKService {
 
   void onReceivePKCancel(IncomingUserRequestCancelledEvent event) {
     currentZegoUserRequest = null;
-    incomingPKRequestCancelStreamCtrl
-        .add(IncomingPKRequestCancelledEvent(requestID: event.requestID));
+    incomingPKRequestCancelStreamCtrl.add(IncomingPKRequestCancelledEvent(requestID: event.requestID));
   }
 
   void onReceivePKAccept(OutgoingUserRequestAcceptedEvent event) {
-    final Map<String, dynamic> invitationMap =
-        jsonDecode(event.info.extendedData);
+    final Map<String, dynamic> invitationMap = jsonDecode(event.info.extendedData);
     final String roomID = invitationMap['room_id'];
     final String userName = invitationMap['user_name'];
     final int type = invitationMap['type'];
     if (type == PKProtocolType.startPK || type == PKProtocolType.resume) {
-      willStartPK(
-          roomID: roomID,
-          userID: currentZegoUserRequest?.invitee.first ?? '',
-          userName: userName);
-      outgoingPKRequestAcceptStreamCtrl
-          .add(OutgoingPKRequestAcceptEvent(requestID: event.requestID));
+      willStartPK(roomID: roomID, userID: currentZegoUserRequest?.invitee.first ?? '', userName: userName);
+      outgoingPKRequestAcceptStreamCtrl.add(OutgoingPKRequestAcceptEvent(requestID: event.requestID));
     }
   }
 
@@ -453,26 +400,22 @@ class PKService {
     currentZegoUserRequest = null;
     roomPKStateNoti.value = RoomPKState.isNoPK;
     clearData();
-    outgoingPKRequestRejectedStreamCtrl
-        .add(OutgoingPKRequestRejectedEvent(requestID: event.requestID));
+    outgoingPKRequestRejectedStreamCtrl.add(OutgoingPKRequestRejectedEvent(requestID: event.requestID));
   }
 
   void onReceivePKTimeout(IncomingUserRequestTimeoutEvent event) {
     currentZegoUserRequest = null;
-    incomingPKRequestTimeoutStreamCtrl
-        .add(IncomingPKRequestTimeoutEvent(requestID: event.requestID));
+    incomingPKRequestTimeoutStreamCtrl.add(IncomingPKRequestTimeoutEvent(requestID: event.requestID));
   }
 
   void onReceivePKAnswerTimeout(OutgoingUserRequestTimeoutEvent event) {
     if (event.requestID == currentZegoUserRequest?.requestID) {
       clearData();
     }
-    outgoingPKRequestAnsweredTimeoutStreamCtrl
-        .add(OutgoingPKRequestTimeoutEvent(requestID: event.requestID));
+    outgoingPKRequestAnsweredTimeoutStreamCtrl.add(OutgoingPKRequestTimeoutEvent(requestID: event.requestID));
   }
 
-  void onRoomAttributeBatchUpdate(
-      ZIMServiceRoomAttributeBatchUpdatedEvent event) {
+  void onRoomAttributeBatchUpdate(ZIMServiceRoomAttributeBatchUpdatedEvent event) {
     event.updateInfos.forEach(_onRoomAttributeUpdate);
   }
 

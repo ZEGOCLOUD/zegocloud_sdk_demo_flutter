@@ -123,7 +123,7 @@ class ZegoLiveStreamingManager {
           SDKKeyCenter.serverSecret,
           ZEGOSDKManager.instance.currentUser!.userID);
     }
-    final result = await ZEGOSDKManager.instance.loginRoom(roomID, ZegoScenario.Broadcast, token: token);
+    final result = await ZEGOSDKManager.instance.loginRoom(roomID, ZegoScenario.Broadcast,token: token);
     return result;
   }
 
