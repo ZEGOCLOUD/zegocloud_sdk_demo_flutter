@@ -6,7 +6,9 @@ import im.zego.effects.enums.ZegoEffectsVideoFrameFormat
 import im.zego.zego_effects_plugin.ZGEffectsHelper
 import im.zego.zego_express_engine.IZegoFlutterCustomVideoProcessHandler
 import im.zego.zego_express_engine.ZGFlutterPublishChannel
+import im.zego.zego_express_engine.ZGFlutterVideoFrameParam
 import im.zego.zego_express_engine.ZegoCustomVideoProcessManager
+import java.nio.ByteBuffer
 
 class ZegoBeautyPluginVideoProcess : IZegoFlutterCustomVideoProcessHandler {
     fun enableCustomVideoProcessing() {
@@ -28,6 +30,16 @@ class ZegoBeautyPluginVideoProcess : IZegoFlutterCustomVideoProcessHandler {
             processedTextureID, width, height,
             referenceTimeMillisecond, channel
         )
+    }
+
+    override fun onCapturedUnprocessedRawData(
+        data: ByteBuffer?,
+        dataLength: IntArray?,
+        param: ZGFlutterVideoFrameParam?,
+        referenceTimeMillisecond: Long,
+        channel: ZGFlutterPublishChannel?
+    ) {
+       
     }
 
     override fun getCustomVideoProcessInputSurfaceTexture(
