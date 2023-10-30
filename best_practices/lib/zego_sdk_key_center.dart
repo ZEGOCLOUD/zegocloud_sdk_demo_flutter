@@ -1,19 +1,5 @@
-typedef SDKKeyCenter = NativeSecret;
-
-class WebSecret {
+class SDKKeyCenter {
   static const int appID = ;
   static const String serverSecret = ;
-  static const String appSign =
-      ;
-  static const String tokenServerUrl =
-      'https://easy-example-call.herokuapp.com';
-}
-
-class NativeSecret {
-  static const int appID = ;
-  static const String serverSecret = ;
-  static const String appSign =
-      ;
-  static const String tokenServerUrl =
-      'https://easy-example-call.herokuapp.com';
+  static const String appSign = ;
 }
