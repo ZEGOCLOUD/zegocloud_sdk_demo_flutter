@@ -1,12 +1,14 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:zego_express_engine/zego_express_engine.dart';
-import 'utils/permission.dart';
+
 import 'home_page.dart';
 import 'key_center.dart';
+import 'utils/permission.dart';
 
 Future<void> createEngine() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +39,7 @@ void jumpToHomePage(
 }
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();

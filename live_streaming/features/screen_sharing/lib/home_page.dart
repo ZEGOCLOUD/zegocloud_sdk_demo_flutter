@@ -1,10 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
-import 'utils/permission.dart';
 
 import 'live_page.dart';
+import 'utils/permission.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key, required this.localUserID, required this.localUserName}) : super(key: key);
+  const HomePage({super.key, required this.localUserID, required this.localUserName});
 
   final String localUserID;
   final String localUserName;
@@ -15,7 +17,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   /// Users who use the same roomID can join the same live streaming.
-  final roomTextCtrl = TextEditingController();
+  final roomTextCtrl = TextEditingController(text: Random().nextInt(10000).toString());
 
   @override
   void initState() {
