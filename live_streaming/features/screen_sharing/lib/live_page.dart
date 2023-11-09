@@ -4,19 +4,19 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:zego_express_engine/zego_express_engine.dart';
+
+import 'key_center.dart';
 import 'utils/device_orientation.dart';
 import 'utils/zegocloud_token.dart';
 
-import 'key_center.dart';
-
 class LivePage extends StatefulWidget {
   const LivePage({
-    Key? key,
+    super.key,
     required this.isHost,
     required this.localUserID,
     required this.localUserName,
     required this.roomID,
-  }) : super(key: key);
+  });
 
   final bool isHost;
   final String localUserID;
@@ -75,7 +75,9 @@ class _LivePageState extends State<LivePage> {
       isLandscape = orientation.isLandscape;
       debugPrint('updateAppOrientation: ${orientation.name}');
       final videoConfig = await ZegoExpressEngine.instance.getVideoConfig();
-      if (isLandscape && (videoConfig.captureWidth > videoConfig.captureHeight)) return;
+      if (isLandscape && (videoConfig.captureWidth > videoConfig.captureHeight)) {
+        return;
+      }
 
       final oldValues = {
         'captureWidth': videoConfig.captureWidth,
@@ -194,7 +196,9 @@ class _LivePageState extends State<LivePage> {
     stopPreview();
     stopPublish();
     stopScreenSharing();
-    if (screenSharingSource != null) ZegoExpressEngine.instance.destroyScreenCaptureSource(screenSharingSource!);
+    if (screenSharingSource != null) {
+      ZegoExpressEngine.instance.destroyScreenCaptureSource(screenSharingSource!);
+    }
     return ZegoExpressEngine.instance.logoutRoom(widget.roomID);
   }
 
@@ -249,16 +253,12 @@ class _LivePageState extends State<LivePage> {
         }
       }
     };
-    ZegoExpressEngine.onApiCalledResult = (int errorCode, String funcName, String info) {
-      if (errorCode != 0) {
-        String errorMessage = 'onApiCalledResult, $funcName failed: $errorCode, $info';
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorMessage)));
-        debugPrint(errorMessage);
 
-        if (funcName == 'startScreenCapture') {
-          stopScreenSharing();
-        }
-      }
+    ZegoExpressEngine.onMobileScreenCaptureExceptionOccurred = (exceptionType) {
+      String errorMessage = 'onMobileScreenCaptureExceptionOccurred: ${exceptionType.index}, ${exceptionType.name}.';
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorMessage)));
+      debugPrint(errorMessage);
+      stopScreenSharing();
     };
 
     ZegoExpressEngine.onPlayerVideoSizeChanged = (String streamID, int width, int height) {
@@ -411,10 +411,10 @@ class _LivePageState extends State<LivePage> {
 
 class DemoButton extends StatelessWidget {
   const DemoButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     required this.text,
-  }) : super(key: key);
+  });
 
   final VoidCallback? onPressed;
   final String text;

@@ -1,7 +1,8 @@
-import 'package:native_device_orientation/native_device_orientation.dart';
-export 'package:native_device_orientation/native_device_orientation.dart';
 import 'package:flutter/services.dart';
+import 'package:native_device_orientation/native_device_orientation.dart';
+
 export 'package:flutter/services.dart';
+export 'package:native_device_orientation/native_device_orientation.dart';
 
 DeviceOrientation deviceOrientationMap(NativeDeviceOrientation nativeValue) {
   final deviceOrientationMap = <NativeDeviceOrientation, DeviceOrientation>{
@@ -17,7 +18,6 @@ DeviceOrientation deviceOrientationMap(NativeDeviceOrientation nativeValue) {
 extension NativeDeviceOrientationExtension on NativeDeviceOrientation {
   bool get isLandscape =>
       this == NativeDeviceOrientation.landscapeLeft || this == NativeDeviceOrientation.landscapeRight;
-
 
   DeviceOrientation get toZegoType => deviceOrientationMap(this);
 }
