@@ -228,6 +228,39 @@ class OutgoingUserRequestTimeoutEvent {
   }
 }
 
+class UserRequestStateChangeEvent {
+  final String requestID;
+  final ZIMCallUserStateChangeInfo info;
+  UserRequestStateChangeEvent({required this.requestID, required this.info});
+
+  @override
+  String toString() {
+    return 'UserRequestStateChangeEvent{invitationID: $requestID, info:$info}';
+  }
+}
+
+class UserRequestEndEvent {
+  final String requestID;
+  final ZIMCallInvitationEndedInfo info;
+  UserRequestEndEvent({required this.requestID, required this.info});
+
+  @override
+  String toString() {
+    return 'UserRequestEndEvent{invitationID: $requestID, info:$info}';
+  }
+}
+
+class UserRequestTimeOutEvent {
+  final String requestID;
+  final List<String> invitees;
+  UserRequestTimeOutEvent({required this.requestID, required this.invitees});
+
+  @override
+  String toString() {
+    return 'UserRequestTimeOutEvent{invitationID: $requestID, invitees:$invitees}';
+  }
+}
+
 class ZIMServiceRoomAttributeUpdateEvent {
   final ZIMRoomAttributesUpdateInfo updateInfo;
   ZIMServiceRoomAttributeUpdateEvent({required this.updateInfo});
