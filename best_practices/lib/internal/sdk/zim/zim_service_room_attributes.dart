@@ -57,6 +57,14 @@ extension ZIMServiceRoom on ZIMService {
   }
 
   void onRoomAttributesUpdated(ZIM zim, ZIMRoomAttributesUpdateInfo updateInfo, String roomID) {
+    final setProperties = <Map<String, String>>[];
+    final deleteProperties = <Map<String, String>>[];
+    if (updateInfo.action == ZIMRoomAttributesUpdateAction.set) {
+      setProperties.add(updateInfo.roomAttributes);
+    } else {
+      deleteProperties.add(updateInfo.roomAttributes);
+    }
+
     updateInfo.roomAttributes.forEach((key, value) {
       if (updateInfo.action == ZIMRoomAttributesUpdateAction.set) {
         roomAttributesMap[key] = value;
@@ -65,19 +73,26 @@ extension ZIMServiceRoom on ZIMService {
       }
     });
     roomAttributeUpdateStreamCtrl.add(ZIMServiceRoomAttributeUpdateEvent(updateInfo: updateInfo));
+    roomAttributeUpdateStreamCtrl2.add(RoomAttributesUpdatedEvent(setProperties, deleteProperties));
   }
 
   void onRoomAttributesBatchUpdated(_, List<ZIMRoomAttributesUpdateInfo> updateInfo, String roomID) {
+    final setProperties = <Map<String, String>>[];
+    final deleteProperties = <Map<String, String>>[];
     for (final info in updateInfo) {
-      info.roomAttributes.forEach((key, value) {
-        if (info.action == ZIMRoomAttributesUpdateAction.set) {
+      if (info.action == ZIMRoomAttributesUpdateAction.set) {
+        setProperties.add(info.roomAttributes);
+        info.roomAttributes.forEach((key, value) {
           roomAttributesMap[key] = value;
-        } else {
+        });
+      } else {
+        deleteProperties.add(info.roomAttributes);
+        info.roomAttributes.forEach((key, value) {
           roomAttributesMap.remove(key);
-        }
-      });
+        });
+      }
     }
-
+    roomAttributeUpdateStreamCtrl2.add(RoomAttributesUpdatedEvent(setProperties, deleteProperties));
     roomAttributeBatchUpdatedStreamCtrl.add(ZIMServiceRoomAttributeBatchUpdatedEvent(roomID, updateInfo));
   }
 }

@@ -1,3 +1,7 @@
+import 'dart:math';
+
+import '../../zego_sdk_manager.dart';
+
 class RoomRequestType {
   static const int audienceApplyToBecomeCoHost = 10000;
   static const int audienceCancelCoHostApply = 10001;
@@ -15,9 +19,9 @@ class PKProtocolType {
 }
 
 class RoomCommandType {
-    static const int muteSpeaker = 20000;
-    static const int unMuteSpeaker = 20001;
-    static const int kickOutRoom = 20002;
+  static const int muteSpeaker = 20000;
+  static const int unMuteSpeaker = 20001;
+  static const int kickOutRoom = 20002;
 }
 
 enum ZegoLiveRole {
@@ -32,43 +36,99 @@ class SEIType {
   static const int deviceState = 0; // device_state
 }
 
-class IncomingPKRequestEvent {
+class PKBattleReceivedEvent {
   final String requestID;
-  IncomingPKRequestEvent({required this.requestID});
+  final ZIMCallInvitationReceivedInfo info;
+  PKBattleReceivedEvent({required this.requestID, required this.info});
 
   @override
   String toString() {
-    return 'IncomingPKRequestEvent{requestID: $requestID}';
+    return 'PKBattleReceivedEvent{requestID: $requestID, info: $info}';
   }
 }
 
-class OutgoingPKRequestAcceptEvent {
-  final String requestID;
-  OutgoingPKRequestAcceptEvent({required this.requestID});
+class PKBattleAcceptedEvent {
+  final String userID;
+  final String extendedData;
+  PKBattleAcceptedEvent({required this.userID, required this.extendedData});
 
   @override
   String toString() {
-    return 'OutgoingPKRequestAcceptEvent{requestID: $requestID}';
+    return 'PKBattleAcceptedEvent{userID: $userID, extendedData: $extendedData}';
   }
 }
 
-class OutgoingPKRequestRejectedEvent {
-  final String requestID;
-  OutgoingPKRequestRejectedEvent({required this.requestID});
+class PKBattleUserJoinEvent {
+  final String userID;
+  final String extendedData;
+  PKBattleUserJoinEvent({required this.userID, required this.extendedData});
 
   @override
   String toString() {
-    return 'OutgoingPKRequestRejectedEvent{requestID: $requestID}';
+    return 'PKBattleUserJoinEvent{userID: $userID, extendedData: $extendedData}';
   }
 }
 
-class IncomingPKRequestCancelledEvent {
-  final String requestID;
-  IncomingPKRequestCancelledEvent({required this.requestID});
+class PKBattleTimeoutEvent {
+  final String userID;
+  final String extendedData;
+  PKBattleTimeoutEvent({required this.userID, required this.extendedData});
 
   @override
   String toString() {
-    return 'OutgoingPKRequestRejectedEvent{requestID: $requestID}';
+    return 'PKBattleTimeoutEvent{userID: $userID, extendedData: $extendedData}';
+  }
+}
+class PKBattleUserQuitEvent {
+  final String userID;
+  final String extendedData;
+  PKBattleUserQuitEvent({required this.userID, required this.extendedData});
+
+  @override
+  String toString() {
+    return 'PKBattleUserQuitEvent{userID: $userID, extendedData: $extendedData}';
+  }
+}
+
+class PKBattleUserUpdateEvent {
+  final List<String> userList;
+  PKBattleUserUpdateEvent({required this.userList});
+
+  @override
+  String toString() {
+    return 'PKBattleUserUpdateEvent{userList: $userList}';
+  }
+}
+
+class PKBattleUserConnectingEvent {
+  final String userID;
+  final int duration;
+  PKBattleUserConnectingEvent({required this.userID, required this.duration});
+
+  @override
+  String toString() {
+    return 'PKBattleUserConnectingEvent{userID: $userID, duration:$duration}';
+  }
+}
+
+class PKBattleRejectedEvent {
+  final String userID;
+  final String extendedData;
+  PKBattleRejectedEvent({required this.userID, required this.extendedData});
+
+  @override
+  String toString() {
+    return 'PKBattleRejectedEvent{userID: $userID, extendedData:$extendedData}';
+  }
+}
+
+class PKBattleCancelledEvent {
+  final String requestID;
+  PKBattleCancelledEvent({required this.requestID});
+
+  @override
+  String toString() {
+    return 'PKBattleCancelledEvent{requestID: $requestID}';
   }
 }
 
@@ -91,4 +151,3 @@ class OutgoingPKRequestTimeoutEvent {
     return 'OutgoingPKRequestTimeoutEvent{requestID: $requestID}';
   }
 }
-

@@ -10,6 +10,11 @@ extension ZIMServiceInvitation on ZIMService {
     return ZIM.getInstance()!.callInvite(userList, config ?? ZIMUserRequestSendConfig());
   }
 
+  Future<ZIMCallingInvitationSentResult> addUserToRequest(
+      List<String> invitees, String requestID, ZIMCallingInviteConfig config) async {
+    return ZIM.getInstance()!.callingInvite(invitees, requestID, config);
+  }
+
   Future<ZIMCallCancelSentResult> cancelUserRequest(List<String> userList, String requestID,
       {ZIMUserRequestCancelConfig? config}) async {
     return ZIM.getInstance()!.callCancel(userList, requestID, config ?? ZIMCallCancelConfig());
@@ -21,6 +26,14 @@ extension ZIMServiceInvitation on ZIMService {
 
   Future<ZIMCallRejectionSentResult> rejectUserRequest(String requestID, {ZIMUserRequestRejectConfig? config}) async {
     return ZIM.getInstance()!.callReject(requestID, config ?? ZIMUserRequestRejectConfig());
+  }
+
+  Future<ZIMCallEndSentResult> endUserRequest(String requestID, ZIMCallEndConfig config) async {
+    return ZIM.getInstance()!.callEnd(requestID, config);
+  }
+
+  Future<ZIMCallQuitSentResult> quitUserRequest(String requestID, ZIMCallQuitConfig config) async {
+    return ZIM.getInstance()!.callQuit(requestID, config);
   }
 
   void onUserRequestReceived(ZIM zim, ZIMCallInvitationReceivedInfo info, String invitationID) {
@@ -46,5 +59,17 @@ extension ZIMServiceInvitation on ZIMService {
   void onUserRequestAnsweredTimeout(ZIM zim, List<String> invitees, String invitationID) {
     outgoingUserRequestTimeoutStreamCtrl
         .add(OutgoingUserRequestTimeoutEvent(requestID: invitationID, invitees: invitees));
+  }
+
+  void onCallUserStateChanged(ZIM zim, ZIMCallUserStateChangeInfo callUserStateChangeInfo, String callID) {
+    userRequestStateChangeStreamCtrl.add(UserRequestStateChangeEvent(requestID: callID, info: callUserStateChangeInfo));
+  }
+
+  void onCallInvitationEnded(ZIM zim, ZIMCallInvitationEndedInfo callInvitationEndedInfo, String callID) {
+    userRequestEndStreamCtrl.add(UserRequestEndEvent(requestID: callID, info: callInvitationEndedInfo));
+  }
+
+  void onCallInviteesAnsweredTimeout(ZIM zim, List<String> invitees, String callID) {
+    userRequestTimeOutStreamCtrl.add(UserRequestTimeOutEvent(requestID: callID, invitees: invitees));
   }
 }
