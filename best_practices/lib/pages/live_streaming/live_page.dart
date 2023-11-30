@@ -11,6 +11,8 @@ import '../../components/common/zego_audio_video_view.dart';
 import '../../components/common/zego_member_button.dart';
 import '../../components/live_streaming/zego_live_bottom_bar.dart';
 import '../../components/live_streaming/zego_pk_view.dart';
+import '../../components/pk/pk_button.dart';
+import '../../components/pk/pk_container.dart';
 import '../../internal/sdk/zim/Define/zim_define.dart';
 import '../../internal/sdk/utils/flutter_extension.dart';
 import '../../internal/sdk/zim/Define/zim_room_request.dart';
@@ -52,14 +54,14 @@ class ZegoLivePageState extends State<ZegoLivePage> {
     final expressService = ZEGOSDKManager().expressService;
     subscriptions.addAll([
       expressService.roomStateChangedStreamCtrl.stream.listen(onExpressRoomStateChanged),
-      liveStreamingManager.incomingPKRequestStreamCtrl.stream.listen(onIncomingPKRequestReceived),
-      liveStreamingManager.incomingPKRequestCancelStreamCtrl.stream.listen(onIncomingPKRequestCancelled),
-      liveStreamingManager.outgoingPKRequestAcceptStreamCtrl.stream.listen(onOutgoingPKRequestAccepted),
-      liveStreamingManager.outgoingPKRequestRejectedStreamCtrl.stream.listen(onOutgoingPKRequestRejected),
+      liveStreamingManager.onPKBattleReceived.stream.listen(onPKRequestReceived),
+      liveStreamingManager.onPKBattleCancelStreamCtrl.stream.listen(onPKRequestCancelled),
+      liveStreamingManager.onPKBattleRejectedStreamCtrl.stream.listen(onPKRequestRejected),
       liveStreamingManager.incomingPKRequestTimeoutStreamCtrl.stream.listen(onIncomingPKRequestTimeout),
       liveStreamingManager.outgoingPKRequestAnsweredTimeoutStreamCtrl.stream.listen(onOutgoingPKRequestTimeout),
       liveStreamingManager.onPKStartStreamCtrl.stream.listen(onPKStart),
       liveStreamingManager.onPKEndStreamCtrl.stream.listen(onPKEnd),
+      liveStreamingManager.onPKUserConnectingCtrl.stream.listen(onPKUserConnecting),
       zimService.roomStateChangedStreamCtrl.stream.listen(onZIMRoomStateChanged),
       zimService.connectionStateStreamCtrl.stream.listen(onZIMConnectionStateChanged),
       zimService.onInComingRoomRequestStreamCtrl.stream.listen(onInComingRoomRequest),
@@ -79,7 +81,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
         token = ZegoTokenUtils.generateToken(
             SDKKeyCenter.appID, SDKKeyCenter.serverSecret, ZEGOSDKManager.instance.currentUser!.userID);
       }
-      ZEGOSDKManager.instance.loginRoom(widget.roomID, ZegoScenario.Broadcast,token: token).then(
+      ZEGOSDKManager.instance.loginRoom(widget.roomID, ZegoScenario.Broadcast, token: token).then(
         (value) {
           if (value.errorCode != 0) {
             ScaffoldMessenger.of(context)
@@ -114,14 +116,14 @@ class ZegoLivePageState extends State<ZegoLivePage> {
       valueListenable: liveStreamingManager.isLivingNotifier,
       builder: (context, isLiveing, _) {
         return ValueListenableBuilder<RoomPKState>(
-          valueListenable: ZegoLiveStreamingManager().roomPKStateNoti,
-          builder: (context, RoomPKState roomPKState, child) {
+          valueListenable: ZegoLiveStreamingManager().pkStateNoti,
+          builder: (context, pkState, child) {
             return Scaffold(
               body: Stack(
                 children: [
                   backgroundImage(),
                   hostVideoView(),
-                  if (roomPKState != RoomPKState.isStartPK) coHostVideoView(),
+                  if (pkState != RoomPKState.isStartPK) coHostVideoView(),
                   if (!isLiveing && widget.role == ZegoLiveRole.host) startLiveButton(),
                   hostText(),
                   leaveButton(),
@@ -139,9 +141,9 @@ class ZegoLivePageState extends State<ZegoLivePage> {
 
   Widget bottomBar() {
     return ValueListenableBuilder(
-        valueListenable: ZegoLiveStreamingManager().roomPKStateNoti,
+        valueListenable: ZegoLiveStreamingManager().pkStateNoti,
         builder: (context, RoomPKState pkState, _) {
-          if (pkState == RoomPKState.isNoPK || ZegoLiveStreamingManager().isLocalUserHost()) {
+          if (pkState != RoomPKState.isStartPK || ZegoLiveStreamingManager().isLocalUserHost()) {
             return LayoutBuilder(
               builder: (context, containers) {
                 return Padding(
@@ -167,7 +169,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
 
   Widget hostVideoView() {
     return ValueListenableBuilder(
-        valueListenable: liveStreamingManager.roomPKStateNoti,
+        valueListenable: liveStreamingManager.pkStateNoti,
         builder: (context, RoomPKState pkState, _) {
           return ValueListenableBuilder(
               valueListenable: liveStreamingManager.onPKViewAvaliableNoti,
@@ -181,8 +183,8 @@ class ZegoLivePageState extends State<ZegoLivePage> {
                               top: 100,
                               child: SizedBox(
                                 width: constraints.maxWidth,
-                                height: constraints.maxWidth * 480 / 540,
-                                child: const ZegoPKBattleView(),
+                                height: constraints.maxWidth * 16 / 18,
+                                child: const ZegoPKContainerView(),
                               )),
                         ],
                       );
@@ -331,76 +333,13 @@ class ZegoLivePageState extends State<ZegoLivePage> {
   }
 
   Widget pkButton() {
-    return Positioned(
+    return const Positioned(
       bottom: 80,
       right: 30,
-      child: ValueListenableBuilder<RoomPKState>(
-          valueListenable: ZegoLiveStreamingManager().roomPKStateNoti,
-          builder: (context, roomPKState, _) {
-            var text = '';
-            if (roomPKState == RoomPKState.isNoPK) {
-              text = 'PK Battle Request';
-            } else if (roomPKState == RoomPKState.isRequestPK) {
-              text = 'Cancel';
-            } else if (roomPKState == RoomPKState.isStartPK) {
-              text = 'End PK';
-            }
-            return ElevatedButton(
-                onPressed: () {
-                  pkClick(roomPKState);
-                },
-                child: Text(text));
-          }),
+      child: PKButton(),
     );
   }
-
-  void pkClick(RoomPKState state) {
-    switch (state) {
-      case RoomPKState.isNoPK:
-        startPK();
-        break;
-      case RoomPKState.isRequestPK:
-        ZegoLiveStreamingManager().cancelPKBattleRequest();
-        break;
-      case RoomPKState.isStartPK:
-        ZegoLiveStreamingManager().sendPKBattlesStopRequest();
-        break;
-    }
-  }
-
-  void startPK() {
-    final editingController = TextEditingController();
-    showCupertinoDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) {
-        return CupertinoAlertDialog(
-          title: const Text('Input a user id'),
-          content: CupertinoTextField(controller: editingController),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: Navigator.of(context).pop,
-              child: const Text('Cancel'),
-            ),
-            CupertinoDialogAction(
-              onPressed: () {
-                Navigator.of(context).pop();
-                ZegoLiveStreamingManager().sendPKBattlesStartRequest(editingController.text).then((value) {
-                  if (value.info.errorInvitees.map((e) => e.userID).contains(editingController.text)) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('start pk failed')));
-                  }
-                }).catchError((error) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('start pk failed')));
-                });
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
+  
   void onExpressRoomStateChanged(ZegoRoomStateEvent event) {
     debugPrint('LivePage:onExpressRoomStateChanged: $event');
     ScaffoldMessenger.of(context).showSnackBar(
@@ -478,14 +417,14 @@ class ZegoLivePageState extends State<ZegoLivePage> {
             CupertinoDialogAction(
               child: const Text('Disagree'),
               onPressed: () {
-                liveStreamingManager.rejectPKBattleRequest(requestID);
+                liveStreamingManager.rejectPKStartRequest(requestID);
                 Navigator.pop(context);
               },
             ),
             CupertinoDialogAction(
               child: const Text('Agree'),
               onPressed: () {
-                liveStreamingManager.acceptPKBattleRequest(requestID);
+                liveStreamingManager.acceptPKStartRequest(requestID);
                 Navigator.pop(context);
               },
             ),

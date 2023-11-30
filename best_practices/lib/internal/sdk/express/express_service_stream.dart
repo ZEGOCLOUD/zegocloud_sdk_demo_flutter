@@ -118,22 +118,6 @@ extension ExpressServiceStream on ExpressService {
     });
   }
 
-  Future<void> onCapturedSoundLevelUpdate(double soundLevel) async {}
-
-  Future<void> onRemoteSoundLevelUpdate(Map<String, double> soundLevels) async {}
-
-  Future<void> onPlayerRecvAudioFirstFrame(String streamID) async {
-    recvAudioFirstFrameCtrl.add(ZegoRecvAudioFirstFrameEvent(streamID));
-  }
-
-  Future<void> onPlayerRecvVideoFirstFrame(String streamID) async {
-    recvVideoFirstFrameCtrl.add(ZegoRecvVideoFirstFrameEvent(streamID));
-  }
-
-  Future<void> onPlayerRecvSEI(String streamID, Uint8List data) async {
-    recvSEICtrl.add(ZegoRecvSEIEvent(streamID, data));
-  }
-
   Future<void> startSoundLevelMonitor({int millisecond = 1000}) async {
     final config = ZegoSoundLevelConfig(millisecond, false);
     ZegoExpressEngine.instance.startSoundLevelMonitor(config: config);
@@ -141,6 +125,22 @@ extension ExpressServiceStream on ExpressService {
 
   Future<void> stopSoundLevelMonitor() async {
     ZegoExpressEngine.instance.stopSoundLevelMonitor();
+  }
+
+  void onCapturedSoundLevelUpdate(double soundLevel) {}
+
+  void onRemoteSoundLevelUpdate(Map<String, double> soundLevels) {}
+
+  void onPlayerRecvAudioFirstFrame(String streamID) {
+    recvAudioFirstFrameCtrl.add(ZegoRecvAudioFirstFrameEvent(streamID));
+  }
+
+  void onPlayerRecvVideoFirstFrame(String streamID) {
+    recvVideoFirstFrameCtrl.add(ZegoRecvVideoFirstFrameEvent(streamID));
+  }
+
+  void onPlayerRecvSEI(String streamID, Uint8List data) {
+    recvSEICtrl.add(ZegoRecvSEIEvent(streamID, data));
   }
 
   void onRoomStreamExtraInfoUpdate(String roomID, List<ZegoStream> streamList) {
