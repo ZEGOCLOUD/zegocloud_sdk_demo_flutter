@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import '../../../zego_live_streaming_manager.dart';
 import '../../../zego_sdk_manager.dart';
@@ -26,9 +27,9 @@ extension PKServiceExpressExtension on PKService {
   void onRoomUserUpdate(ZegoRoomUserListUpdateEvent event) {
     if (event.updateType == ZegoUpdateType.Delete) {
       if (ZegoLiveStreamingManager().hostNoti.value?.userID != null &&
-          isPKStarted &&
+          pkStateNoti.value == RoomPKState.isStartPK &&
           ZegoLiveStreamingManager().isLocalUserHost()) {
-        isPKStarted = false;
+        pkStateNoti.value = RoomPKState.isNoPK;
         onPKEndStreamCtrl.add(null);
         seiTimer?.cancel();
       }
@@ -81,6 +82,6 @@ extension PKServiceExpressExtension on PKService {
 
   void onMixerSoundLevelUpdate(ZegoMixerSoundLevelUpdateEvent event) {
     //..
-    
+
   }
 }

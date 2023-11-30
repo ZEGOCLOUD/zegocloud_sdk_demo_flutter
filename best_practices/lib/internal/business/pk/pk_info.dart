@@ -1,6 +1,7 @@
+import '../../sdk/utils/flutter_extension.dart';
 import 'pk_user.dart';
 
 class PKInfo {
   String? requestID;
-  List<PKUser> pkUserList = [];
+  ListNotifier<PKUser> pkUserList = ListNotifier(<PKUser>[]);
 }

@@ -16,7 +16,7 @@ class _PKViewState extends State<PKView> {
   void initState() {
     super.initState();
     if (widget.pkUser.userID == ZEGOSDKManager().currentUser?.userID) {
-      ZEGOSDKManager().expressService.startPreview();
+      // ZEGOSDKManager().expressService.startPreview();
     } else {
       ZEGOSDKManager().expressService.startPlayingAnotherHostStream(widget.pkUser.pkUserStream, widget.pkUser.sdkUser);
     }
@@ -25,12 +25,26 @@ class _PKViewState extends State<PKView> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-        valueListenable: widget.pkUser.camera,
-        builder: (context, bool isCameraOn, _) {
-          if (isCameraOn) {
-            videoView();
+        valueListenable: widget.pkUser.connectingDuration,
+        builder: (context, int duration, _) {
+          if (duration > 5000) {
+            return hostReconnecting();
           } else {
-
+            return ValueListenableBuilder(
+                valueListenable: widget.pkUser.camera,
+                builder: (context, bool isCameraOn, _) {
+                  if (isCameraOn) {
+                    return SizedBox(
+                      child: Stack(
+                        children: [videoView(), foregroundView()],
+                      ),
+                    );
+                  } else {
+                    return SizedBox(
+                      child: backGroundView(),
+                    );
+                  }
+                });
           }
         });
   }
@@ -69,7 +83,9 @@ class _PKViewState extends State<PKView> {
   }
 
   Widget foregroundView() {
-    return Container();
+    return Container(
+      color: Colors.transparent,
+    );
   }
 
   Widget videoView() {
@@ -77,9 +93,14 @@ class _PKViewState extends State<PKView> {
       valueListenable: widget.pkUser.sdkUser.videoViewNotifier,
       builder: (context, view, _) {
         if (view != null) {
-          return view;
+          return Container(
+            color: Colors.blue,
+            child: view,
+          );
         } else {
-          return Container();
+          return Container(
+            color: Colors.red,
+          );
         }
       },
     );

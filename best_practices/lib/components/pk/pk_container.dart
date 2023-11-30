@@ -5,6 +5,8 @@ import '../../internal/business/pk/pk_user.dart';
 import '../../internal/sdk/utils/flutter_extension.dart';
 import '../../zego_live_streaming_manager.dart';
 import '../../zego_sdk_manager.dart';
+import 'pk_mixer_view.dart';
+import 'pk_view.dart';
 
 class ZegoPKContainerView extends StatefulWidget {
   const ZegoPKContainerView({super.key});
@@ -30,57 +32,98 @@ class _ZegoPKContainerViewState extends State<ZegoPKContainerView> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    for (final element in subscriptions) {
+      element.cancel();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<ZegoLiveRole>(
         valueListenable: liveManager.currentUserRoleNoti,
         builder: (context, role, _) {
           if (role == ZegoLiveRole.host) {
             //is host
-            return Container();
+            return hostPKView();
           } else {
             // is not host
-            return Container();
+            return audiencePKView();
           }
         });
   }
 
   Widget audiencePKView() {
-    return Container();
-  }
-
-  Widget hostPKView() {
     return ValueListenableBuilder<List<PKUser>>(
-        valueListenable: pkUserListNoti,
-        builder: (context, pkUsers, _) {
-          return Stack(
-            children: hostPKViews(pkUsers),
+        valueListenable: ZegoLiveStreamingManager().pkInfo!.pkUserList,
+        builder: (context, pkusers, _) {
+          final pkAcceptUser = pkusers.where((element) => element.hasAccepted).toList();
+          return PKMixerView(
+            pkAcceptUsers: pkAcceptUser,
+            mixStreamID: '${ZEGOSDKManager().expressService.currentRoomID}_mix',
           );
         });
   }
 
-  List<Widget> hostPKViews(List<PKUser> pkUsers) {
-    final views = <Widget>[];
-    for (final pkuser in pkUsers) {
+  Widget hostPKView() {
+    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+      return ValueListenableBuilder<List<PKUser>>(
+          valueListenable: ZegoLiveStreamingManager().pkInfo!.pkUserList,
+          builder: (context, pkUsers, _) {
+            return Container(
+              color: Colors.black,
+              child: Stack(
+                children: hostPKViews(pkUsers, constraints),
+              ),
+            );
+          });
+    });
+  }
+
+  List<Positioned> hostPKViews(List<PKUser> pkUsers, BoxConstraints constraints) {
+    final views = <Positioned>[];
+    for (final pkuser in pkUsers.where((element) => element.hasAccepted).toList()) {
+      final newRect = conversionRect(pkuser.rect, constraints);
       final positioned = Positioned(
-          left: pkuser.rect.left,
-          right: pkuser.rect.right,
-          top: pkuser.rect.top,
-          bottom: pkuser.rect.bottom,
-          child: Container());
+          left: newRect.left,
+          top: newRect.top,
+          width: newRect.right - newRect.left,
+          height: newRect.bottom - newRect.top,
+          child: Container(
+            width: newRect.right - newRect.left,
+            height: newRect.bottom - newRect.top,
+            color: pkuser.userID == ZEGOSDKManager().currentUser?.userID ? Colors.yellow : Colors.blue,
+            child: PKView(pkUser: pkuser),
+          ));
       views.add(positioned);
     }
     return views;
   }
 
+  Rect conversionRect(Rect originalRect, BoxConstraints constraints) {
+    final wRatio = constraints.maxWidth / 1080.0;
+    final hRatio = constraints.maxHeight / 960.0;
+    return Rect.fromLTRB(originalRect.left * wRatio, originalRect.top * hRatio, originalRect.right * wRatio,
+        originalRect.bottom * hRatio);
+  }
+
   void onPKUserJoin(PKBattleUserJoinEvent event) {
-    _onRoomPKUserJoin();
+    onRoomPKUserJoin();
   }
 
   void onPKUserUpdate(PKBattleUserUpdateEvent event) {
-    _onRoomPKUserJoin();
+    onRoomPKUserJoin();
   }
 
-  void onPKUserQuit(PKBattleUserQuitEvent event) {}
+  void onPKUserQuit(PKBattleUserQuitEvent event) {
+    onRoomPKUserJoin();
+  }
 
-  void _onRoomPKUserJoin() {}
+  void onRoomPKUserJoin() {
+    if (ZegoLiveStreamingManager().pkInfo != null) {
+      setState(() {});
+      //pkUserListNoti.value = ZegoLiveStreamingManager().pkInfo!.pkUserList.value;
+    }
+  }
 }

@@ -74,7 +74,7 @@ class ZIMService {
     ZIMEventHandler.onCallInviteesAnsweredTimeout = onUserRequestAnsweredTimeout;
     ZIMEventHandler.onCallUserStateChanged = onCallUserStateChanged;
     ZIMEventHandler.onCallInvitationEnded = onCallInvitationEnded;
-    ZIMEventHandler.onCallInviteesAnsweredTimeout = onCallInviteesAnsweredTimeout;
+    ZIMEventHandler.onCallInvitationTimeout = onUserRequestTimeout;
     ZIMEventHandler.onRoomAttributesUpdated = onRoomAttributesUpdated;
     ZIMEventHandler.onRoomAttributesBatchUpdated = onRoomAttributesBatchUpdated;
   }
@@ -91,7 +91,7 @@ class ZIMService {
     ZIMEventHandler.onCallInviteesAnsweredTimeout = null;
     ZIMEventHandler.onCallInvitationEnded = null;
     ZIMEventHandler.onCallUserStateChanged = null;
-    ZIMEventHandler.onCallInviteesAnsweredTimeout = null;
+    ZIMEventHandler.onCallInvitationTimeout = null;
     ZIMEventHandler.onRoomAttributesUpdated = null;
     ZIMEventHandler.onRoomAttributesBatchUpdated = null;
   }

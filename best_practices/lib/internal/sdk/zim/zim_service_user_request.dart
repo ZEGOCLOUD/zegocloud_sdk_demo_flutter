@@ -44,10 +44,6 @@ extension ZIMServiceInvitation on ZIMService {
     incomingUserRequestCancelledStreamCtrl.add(IncomingUserRequestCancelledEvent(requestID: invitationID, info: info));
   }
 
-  void onUserRequestTimeout(ZIM zim, ZIMCallInvitationTimeoutInfo info, String invitationID) {
-    incomingUserRequestTimeoutStreamCtrl.add(IncomingUserRequestTimeoutEvent(info: info, requestID: invitationID));
-  }
-
   void onUserRequestAccepted(ZIM zim, ZIMCallInvitationAcceptedInfo info, String invitationID) {
     outgoingUserRequestAcceptedStreamCtrl.add(OutgoingUserRequestAcceptedEvent(requestID: invitationID, info: info));
   }
@@ -71,5 +67,9 @@ extension ZIMServiceInvitation on ZIMService {
 
   void onCallInviteesAnsweredTimeout(ZIM zim, List<String> invitees, String callID) {
     userRequestTimeOutStreamCtrl.add(UserRequestTimeOutEvent(requestID: callID, invitees: invitees));
+  }
+
+  void onUserRequestTimeout(ZIM zim, ZIMCallInvitationTimeoutInfo info, String invitationID) {
+    incomingUserRequestTimeoutStreamCtrl.add(IncomingUserRequestTimeoutEvent(info: info, requestID: invitationID));
   }
 }

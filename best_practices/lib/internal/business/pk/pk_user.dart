@@ -4,6 +4,7 @@ import 'dart:ffi';
 import 'package:flutter/material.dart';
 
 import '../../../zego_sdk_manager.dart';
+import '../call/call_data.dart';
 
 class PKUser {
   final String userID;
@@ -12,19 +13,20 @@ class PKUser {
 
   ValueNotifier<bool> camera = ValueNotifier(false);
   ValueNotifier<bool> microphone = ValueNotifier(false);
+  ValueNotifier<int> connectingDuration = ValueNotifier(0);
   ZIMCallUserState callUserState = ZIMCallUserState.unknown;
   bool isMute = false;
   String extendedData = '';
   Rect rect = Rect.zero;
 
-  bool _hasAccepted = false;
+  // final bool _hasAccepted = (callUserState == ZIMCallUserState.accepted);
   bool get hasAccepted {
-    return _hasAccepted;
+    return (callUserState == ZIMCallUserState.accepted);
   }
 
-  bool _isWaiting = false;
+  // bool _isWaiting = false;
   bool get isWaiting {
-    return _isWaiting;
+    return (callUserState == ZIMCallUserState.received);
   }
 
   String get pkUserStream {
@@ -57,7 +59,7 @@ class PKUser {
     map['uid'] = userID;
     map['rid'] = roomID;
     map['u_name'] = userName;
-    final rectMap = <String, dynamic>{};
+    final rectMap = <String, double>{};
     rectMap['top'] = rect.top;
     rectMap['left'] = rect.left;
     rectMap['right'] = rect.right;
@@ -71,11 +73,11 @@ class PKUser {
     final String uid = userMap['uid'];
     final String rid = userMap['rid'];
     final name = userMap['u_name'] ?? '';
-    final Map<String, double> rectMap = userMap['rect'];
-    final top = rectMap['top'] ?? 0;
-    final left = rectMap['left'] ?? 0;
-    final right = rectMap['right'] ?? 0;
-    final bottom = rectMap['bottom'] ?? 0;
+    final Map<String, dynamic> rectMap = userMap['rect'];
+    final top = rectMap['top'] as double;
+    final left = rectMap['left'] as double;
+    final right = rectMap['right'] as double;
+    final bottom = rectMap['bottom'] as double;
     final user = PKUser(userID: uid, sdkUser: ZegoSDKUser(userID: uid, userName: name))
       ..roomID = rid
       ..userName = name

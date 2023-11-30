@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'internal/business/coHost/cohost_service.dart';
 import 'internal/business/pk/pk_define.dart';
+import 'internal/business/pk/pk_info.dart';
 import 'internal/business/pk/pk_service.dart';
 import 'internal/sdk/utils/flutter_extension.dart';
 import 'utils/zegocloud_token.dart';
@@ -19,87 +20,75 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
   factory ZegoLiveStreamingManager() => instance;
   static final ZegoLiveStreamingManager instance = ZegoLiveStreamingManager._internal();
 
-  ValueNotifier<ZegoSDKUser?> get hostNoti {
-    return cohostService?.hostNoti ?? ValueNotifier(null);
-  }
+  List<ZegoMixerInput> Function(List<String> streamIDList, ZegoMixerVideoConfig videoConfig)? setMixerLayout;
 
   ValueNotifier<ZegoLiveRole> currentUserRoleNoti = ValueNotifier(ZegoLiveRole.audience);
-
-  ListNotifier<ZegoSDKUser> get coHostUserListNoti {
-    return cohostService?.coHostUserListNoti ?? ListNotifier([]);
-  }
-
-  ValueNotifier<RoomPKState> get roomPKStateNoti {
-    return pkService?.roomPKStateNoti ?? ValueNotifier(RoomPKState.isNoPK);
-  }
-
-  ValueNotifier<bool> get isMuteAnotherAudioNoti {
-    return pkService?.isMuteAnotherAudioNoti ?? ValueNotifier(false);
-  }
-
-  ValueNotifier<bool> get onPKViewAvaliableNoti {
-    return pkService?.onPKViewAvaliableNoti ?? ValueNotifier(false);
-  }
-
-  ZegoSDKUser? get pkUser {
-    return pkService?.pkUser;
-  }
-
   ValueNotifier<bool> isLivingNotifier = ValueNotifier(false);
-
   List<StreamSubscription> subscriptions = [];
 
-  StreamController<PKBattleReceivedEvent> get onPKBattleReceived {
-    return pkService?.onPKBattleReceived ?? StreamController<PKBattleReceivedEvent>.broadcast();
-  }
+  PKInfo? get pkInfo => pkService?.pkInfo;
 
-  StreamController<PKBattleCancelledEvent> get onPKBattleCancelStreamCtrl {
-    return pkService?.onPKBattleCancelStreamCtrl ?? StreamController<PKBattleCancelledEvent>.broadcast();
-  }
+  ValueNotifier<ZegoSDKUser?> get hostNoti => cohostService?.hostNoti ?? ValueNotifier(null);
 
-  StreamController<PKBattleRejectedEvent> get onPKBattleRejectedStreamCtrl {
-    return pkService?.onPKBattleRejectedStreamCtrl ?? StreamController<PKBattleRejectedEvent>.broadcast();
-  }
+  ListNotifier<ZegoSDKUser> get coHostUserListNoti => cohostService?.coHostUserListNoti ?? ListNotifier([]);
 
-  StreamController<PKBattleAcceptedEvent> get onPKBattleAcceptedCtrl {
-    return pkService?.onPKBattleAcceptedCtrl ?? StreamController<PKBattleAcceptedEvent>.broadcast();
-  }
+  ValueNotifier<RoomPKState> get pkStateNoti => pkService?.pkStateNoti ?? ValueNotifier(RoomPKState.isNoPK);
 
-  StreamController<PKBattleUserJoinEvent> get onPKUserJoinCtrl {
-    return pkService?.onPKUserJoinCtrl ?? StreamController<PKBattleUserJoinEvent>.broadcast();
-  }
+  ValueNotifier<bool> get isMuteAnotherAudioNoti => pkService?.isMuteAnotherAudioNoti ?? ValueNotifier(false);
 
-  StreamController<PKBattleUserQuitEvent> get onPKBattleUserQuitCtrl {
-    return pkService?.onPKBattleUserQuitCtrl ?? StreamController<PKBattleUserQuitEvent>.broadcast();
-  }
+  ValueNotifier<bool> get onPKViewAvaliableNoti => pkService?.onPKViewAvaliableNoti ?? ValueNotifier(false);
 
-  StreamController<PKBattleUserUpdateEvent> get onPKBattleUserUpdateCtrl {
-    return pkService?.onPKBattleUserUpdateCtrl ?? StreamController<PKBattleUserUpdateEvent>.broadcast();
-  }
+  ZegoSDKUser? get pkUser => pkService?.pkUser;
 
-  StreamController get onPKStartStreamCtrl {
-    return pkService?.onPKStartStreamCtrl ?? StreamController.broadcast();
-  }
+  StreamController<PKBattleReceivedEvent> get onPKBattleReceived =>
+      pkService?.onPKBattleReceived ?? StreamController<PKBattleReceivedEvent>.broadcast();
 
-  StreamController get onPKEndStreamCtrl {
-    return pkService?.onPKEndStreamCtrl ?? StreamController.broadcast();
-  }
+  StreamController<PKBattleCancelledEvent> get onPKBattleCancelStreamCtrl =>
+      pkService?.onPKBattleCancelStreamCtrl ?? StreamController<PKBattleCancelledEvent>.broadcast();
 
-  StreamController<IncomingPKRequestTimeoutEvent> get incomingPKRequestTimeoutStreamCtrl {
-    return pkService?.incomingPKRequestTimeoutStreamCtrl ?? StreamController<IncomingPKRequestTimeoutEvent>.broadcast();
-  }
+  StreamController<PKBattleRejectedEvent> get onPKBattleRejectedStreamCtrl =>
+      pkService?.onPKBattleRejectedStreamCtrl ?? StreamController<PKBattleRejectedEvent>.broadcast();
 
-  StreamController<OutgoingPKRequestTimeoutEvent> get outgoingPKRequestAnsweredTimeoutStreamCtrl {
-    return pkService?.outgoingPKRequestAnsweredTimeoutStreamCtrl ??
-        StreamController<OutgoingPKRequestTimeoutEvent>.broadcast();
-  }
+  StreamController<PKBattleAcceptedEvent> get onPKBattleAcceptedCtrl =>
+      pkService?.onPKBattleAcceptedCtrl ?? StreamController<PKBattleAcceptedEvent>.broadcast();
+
+  StreamController<PKBattleUserJoinEvent> get onPKUserJoinCtrl =>
+      pkService?.onPKUserJoinCtrl ?? StreamController<PKBattleUserJoinEvent>.broadcast();
+
+  StreamController<PKBattleUserQuitEvent> get onPKBattleUserQuitCtrl =>
+      pkService?.onPKBattleUserQuitCtrl ?? StreamController<PKBattleUserQuitEvent>.broadcast();
+
+  StreamController<PKBattleUserUpdateEvent> get onPKBattleUserUpdateCtrl =>
+      pkService?.onPKBattleUserUpdateCtrl ?? StreamController<PKBattleUserUpdateEvent>.broadcast();
+
+  StreamController get onPKStartStreamCtrl => pkService?.onPKStartStreamCtrl ?? StreamController.broadcast();
+
+  StreamController get onPKEndStreamCtrl => pkService?.onPKEndStreamCtrl ?? StreamController.broadcast();
+
+  StreamController<PKBattleUserConnectingEvent> get onPKUserConnectingCtrl =>
+      pkService?.onPKUserConnectingCtrl ?? StreamController<PKBattleUserConnectingEvent>.broadcast();
+
+  StreamController<IncomingPKRequestTimeoutEvent> get incomingPKRequestTimeoutStreamCtrl =>
+      pkService?.incomingPKRequestTimeoutStreamCtrl ?? StreamController<IncomingPKRequestTimeoutEvent>.broadcast();
+
+  StreamController<OutgoingPKRequestTimeoutEvent> get outgoingPKRequestAnsweredTimeoutStreamCtrl =>
+      pkService?.outgoingPKRequestAnsweredTimeoutStreamCtrl ??
+      StreamController<OutgoingPKRequestTimeoutEvent>.broadcast();
 
   PKService? pkService;
   CoHostService? cohostService;
 
   @override
   void init() {
-    pkService = PKService()..addListener();
+    pkService = PKService()
+      ..addListener()
+      ..setMixerLayout = (streamIDList, videoConfig) {
+        if (setMixerLayout != null) {
+          return setMixerLayout!(streamIDList, videoConfig);
+        } else {
+          return [];
+        }
+      };
     cohostService = CoHostService();
     final expressService = ZEGOSDKManager().expressService;
     subscriptions.addAll([
@@ -250,7 +239,9 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
   @override
   Future<void> quitPKBattle() async {
     if (pkService?.pkInfo != null) {
+      pkService!.stopPlayAnotherHostStream();
       pkService!.quitPKBattle(pkService?.pkInfo!.requestID ?? '');
+      pkService!.stopPKBattle();
     }
   }
 
@@ -258,6 +249,7 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
   Future<void> endPKBattle() async {
     if (pkService?.pkInfo != null) {
       pkService!.endPKBattle(pkService?.pkInfo!.requestID ?? '');
+      pkService?.stopPKBattle();
     }
   }
 

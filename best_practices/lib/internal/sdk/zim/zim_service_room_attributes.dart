@@ -27,8 +27,8 @@ extension ZIMServiceRoom on ZIMService {
           currentRoomID ?? '',
           ZIMRoomAttributesBatchOperationConfig()
             ..isForce = isForce
-            ..isDeleteAfterOwnerLeft = isUpdateOwner
-            ..isUpdateOwner = isDeleteAfterOwnerLeft,
+            ..isDeleteAfterOwnerLeft = isDeleteAfterOwnerLeft
+            ..isUpdateOwner = isUpdateOwner,
         );
   }
 
