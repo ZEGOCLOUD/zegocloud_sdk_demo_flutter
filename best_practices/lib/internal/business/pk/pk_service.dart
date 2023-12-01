@@ -221,6 +221,7 @@ class PKService implements PKServiceInterface {
       //...
     } else {
       muteHostAudioVideo(false);
+      ZEGOSDKManager().expressService.stopPlayingMixerStream(generateMixerStreamID());
     }
     pkInfo = null;
     cancelTime();
@@ -311,8 +312,10 @@ class PKService implements PKServiceInterface {
       }
     }
     final videoConfig = ZegoMixerVideoConfig.defaultConfig()
-      ..width = 1080
-      ..height = 960;
+      ..width = 972
+      ..height = 864
+      ..fps = 15
+      ..bitrate = 1500;
 
     var inputList = <ZegoMixerInput>[];
     if (setMixerLayout != null) {
@@ -352,8 +355,8 @@ class PKService implements PKServiceInterface {
       for (var i = 0; i < 2; i++) {
         double left = (videoConfig.width / streamList.length) * i;
         double top = 0;
-        double width = 1080 / 2;
-        double height = 960;
+        double width = 972 / 2;
+        double height = 864;
         final rect = Rect.fromLTRB(left, top, width * (i + 1), height);
         final input = ZegoMixerInput.defaultConfig()
           ..streamID = streamList[i]
@@ -362,12 +365,66 @@ class PKService implements PKServiceInterface {
           ..soundLevelID = 0;
         inputList.add(input);
       }
-    } else {
+    } else if (streamList.length == 3) {
+      for (var i = 0; i < 3; i++) {
+        double left = i == 0 ? 0 : (videoConfig.width / 2);
+        double top = i == 2 ? (videoConfig.height / 2) : 0;
+        double width = 972 / 2;
+        double height = i == 0 ? 864 : 432;
+        double right = i == 0 ? width : 972;
+        double bottom = i == 1 ? 432 : 864;
+        final rect = Rect.fromLTRB(left, top, right, bottom);
+        final input = ZegoMixerInput.defaultConfig()
+          ..streamID = streamList[i]
+          ..contentType = ZegoMixerInputContentType.Video
+          ..layout = rect
+          ..soundLevelID = 0;
+        inputList.add(input);
+      }
+    } else if (streamList.length == 4) {
       int row = 2;
-      int maxCellCount = streamList.length % 2 == 0 ? streamList.length : (streamList.length + 1);
-      int column = maxCellCount ~/ row;
-      double cellWidth = 1080 / column;
-      double cellHeight = 960 / row;
+      int column = 2;
+      double cellWidth = 972 / column;
+      double cellHeight = 864 / row;
+      double left, top, right, bottom;
+      for (var i = 0; i < streamList.length; i++) {
+        left = cellWidth * (i % column);
+        top = cellHeight * (i < column ? 0 : 1);
+        right = left + cellWidth;
+        bottom = top + cellHeight;
+        final rect = Rect.fromLTRB(left, top, right, bottom);
+        final input = ZegoMixerInput.defaultConfig()
+          ..streamID = streamList[i]
+          ..contentType = ZegoMixerInputContentType.Video
+          ..layout = rect;
+        inputList.add(input);
+      }
+    } else if (streamList.length == 5) {
+      double lastLeft = 0;
+      double lastTop = 0;
+      double height = 432;
+      for (var i = 0; i < 5; i++) {
+        if (i == 2) {
+          lastLeft = 0;
+        }
+        double width = i < 2 ? (videoConfig.width / 2) : (videoConfig.width / 3);
+        double left = lastLeft + (width * (i < 2 ? i : (i - 2)));
+        double right = left + width;
+        double top = i > 1 ? height : 0;
+        double bottom = top + height;
+        final rect = Rect.fromLTRB(left, top, right, bottom);
+        final input = ZegoMixerInput.defaultConfig()
+          ..streamID = streamList[i]
+          ..contentType = ZegoMixerInputContentType.Video
+          ..layout = rect
+          ..soundLevelID = 0;
+        inputList.add(input);
+      }
+    } else if (streamList.length > 5) {
+      int row = streamList.length % 3 == 0 ? (streamList.length ~/ 3) : (streamList.length ~/ 3) + 1;
+      int column = 3;
+      double cellWidth = videoConfig.width / column;
+      double cellHeight = videoConfig.height / row;
       double left, top, right, bottom;
       for (var i = 0; i < streamList.length; i++) {
         left = cellWidth * (i % column);
@@ -521,7 +578,7 @@ class PKService implements PKServiceInterface {
   }
 
   void checkSEITime() {
-    checkSEITimer = Timer.periodic(const Duration(milliseconds: 2500), (timer) {
+    checkSEITimer = Timer.periodic(const Duration(milliseconds: 1000), (timer) {
       final now = DateTime.now().millisecondsSinceEpoch;
       seiTimeMap.forEach((key, value) {
         final timerStamp = value;
@@ -535,7 +592,7 @@ class PKService implements PKServiceInterface {
   }
 
   void startSendSEI() {
-    seiTimer = Timer.periodic(const Duration(milliseconds: 2500), (timer) {
+    seiTimer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
       final currentUser = ZEGOSDKManager().currentUser;
       final seiData = <String, dynamic>{
         'type': SEIType.deviceState,

@@ -1,6 +1,10 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../internal/business/pk/pk_user.dart';
+import '../../zego_live_streaming_manager.dart';
 import '../../zego_sdk_manager.dart';
 
 class PKView extends StatefulWidget {
@@ -12,14 +16,55 @@ class PKView extends StatefulWidget {
 }
 
 class _PKViewState extends State<PKView> {
+  List<StreamSubscription> subscriptions = [];
+
   @override
   void initState() {
     super.initState();
+    subscriptions.add(ZegoLiveStreamingManager().onPKUserConnectingCtrl.stream.listen(onPKUserConnecting));
+
     if (widget.pkUser.userID == ZEGOSDKManager().currentUser?.userID) {
-      // ZEGOSDKManager().expressService.startPreview();
     } else {
+      if (kDebugMode) {
+        print('PKView startPlayingAnotherHostStream:${widget.pkUser.pkUserStream}');
+      }
       ZEGOSDKManager().expressService.startPlayingAnotherHostStream(widget.pkUser.pkUserStream, widget.pkUser.sdkUser);
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    for (final element in subscriptions) {
+      element.cancel();
+    }
+  }
+
+  void onPKUserConnecting(PKBattleUserConnectingEvent event) {
+    if (event.userID == widget.pkUser.userID) {
+      final pkUserMuted = ZegoLiveStreamingManager().isPKUserMuted(event.userID);
+      if (event.duration > 5000) {
+        if (!pkUserMuted) {
+          ZegoLiveStreamingManager().mutePKUser([event.userID], true).then((value) {
+            if (value.errorCode == 0) {
+              mutePlayAudio(true);
+            }
+          });
+        }
+      } else {
+        if (pkUserMuted) {
+          ZegoLiveStreamingManager().mutePKUser([event.userID], false).then((value) {
+            if (value.errorCode == 0) {
+              mutePlayAudio(false);
+            }
+          });
+        }
+      }
+    }
+  }
+
+  void mutePlayAudio(bool mute) {
+    ZEGOSDKManager().expressService.mutePlayStreamAudio(widget.pkUser.pkUserStream, mute);
   }
 
   @override
@@ -31,7 +76,7 @@ class _PKViewState extends State<PKView> {
             return hostReconnecting();
           } else {
             return ValueListenableBuilder(
-                valueListenable: widget.pkUser.camera,
+                valueListenable: widget.pkUser.sdkUser.isCamerOnNotifier,
                 builder: (context, bool isCameraOn, _) {
                   if (isCameraOn) {
                     return SizedBox(

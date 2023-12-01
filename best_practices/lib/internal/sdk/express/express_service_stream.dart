@@ -100,6 +100,9 @@ extension ExpressServiceStream on ExpressService {
   }
 
   Future<void> startPlayingAnotherHostStream(String streamID, ZegoSDKUser anotherHost) async {
+    if (kDebugMode) {
+      print('startPlayingAnotherHostStream:$streamID');
+    }
     await ZegoExpressEngine.instance.createCanvasView((viewID) async {
       anotherHost.viewID = viewID;
       final canvas = ZegoCanvas(anotherHost.viewID, viewMode: ZegoViewMode.AspectFill);
@@ -115,6 +118,12 @@ extension ExpressServiceStream on ExpressService {
       await ZegoExpressEngine.instance.startPlayingStream(streamID, canvas: canvas);
     }).then((videoViewWidget) {
       mixerStreamNotifier.value = videoViewWidget;
+    });
+  }
+
+  Future<void> stopPlayingMixerStream(String streamID) async {
+    ZegoExpressEngine.instance.stopPlayingStream(streamID).then((value) {
+      mixerStreamNotifier.value = null;
     });
   }
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../internal/business/pk/pk_user.dart';
 import '../../internal/sdk/utils/flutter_extension.dart';
@@ -27,7 +28,7 @@ class _ZegoPKContainerViewState extends State<ZegoPKContainerView> {
     subscriptions.addAll([
       ZegoLiveStreamingManager().onPKUserJoinCtrl.stream.listen(onPKUserJoin),
       ZegoLiveStreamingManager().onPKBattleUserQuitCtrl.stream.listen(onPKUserQuit),
-      ZegoLiveStreamingManager().onPKBattleUserUpdateCtrl.stream.listen(onPKUserUpdate)
+      ZegoLiveStreamingManager().onPKBattleUserUpdateCtrl.stream.listen(onPKUserUpdate),
     ]);
   }
 
@@ -82,6 +83,9 @@ class _ZegoPKContainerViewState extends State<ZegoPKContainerView> {
   }
 
   List<Positioned> hostPKViews(List<PKUser> pkUsers, BoxConstraints constraints) {
+    if (kDebugMode) {
+      print('hostPKViews:${pkUsers.map((e) => e.pkUserStream).toList()}');
+    }
     final views = <Positioned>[];
     for (final pkuser in pkUsers.where((element) => element.hasAccepted).toList()) {
       final newRect = conversionRect(pkuser.rect, constraints);
@@ -102,8 +106,8 @@ class _ZegoPKContainerViewState extends State<ZegoPKContainerView> {
   }
 
   Rect conversionRect(Rect originalRect, BoxConstraints constraints) {
-    final wRatio = constraints.maxWidth / 1080.0;
-    final hRatio = constraints.maxHeight / 960.0;
+    final wRatio = constraints.maxWidth / 972.0;
+    final hRatio = constraints.maxHeight / 864.0;
     return Rect.fromLTRB(originalRect.left * wRatio, originalRect.top * hRatio, originalRect.right * wRatio,
         originalRect.bottom * hRatio);
   }
@@ -123,7 +127,6 @@ class _ZegoPKContainerViewState extends State<ZegoPKContainerView> {
   void onRoomPKUserJoin() {
     if (ZegoLiveStreamingManager().pkInfo != null) {
       setState(() {});
-      //pkUserListNoti.value = ZegoLiveStreamingManager().pkInfo!.pkUserList.value;
     }
   }
 }

@@ -5,6 +5,8 @@ extension ExpressServiceMixer on ExpressService {
     final result = await ZegoExpressEngine.instance.startMixerTask(task);
     if (result.errorCode != 0) {
       currentMixerTask = null;
+    } else {
+      currentMixerTask = task;
     }
     return result;
   }
