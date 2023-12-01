@@ -25,9 +25,6 @@ class _PKViewState extends State<PKView> {
 
     if (widget.pkUser.userID == ZEGOSDKManager().currentUser?.userID) {
     } else {
-      if (kDebugMode) {
-        print('PKView startPlayingAnotherHostStream:${widget.pkUser.pkUserStream}');
-      }
       ZEGOSDKManager().expressService.startPlayingAnotherHostStream(widget.pkUser.pkUserStream, widget.pkUser.sdkUser);
     }
   }

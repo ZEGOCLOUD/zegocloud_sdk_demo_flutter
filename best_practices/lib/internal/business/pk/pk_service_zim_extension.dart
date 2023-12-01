@@ -116,6 +116,12 @@ extension PKServiceZIMExtension on PKService {
               ..microphone.value = localUser?.isMicOnNotifier.value ?? false;
             pkInfo!.pkUserList.insert(0, newPKUser);
           } else {
+            final extendedData = PKExtendedData.parse(userInfo.extendedData);
+            if (extendedData != null) {
+              newPKUser
+                ..roomID = extendedData.roomID ?? ''
+                ..userName = extendedData.userName ?? '';
+            }
             pkInfo!.pkUserList.add(newPKUser);
           }
         }
