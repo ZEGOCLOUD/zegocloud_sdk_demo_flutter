@@ -83,9 +83,6 @@ class _ZegoPKContainerViewState extends State<ZegoPKContainerView> {
   }
 
   List<Positioned> hostPKViews(List<PKUser> pkUsers, BoxConstraints constraints) {
-    if (kDebugMode) {
-      print('hostPKViews:${pkUsers.map((e) => e.pkUserStream).toList()}');
-    }
     final views = <Positioned>[];
     for (final pkuser in pkUsers.where((element) => element.hasAccepted).toList()) {
       final newRect = conversionRect(pkuser.rect, constraints);

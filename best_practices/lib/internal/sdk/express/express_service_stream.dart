@@ -100,9 +100,6 @@ extension ExpressServiceStream on ExpressService {
   }
 
   Future<void> startPlayingAnotherHostStream(String streamID, ZegoSDKUser anotherHost) async {
-    if (kDebugMode) {
-      print('startPlayingAnotherHostStream:$streamID');
-    }
     await ZegoExpressEngine.instance.createCanvasView((viewID) async {
       anotherHost.viewID = viewID;
       final canvas = ZegoCanvas(anotherHost.viewID, viewMode: ZegoViewMode.AspectFill);
