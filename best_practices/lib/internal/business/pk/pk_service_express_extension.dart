@@ -26,12 +26,10 @@ extension PKServiceExpressExtension on PKService {
 
   void onRoomUserUpdate(ZegoRoomUserListUpdateEvent event) {
     if (event.updateType == ZegoUpdateType.Delete) {
-      if (ZegoLiveStreamingManager().hostNoti.value?.userID != null &&
-          pkStateNoti.value == RoomPKState.isStartPK &&
-          ZegoLiveStreamingManager().isLocalUserHost()) {
+      if (ZegoLiveStreamingManager().hostNoti.value == null && pkStateNoti.value == RoomPKState.isStartPK) {
         pkStateNoti.value = RoomPKState.isNoPK;
         onPKEndStreamCtrl.add(null);
-        seiTimer?.cancel();
+        cancelTime();
       }
     }
   }
@@ -69,19 +67,18 @@ extension PKServiceExpressExtension on PKService {
 
     final pkuser = getPKUser(pkInfo!, senderID);
     if (pkInfo != null && pkuser != null) {
-      final micChanged = pkuser.microphone.value != isMicOpen;
-      final camChanged = pkuser.camera.value != isCameraOpen;
+      final micChanged = pkuser.sdkUser.isMicOnNotifier.value != isMicOpen;
+      final camChanged = pkuser.sdkUser.isCamerOnNotifier.value != isCameraOpen;
       if (micChanged) {
-        pkuser.microphone.value = isMicOpen;
+        pkuser.sdkUser.isMicOnNotifier.value = isMicOpen;
       }
       if (camChanged) {
-        pkuser.camera.value = isCameraOpen;
+        pkuser.sdkUser.isCamerOnNotifier.value = isCameraOpen;
       }
     }
   }
 
   void onMixerSoundLevelUpdate(ZegoMixerSoundLevelUpdateEvent event) {
     //..
-
   }
 }

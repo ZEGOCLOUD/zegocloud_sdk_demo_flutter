@@ -3,6 +3,7 @@ import 'zego_live_streaming_manager.dart';
 import 'zego_sdk_manager.dart';
 
 abstract class ZegoLiveStreamingManagerInterface {
+
   void init();
   void uninit();
   Future<ZegoRoomLoginResult> startLive(String roomID);

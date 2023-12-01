@@ -22,6 +22,7 @@ extension ZegoLiveStreamingManagerExtension on ZegoLiveStreamingManager {
   }
 
   void onRoomUserUpdate(ZegoRoomUserListUpdateEvent event) {
+    cohostService!.onRoomUserListUpdate(event);
     pkService!.onRoomUserUpdate(event);
   }
 

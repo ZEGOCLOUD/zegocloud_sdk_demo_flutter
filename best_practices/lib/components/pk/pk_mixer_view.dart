@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../internal/business/pk/pk_user.dart';
+import '../../zego_live_streaming_manager.dart';
 import '../../zego_sdk_manager.dart';
 
 class PKMixerView extends StatefulWidget {
@@ -52,8 +53,8 @@ class _PKMixerViewState extends State<PKMixerView> {
   }
 
   Rect conversionRect(Rect originalRect, BoxConstraints constraints) {
-    final wRatio = constraints.maxWidth / 1080.0;
-    final hRatio = constraints.maxHeight / 960.0;
+    final wRatio = constraints.maxWidth / 972.0;
+    final hRatio = constraints.maxHeight / 864.0;
     return Rect.fromLTRB(originalRect.left * wRatio, originalRect.top * hRatio, originalRect.right * wRatio,
         originalRect.bottom * hRatio);
   }
@@ -83,7 +84,7 @@ class _PKMixerViewState extends State<PKMixerView> {
 
   Widget backGroundView(PKUser user) {
     return ValueListenableBuilder(
-        valueListenable: user.camera,
+        valueListenable: user.sdkUser.isCamerOnNotifier,
         builder: (context, bool isCameraOn, _) {
           if (isCameraOn) {
             return IgnorePointer(

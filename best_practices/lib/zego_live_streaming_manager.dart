@@ -233,7 +233,20 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
 
   @override
   Future<ZegoMixerStartResult> mutePKUser(List<String> muteUserList, bool mute) async {
-    return pkService!.mutePKUser([], mute);
+    if (pkInfo != null) {
+      final muteIndex = <int>[];
+      for (final muteUserID in muteUserList) {
+        var index = 0;
+        for (final user in pkInfo!.pkUserList.value) {
+          if (user.userID == muteUserID) {
+            muteIndex.add(index);
+          }
+          index++;
+        }
+      }
+      return pkService!.mutePKUser(muteIndex, mute);
+    }
+    return ZegoMixerStartResult(-9999, {});
   }
 
   @override
