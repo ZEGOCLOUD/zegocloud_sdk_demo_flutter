@@ -5,17 +5,20 @@ extension ExpressServiceMixer on ExpressService {
     final result = await ZegoExpressEngine.instance.startMixerTask(task);
     if (result.errorCode != 0) {
       currentMixerTask = null;
+    } else {
+      currentMixerTask = task;
     }
     return result;
   }
 
-  void stopMixerTask() {
+  Future<ZegoMixerStopResult> stopMixerTask() async {
     if (currentMixerTask == null) {
-      return;
+      return ZegoMixerStopResult(-9999);
     }
-    ZegoExpressEngine.instance.stopMixerTask(currentMixerTask!);
+    final result = await ZegoExpressEngine.instance.stopMixerTask(currentMixerTask!);
+    return result;
   }
-  
+
   Future<void> onMixerSoundLevelUpdate(Map<int, double> soundLevels) async {
     mixerSoundLevelUpdateCtrl.add(ZegoMixerSoundLevelUpdateEvent(soundLevels));
   }

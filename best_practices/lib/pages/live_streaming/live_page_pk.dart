@@ -5,17 +5,15 @@ import '../../zego_sdk_manager.dart';
 import 'live_page.dart';
 
 extension ZegoLiveStreamingPKBattleManagerEventConv on ZegoLivePageState {
-  void onIncomingPKRequestReceived(IncomingPKRequestEvent event) {
+  void onPKRequestReceived(PKBattleReceivedEvent event) {
     showPKDialog(event.requestID);
   }
 
-  void onOutgoingPKRequestAccepted(OutgoingPKRequestAcceptEvent event) {}
-
-  void onOutgoingPKRequestRejected(OutgoingPKRequestRejectedEvent event) {
+  void onPKRequestRejected(PKBattleRejectedEvent event) {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('pk request is rejected')));
   }
 
-  void onIncomingPKRequestCancelled(IncomingPKRequestCancelledEvent event) {
+  void onPKRequestCancelled(PKBattleCancelledEvent event) {
     if (showingPKDialog) {
       Navigator.pop(context);
     }
@@ -29,17 +27,31 @@ extension ZegoLiveStreamingPKBattleManagerEventConv on ZegoLivePageState {
 
   void onOutgoingPKRequestTimeout(OutgoingPKRequestTimeoutEvent event) {}
 
+  void onPKUserConnecting(PKBattleUserConnectingEvent event) {
+    if (event.duration > 60000) {
+      if (event.userID != ZEGOSDKManager().currentUser?.userID) {
+        liveStreamingManager.removeUserFromPKBattle(event.userID);
+      } else {
+        liveStreamingManager.quitPKBattle();
+      }
+    }
+  }
+
   void onPKStart(dynamic event) {
     //stop cohost
     if (!ZegoLiveStreamingManager().isLocalUserHost()) {
       liveStreamingManager.endCoHost();
     }
     if (ZegoLiveStreamingManager().isLocalUserHost()) {
-      for (final RoomRequest element in ZEGOSDKManager.instance.zimService.roomRequestMapNoti.value.values.toList()) {
+      ZEGOSDKManager().zimService.roomRequestMapNoti.value.values.toList().forEach((element) {
         refuseApplyCohost(element);
-      }
+      });
     }
   }
 
-  void onPKEnd(dynamic event) {}
+  void onPKEnd(dynamic event) {
+    if (showingPKDialog) {
+      Navigator.pop(context);
+    }
+  }
 }

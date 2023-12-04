@@ -11,10 +11,10 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.2
-  zego_express_engine: ^3.6.1
+  zego_express_engine: ^3.9.0
   permission_handler: ^10.4.3
   encrypt: ^5.0.1
-  zego_zim: ^2.9.0
+  zego_zim: ^2.12.0
 
 dev_dependencies:
   flutter_test:

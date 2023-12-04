@@ -6,26 +6,9 @@ import '../../sdk/basic/zego_sdk_user.dart';
 import '../../sdk/utils/flutter_extension.dart';
 
 class CoHostService {
+  
   ValueNotifier<ZegoSDKUser?> hostNoti = ValueNotifier(null);
-
-  List<StreamSubscription> subscriptions = [];
   ListNotifier<ZegoSDKUser> coHostUserListNoti = ListNotifier([]);
-
-  void addListener() {
-    final expressService = ZEGOSDKManager().expressService;
-    subscriptions.addAll([
-      expressService.streamListUpdateStreamCtrl.stream
-          .listen(onStreamListUpdate),
-      expressService.roomUserListUpdateStreamCtrl.stream
-          .listen(onRoomUserListUpdate),
-    ]);
-  }
-
-  void uninit() {
-    for (final subscription in subscriptions) {
-      subscription.cancel();
-    }
-  }
 
   bool isHost(String userID) {
     return hostNoti.value?.userID == userID;
@@ -66,7 +49,7 @@ class CoHostService {
     });
   }
 
-  void onStreamListUpdate(ZegoRoomStreamListUpdateEvent event) {
+  void onReceiveStreamUpdate(ZegoRoomStreamListUpdateEvent event) {
     if (event.updateType == ZegoUpdateType.Add) {
       for (final element in event.streamList) {
         if (element.streamID.endsWith('_host')) {
