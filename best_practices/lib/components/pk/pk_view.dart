@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../internal/business/pk/pk_user.dart';
 import '../../zego_live_streaming_manager.dart';
 import '../../zego_sdk_manager.dart';
+import 'pk_mute_button.dart';
 
 class PKView extends StatefulWidget {
   final PKUser pkUser;
@@ -38,26 +39,26 @@ class _PKViewState extends State<PKView> {
   }
 
   void onPKUserConnecting(PKBattleUserConnectingEvent event) {
-    if (event.userID == widget.pkUser.userID) {
-      final pkUserMuted = ZegoLiveStreamingManager().isPKUserMuted(event.userID);
-      if (event.duration > 5000) {
-        if (!pkUserMuted) {
-          ZegoLiveStreamingManager().mutePKUser([event.userID], true).then((value) {
-            if (value.errorCode == 0) {
-              mutePlayAudio(true);
-            }
-          });
-        }
-      } else {
-        if (pkUserMuted) {
-          ZegoLiveStreamingManager().mutePKUser([event.userID], false).then((value) {
-            if (value.errorCode == 0) {
-              mutePlayAudio(false);
-            }
-          });
-        }
-      }
-    }
+    // if (event.userID == widget.pkUser.userID) {
+    //   final pkUserMuted = ZegoLiveStreamingManager().isPKUserMuted(event.userID);
+    //   if (event.duration > 5000) {
+    //     if (!pkUserMuted) {
+    //       ZegoLiveStreamingManager().mutePKUser([event.userID], true).then((value) {
+    //         if (value.errorCode == 0) {
+    //           mutePlayAudio(true);
+    //         }
+    //       });
+    //     }
+    //   } else {
+    //     if (pkUserMuted) {
+    //       ZegoLiveStreamingManager().mutePKUser([event.userID], false).then((value) {
+    //         if (value.errorCode == 0) {
+    //           mutePlayAudio(false);
+    //         }
+    //       });
+    //     }
+    //   }
+    // }
   }
 
   void mutePlayAudio(bool mute) {
@@ -125,9 +126,23 @@ class _PKViewState extends State<PKView> {
   }
 
   Widget foregroundView() {
-    return Container(
-      color: Colors.transparent,
-    );
+    if (ZEGOSDKManager().currentUser?.userID == widget.pkUser.userID) {
+      return Container();
+    } else {
+      return LayoutBuilder(builder: (context, constraints) {
+        return Stack(
+          children: [
+            Positioned(
+              left: constraints.maxWidth - 80,
+              top: 20,
+              width: 60,
+              height: 60,
+              child: PKMuteButton(pkUser: widget.pkUser),
+            )
+          ],
+        );
+      });
+    }
   }
 
   Widget videoView() {

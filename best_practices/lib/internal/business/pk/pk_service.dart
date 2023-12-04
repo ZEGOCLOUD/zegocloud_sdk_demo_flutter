@@ -184,13 +184,11 @@ class PKService implements PKServiceInterface {
     if (task == null || (task != null && task!.inputList.isEmpty)) {
       return ZegoMixerStartResult(-9999, {});
     }
-    final muteStreamList = <String>[];
     for (final index in muteIndexList) {
       if (index < task!.inputList.length) {
         final mixerInput = task!.inputList[index];
         if (mute) {
           mixerInput.contentType = ZegoMixerInputContentType.VideoOnly;
-          muteStreamList.add(mixerInput.streamID);
         } else {
           mixerInput.contentType = ZegoMixerInputContentType.Video;
         }
@@ -200,13 +198,9 @@ class PKService implements PKServiceInterface {
     final result = await ZEGOSDKManager().expressService.startMixerTask(task!);
     if (result.errorCode == 0) {
       if (pkInfo != null) {
-        for (final streamID in muteStreamList) {
-          for (final pkuser in pkInfo!.pkUserList.value) {
-            if (pkuser.pkUserStream == streamID) {
-              pkuser.isMute = true;
-              ZEGOSDKManager().expressService.mutePlayStreamAudio(streamID, mute);
-            }
-          }
+        for (final index in muteIndexList) {
+          final pkuser = pkInfo!.pkUserList.value[index]..isMute = mute;
+          ZEGOSDKManager().expressService.mutePlayStreamAudio(pkuser.pkUserStream, mute);
         }
       }
     }
