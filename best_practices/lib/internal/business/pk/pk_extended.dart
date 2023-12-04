@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+
 class PKExtendedData {
   String? roomID;
   String? userName;
@@ -10,14 +12,20 @@ class PKExtendedData {
   static const START_PK = 91000;
 
   static PKExtendedData? parse(String extendedData) {
-    final Map<String, dynamic> extendedDataMap = jsonDecode(extendedData);
+    late Map<String, dynamic> extendedDataMap;
+    try {
+      extendedDataMap = jsonDecode(extendedData);
+    } catch (e) {
+      debugPrint('parse json fail');
+      return null;
+    }
     if (extendedDataMap.keys.contains('type')) {
       final type = extendedDataMap['type'] as int;
       if (type == START_PK) {
-        final data = PKExtendedData();
-        data.type = type;
-        data.roomID = extendedDataMap['room_id'] as String;
-        data.userName = extendedDataMap['user_name'] as String;
+        final data = PKExtendedData()
+          ..type = type
+          ..roomID = extendedDataMap['room_id'] as String
+          ..userName = extendedDataMap['user_name'] as String;
         if (extendedDataMap.keys.contains('user_id')) {
           data.userID = extendedDataMap['user_id'] as String;
         }
