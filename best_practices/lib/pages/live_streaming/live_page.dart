@@ -10,7 +10,6 @@ import '../../components/common/zego_apply_cohost_list_page.dart';
 import '../../components/common/zego_audio_video_view.dart';
 import '../../components/common/zego_member_button.dart';
 import '../../components/live_streaming/zego_live_bottom_bar.dart';
-import '../../components/live_streaming/zego_pk_view.dart';
 import '../../components/pk/pk_button.dart';
 import '../../components/pk/pk_container.dart';
 import '../../internal/sdk/zim/Define/zim_define.dart';
