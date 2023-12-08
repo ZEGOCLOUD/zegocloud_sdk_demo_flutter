@@ -85,7 +85,7 @@ class ExpressService {
 
   Future<void> setRoomScenario(ZegoScenario scenario) async {
     currentScenario = scenario;
-    ZegoExpressEngine.instance.setRoomScenario(scenario);
+    return ZegoExpressEngine.instance.setRoomScenario(scenario);
   }
 
   Future<ZegoRoomLoginResult> loginRoom(String roomID, {String? token}) async {
