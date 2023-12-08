@@ -38,11 +38,11 @@ class ZEGOSDKManager {
 
   Future<ZegoRoomLoginResult> loginRoom(String roomID, ZegoScenario scenario, {String? token}) async {
     // await these two methods
+    await expressService.setRoomScenario(scenario);
     final expressResult = await expressService.loginRoom(roomID, token: token);
     if (expressResult.errorCode != 0) {
       return expressResult;
     }
-    expressService.setRoomScenario(scenario);
     final zimResult = await zimService.loginRoom(roomID);
 
     // rollback if one of them failed
