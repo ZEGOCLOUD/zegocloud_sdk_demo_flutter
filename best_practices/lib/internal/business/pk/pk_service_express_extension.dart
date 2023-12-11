@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:ffi';
 
+import 'package:flutter/material.dart';
+
 import '../../../zego_live_streaming_manager.dart';
 import '../../../zego_sdk_manager.dart';
 import '../../internal_defines.dart';
@@ -58,23 +60,27 @@ extension PKServiceExpressExtension on PKService {
   }
 
   void onReceiveSEIEvent(ZegoRecvSEIEvent event) {
-    final jsonString = String.fromCharCodes(event.data);
-    final Map<String, dynamic> seiMap = json.decode(jsonString);
-    final String senderID = seiMap['sender_id'];
-    seiTimeMap[senderID] = DateTime.now().millisecondsSinceEpoch;
-    final isMicOpen = seiMap['mic'] as bool;
-    final isCameraOpen = seiMap['cam'] as bool;
+    try {
+      final jsonString = String.fromCharCodes(event.data);
+      final Map<String, dynamic> seiMap = json.decode(jsonString);
+      final String senderID = seiMap['sender_id'];
+      seiTimeMap[senderID] = DateTime.now().millisecondsSinceEpoch;
+      final isMicOpen = seiMap['mic'] as bool;
+      final isCameraOpen = seiMap['cam'] as bool;
 
-    final pkuser = getPKUser(pkInfo!, senderID);
-    if (pkInfo != null && pkuser != null) {
-      final micChanged = pkuser.sdkUser.isMicOnNotifier.value != isMicOpen;
-      final camChanged = pkuser.sdkUser.isCamerOnNotifier.value != isCameraOpen;
-      if (micChanged) {
-        pkuser.sdkUser.isMicOnNotifier.value = isMicOpen;
+      final pkuser = getPKUser(pkInfo!, senderID);
+      if (pkInfo != null && pkuser != null) {
+        final micChanged = pkuser.sdkUser.isMicOnNotifier.value != isMicOpen;
+        final camChanged = pkuser.sdkUser.isCamerOnNotifier.value != isCameraOpen;
+        if (micChanged) {
+          pkuser.sdkUser.isMicOnNotifier.value = isMicOpen;
+        }
+        if (camChanged) {
+          pkuser.sdkUser.isCamerOnNotifier.value = isCameraOpen;
+        }
       }
-      if (camChanged) {
-        pkuser.sdkUser.isCamerOnNotifier.value = isCameraOpen;
-      }
+    } catch (e) {
+      debugPrint('onReceiveSEIEvent.data: ${event.data}.');
     }
   }
 
