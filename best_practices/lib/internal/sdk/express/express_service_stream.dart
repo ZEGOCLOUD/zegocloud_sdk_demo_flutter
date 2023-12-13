@@ -1,6 +1,8 @@
 part of 'express_service.dart';
 
 extension ExpressServiceStream on ExpressService {
+  ZegoViewMode get streamPlayViewMode => ZegoViewMode.AspectFill;
+
   Future<void> stopPlayingStream(String streamID) async {
     final userID = streamMap[streamID];
     final userInfo = getUser(userID ?? '');
@@ -102,8 +104,14 @@ extension ExpressServiceStream on ExpressService {
   Future<void> startPlayingAnotherHostStream(String streamID, ZegoSDKUser anotherHost) async {
     await ZegoExpressEngine.instance.createCanvasView((viewID) async {
       anotherHost.viewID = viewID;
-      final canvas = ZegoCanvas(anotherHost.viewID, viewMode: ZegoViewMode.AspectFill);
-      await ZegoExpressEngine.instance.startPlayingStream(streamID, canvas: canvas);
+      final canvas = ZegoCanvas(
+        anotherHost.viewID,
+        viewMode: streamPlayViewMode,
+      );
+      await ZegoExpressEngine.instance.startPlayingStream(
+        streamID,
+        canvas: canvas,
+      );
     }).then((videoViewWidget) {
       anotherHost.videoViewNotifier.value = videoViewWidget;
     });
@@ -111,8 +119,11 @@ extension ExpressServiceStream on ExpressService {
 
   Future<void> startPlayingMixerStream(String streamID) async {
     await ZegoExpressEngine.instance.createCanvasView((viewID) async {
-      final canvas = ZegoCanvas(viewID, viewMode: ZegoViewMode.AspectFill);
-      await ZegoExpressEngine.instance.startPlayingStream(streamID, canvas: canvas);
+      final canvas = ZegoCanvas(viewID, viewMode: streamPlayViewMode);
+      await ZegoExpressEngine.instance.startPlayingStream(
+        streamID,
+        canvas: canvas,
+      );
     }).then((videoViewWidget) {
       mixerStreamNotifier.value = videoViewWidget;
     });

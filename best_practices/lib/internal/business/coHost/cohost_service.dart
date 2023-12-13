@@ -5,8 +5,11 @@ import '../../../zego_sdk_manager.dart';
 import '../../sdk/basic/zego_sdk_user.dart';
 import '../../sdk/utils/flutter_extension.dart';
 
+bool isHostStreamID(String streamID) {
+  return streamID.endsWith('_host');
+}
+
 class CoHostService {
-  
   ValueNotifier<ZegoSDKUser?> hostNoti = ValueNotifier(null);
   ListNotifier<ZegoSDKUser> coHostUserListNoti = ListNotifier([]);
 
@@ -52,7 +55,7 @@ class CoHostService {
   void onReceiveStreamUpdate(ZegoRoomStreamListUpdateEvent event) {
     if (event.updateType == ZegoUpdateType.Add) {
       for (final element in event.streamList) {
-        if (element.streamID.endsWith('_host')) {
+        if (isHostStreamID(element.streamID)) {
           hostNoti.value = ZEGOSDKManager().getUser(element.user.userID);
         } else if (element.streamID.endsWith('_cohost')) {
           final cohostUser = ZEGOSDKManager().getUser(element.user.userID);
@@ -63,7 +66,7 @@ class CoHostService {
       }
     } else {
       for (final element in event.streamList) {
-        if (element.streamID.endsWith('_host')) {
+        if (isHostStreamID(element.streamID)) {
           hostNoti.value = null;
         } else if (element.streamID.endsWith('_cohost')) {
           coHostUserListNoti.removeWhere((coHostUser) {

@@ -12,6 +12,7 @@ import '../../components/common/zego_member_button.dart';
 import '../../components/live_streaming/zego_live_bottom_bar.dart';
 import '../../components/pk/pk_button.dart';
 import '../../components/pk/pk_container.dart';
+import '../../internal/business/coHost/cohost_service.dart';
 import '../../internal/sdk/zim/Define/zim_define.dart';
 import '../../internal/sdk/utils/flutter_extension.dart';
 import '../../internal/sdk/zim/Define/zim_room_request.dart';

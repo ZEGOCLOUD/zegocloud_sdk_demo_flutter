@@ -178,8 +178,15 @@ class ExpressService {
     if (userInfo != null) {
       await ZegoExpressEngine.instance.createCanvasView((viewID) async {
         userInfo.viewID = viewID;
-        final canvas = ZegoCanvas(userInfo.viewID, viewMode: ZegoViewMode.AspectFill);
-        await ZegoExpressEngine.instance.startPlayingStream(streamID, canvas: canvas, config: config);
+        final canvas = ZegoCanvas(
+          userInfo.viewID,
+          viewMode: streamPlayViewMode,
+        );
+        await ZegoExpressEngine.instance.startPlayingStream(
+          streamID,
+          canvas: canvas,
+          config: config,
+        );
       }).then((videoViewWidget) {
         userInfo.videoViewNotifier.value = videoViewWidget;
       });
