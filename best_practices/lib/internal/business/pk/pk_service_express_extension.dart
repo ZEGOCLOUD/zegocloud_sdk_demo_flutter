@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../../zego_live_streaming_manager.dart';
 import '../../../zego_sdk_manager.dart';
 import '../../internal_defines.dart';
+import '../coHost/cohost_service.dart';
 import 'pk_service.dart';
 import 'pk_service_zim_extension.dart';
 
@@ -14,7 +15,7 @@ extension PKServiceExpressExtension on PKService {
   void onReceiveStreamUpdate(ZegoRoomStreamListUpdateEvent event) {
     if (event.updateType == ZegoUpdateType.Add) {
       for (final stream in event.streamList) {
-        if (stream.streamID.endsWith('_host')) {
+        if (isHostStreamID(stream.streamID)) {
           if (pkRoomAttribute.isNotEmpty) {
             final pkUsers = pkRoomAttribute['pk_users'];
             if (pkUsers != null && pkUsers.isNotEmpty) {
@@ -52,7 +53,7 @@ extension PKServiceExpressExtension on PKService {
 
   void muteMainStream() {
     ZEGOSDKManager().expressService.streamMap.forEach((key, value) {
-      if (value.contains('_host')) {
+      if (isHostStreamID(value)) {
         ZEGOSDKManager().expressService.mutePlayStreamAudio(value, true);
         ZEGOSDKManager().expressService.mutePlayStreamVideo(value, true);
       }
