@@ -348,6 +348,11 @@ class ZegoLivePageState extends State<ZegoLivePage> {
         content: Text('onExpressRoomStateChanged: reason:${event.reason.name}, errorCode:${event.errorCode}'),
       ),
     );
+    if ((event.reason == ZegoRoomStateChangedReason.KickOut) ||
+        (event.reason == ZegoRoomStateChangedReason.ReconnectFailed) ||
+        (event.reason == ZegoRoomStateChangedReason.LoginFailed)) {
+      Navigator.pop(context);
+    }
   }
 
   void onZIMRoomStateChanged(ZIMServiceRoomStateChangedEvent event) {
@@ -358,6 +363,9 @@ class ZegoLivePageState extends State<ZegoLivePage> {
         content: Text('onZIMRoomStateChanged: $event'),
       ),
     );
+    if (event.state == ZIMRoomState.disconnected) {
+      Navigator.pop(context);
+    }
   }
 
   void onZIMConnectionStateChanged(ZIMServiceConnectionStateChangedEvent event) {
