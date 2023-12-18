@@ -62,9 +62,8 @@ class ListNotifier<T> extends ValueNotifier<List<T>> {
   void triggerNotifierfy() => notifyListeners();
 }
 
-
-class MapNotifier<T> extends ValueNotifier<Map<String,dynamic>> {
-  MapNotifier(Map<String,dynamic> value) : super(value);
+class MapNotifier<T> extends ValueNotifier<Map<String, dynamic>> {
+  MapNotifier(Map<String, dynamic> value) : super(value);
 
   int get length => value.length;
   bool get isEmpty => value.isEmpty;
@@ -92,5 +91,3 @@ class MapNotifier<T> extends ValueNotifier<Map<String,dynamic>> {
 
   void triggerNotifierfy() => notifyListeners();
 }
-
-

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 
 import '../../components/audio_room/seat_item_view.dart';
 import '../../components/common/zego_apply_cohost_list_page.dart';
-import '../../internal/business/audioRoom/layout_config.dart';
 import '../../internal/business/audioRoom/live_audio_room_seat.dart';
 import '../../live_audio_room_manager.dart';
 import '../../zego_sdk_manager.dart';
@@ -25,7 +24,7 @@ class _AudioRoomPageState extends State<AudioRoomPage> {
   String? currentRequestID;
   ValueNotifier<bool> isApplyStateNoti = ValueNotifier(false);
 
-  final liveAudioRoomManager = ZegoLiveAudioRoomManager.instance;
+  final liveAudioRoomManager = ZegoLiveAudioRoomManager();
 
   @override
   void initState() {
@@ -82,7 +81,7 @@ class _AudioRoomPageState extends State<AudioRoomPage> {
         body: Stack(
           children: [
             Positioned(top: 10, child: roomTitle()),
-            Positioned(top: 100, child: creatSeatView()),
+            Positioned(top: 100, child: seatListView()),
             Positioned(bottom: 40, child: bottomView()),
           ],
         ),
@@ -101,7 +100,7 @@ class _AudioRoomPageState extends State<AudioRoomPage> {
           ValueListenableBuilder(
             valueListenable: liveAudioRoomManager.hostUserNoti,
             builder: (BuildContext context, ZegoSDKUser? host, Widget? child) {
-              return host != null ? Text('Host: ${host.userName}(id: ${host.userID})') : const SizedBox.shrink();
+              return host != null ? Text('Host: ${host.userName} (id: ${host.userID})') : const SizedBox.shrink();
             },
           ),
         ],
@@ -279,64 +278,42 @@ class _AudioRoomPageState extends State<AudioRoomPage> {
     );
   }
 
-  Widget creatSeatView() {
-    final size = MediaQuery.of(context).size;
-    return Container(
-      padding: EdgeInsets.only(left: (size.width - 270) / 2, right: (size.width - 270) / 2, bottom: 100),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: seatListView(),
+  Widget seatListView() {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width,
+      height: 300,
+      child: GridView.count(
+        physics: const NeverScrollableScrollPhysics(),
+        mainAxisSpacing: 10,
+        crossAxisCount: 4,
+        children: [
+          ...List.generate(ZegoLiveAudioRoomManager().seatList.length, (seatIndex) {
+            return ZegoSeatItemView(
+              seat: getRoomSeatWithIndex(seatIndex),
+              lockSeatNoti: liveAudioRoomManager.isLockSeat,
+              onPressed: (seat) {
+                if (seat.currentUser.value == null) {
+                  if (liveAudioRoomManager.roleNoti.value == ZegoLiveRole.audience) {
+                    liveAudioRoomManager.takeSeat(seat.seatIndex).then((value) {
+                      openMicAndStartPublishStream();
+                    }).catchError((error) {});
+                  } else if (liveAudioRoomManager.roleNoti.value == ZegoLiveRole.coHost) {
+                    if (getLocalUserSeatIndex() != -1) {
+                      ZegoLiveAudioRoomManager().switchSeat(getLocalUserSeatIndex(), seat.seatIndex);
+                    }
+                  }
+                } else {
+                  if (widget.role == ZegoLiveRole.host &&
+                      (ZEGOSDKManager().currentUser?.userID != seat.currentUser.value?.userID)) {
+                    showRemoveSpeakerAndKitOutSheet(context, seat.currentUser.value!);
+                  }
+                }
+              },
+            );
+          }),
+        ],
       ),
     );
-  }
-
-  List<Widget> seatListView() {
-    final column = <Widget>[];
-    var currentIndex = 0;
-    for (var columIndex = 0; columIndex < liveAudioRoomManager.layoutConfig!.rowConfigs.length; columIndex++) {
-      final rowConfig = liveAudioRoomManager.layoutConfig!.rowConfigs[columIndex];
-      column
-        ..add(Row(
-          children: seatRow(columIndex, currentIndex, rowConfig),
-        ))
-        ..add(const SizedBox(height: 10));
-      currentIndex = currentIndex + rowConfig.count;
-    }
-    return column;
-  }
-
-  List<Widget> seatRow(int columIndex, int seatIndex, ZegoLiveAudioRoomLayoutRowConfig config) {
-    final seatViews = <Widget>[];
-    // todo user list.gen
-    for (var rowIndex = 0; rowIndex < config.count; rowIndex++) {
-      final view = ZegoSeatItemView(
-        seat: getRoomSeatWithIndex(seatIndex + rowIndex),
-        lockSeatNoti: liveAudioRoomManager.isLockSeat,
-        onPressed: (seat) {
-          if (seat.currentUser.value == null) {
-            if (liveAudioRoomManager.roleNoti.value == ZegoLiveRole.audience) {
-              liveAudioRoomManager.takeSeat(seat.seatIndex).then((value) {
-                openMicAndStartPublishStream();
-              }).catchError((error) {});
-            } else if (liveAudioRoomManager.roleNoti.value == ZegoLiveRole.coHost) {
-              if (getLocalUserSeatIndex() != -1) {
-                ZegoLiveAudioRoomManager.instance.switchSeat(getLocalUserSeatIndex(), seat.seatIndex);
-              }
-            }
-          } else {
-            if (widget.role == ZegoLiveRole.host &&
-                (ZEGOSDKManager().currentUser?.userID != seat.currentUser.value?.userID)) {
-              showRemoveSpeakerAndKitOutSheet(context, seat.currentUser.value!);
-            }
-          }
-        },
-      );
-      seatViews
-        ..add(view)
-        ..add(const SizedBox(width: 10));
-    }
-    return seatViews;
   }
 
   void showRemoveSpeakerAndKitOutSheet(BuildContext context, ZegoSDKUser targetUser) {
@@ -349,7 +326,7 @@ class _AudioRoomPageState extends State<AudioRoomPage> {
               title: const Text('remove speaker', textAlign: TextAlign.center),
               onTap: () {
                 Navigator.pop(context);
-                ZegoLiveAudioRoomManager.instance.removeSpeakerFromSeat(targetUser.userID);
+                ZegoLiveAudioRoomManager().removeSpeakerFromSeat(targetUser.userID);
               },
             ),
             ListTile(
@@ -357,14 +334,14 @@ class _AudioRoomPageState extends State<AudioRoomPage> {
                   textAlign: TextAlign.center),
               onTap: () {
                 Navigator.pop(context);
-                ZegoLiveAudioRoomManager.instance.muteSpeaker(targetUser.userID, targetUser.isMicOnNotifier.value);
+                ZegoLiveAudioRoomManager().muteSpeaker(targetUser.userID, targetUser.isMicOnNotifier.value);
               },
             ),
             ListTile(
               title: const Text('kick out user', textAlign: TextAlign.center),
               onTap: () {
                 Navigator.pop(context);
-                ZegoLiveAudioRoomManager.instance.kickOutRoom(targetUser.userID);
+                ZegoLiveAudioRoomManager().kickOutRoom(targetUser.userID);
               },
             ),
           ],
@@ -374,7 +351,7 @@ class _AudioRoomPageState extends State<AudioRoomPage> {
   }
 
   int getLocalUserSeatIndex() {
-    for (final element in ZegoLiveAudioRoomManager.instance.seatList) {
+    for (final element in ZegoLiveAudioRoomManager().seatList) {
       if (element.currentUser.value?.userID == ZEGOSDKManager.instance.currentUser?.userID) {
         return element.seatIndex;
       }
@@ -383,12 +360,13 @@ class _AudioRoomPageState extends State<AudioRoomPage> {
   }
 
   ZegoLiveAudioRoomSeat getRoomSeatWithIndex(int seatIndex) {
-    for (final element in ZegoLiveAudioRoomManager.instance.seatList) {
+    assert(seatIndex >= 0 && seatIndex < ZegoLiveAudioRoomManager().seatList.length, 'seatIndex error');
+    for (final element in ZegoLiveAudioRoomManager().seatList) {
       if (element.seatIndex == seatIndex) {
         return element;
       }
     }
-    return ZegoLiveAudioRoomSeat(0, 0, 0);
+    throw Exception('seatIndex error');
   }
 
   // zim listener
@@ -399,9 +377,9 @@ class _AudioRoomPageState extends State<AudioRoomPage> {
   void onInComingRoomRequestTimeOut() {}
 
   void onOutgoingRoomRequestAccepted(OnOutgoingRoomRequestAcceptedEvent event) {
-    for (final seat in ZegoLiveAudioRoomManager.instance.seatList) {
+    for (final seat in ZegoLiveAudioRoomManager().seatList) {
       if (seat.currentUser.value == null) {
-        ZegoLiveAudioRoomManager.instance.takeSeat(seat.seatIndex).then((value) {
+        ZegoLiveAudioRoomManager().takeSeat(seat.seatIndex).then((value) {
           isApplyStateNoti.value = false;
           openMicAndStartPublishStream();
         });

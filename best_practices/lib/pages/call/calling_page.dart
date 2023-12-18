@@ -84,9 +84,7 @@ class _CallingPageState extends State<CallingPage> {
       subscription?.cancel();
     }
     ZegoCallManager().clearCallData();
-    for (final streamID in streamIDList) {
-      ZEGOSDKManager.instance.expressService.stopPlayingStream(streamID);
-    }
+    streamIDList.forEach(ZEGOSDKManager.instance.expressService.stopPlayingStream);
     ZEGOSDKManager.instance.expressService.stopPreview();
     ZEGOSDKManager.instance.expressService.stopPublishingStream();
     ZEGOSDKManager.instance.expressService.logoutRoom(widget.callData.callID);

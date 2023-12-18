@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../internal/business/audioRoom/layout_config.dart';
 import '../internal/business/call/call_data.dart';
 import '../live_audio_room_manager.dart';
 import '../utils/zegocloud_token.dart';
@@ -29,7 +30,26 @@ class _HomePageState extends State<HomePage> {
     return SafeArea(
       top: false,
       child: Scaffold(
-        appBar: AppBar(title: const Text('Home Page')),
+        appBar: AppBar(
+          title: const Text('Home Page'),
+          actions: [
+            ValueListenableBuilder(
+              valueListenable: ZEGOSDKManager.instance.currentUser!.avatarUrlNotifier,
+              builder: (BuildContext context, String? avatarUrl, Widget? child) {
+                return avatarUrl?.isNotEmpty ?? false
+                    ? CachedNetworkImage(
+                        imageUrl: avatarUrl!,
+                        fit: BoxFit.cover,
+                        progressIndicatorBuilder: (context, url, _) => const CupertinoActivityIndicator(),
+                        errorWidget: (context, url, error) => child!,
+                      )
+                    : const SizedBox.shrink();
+              },
+            ),
+            Text('ID:${ZEGOSDKManager.instance.currentUser!.userID}'),
+            const SizedBox(width: 10),
+          ],
+        ),
         body: const Padding(
           padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
           child: CustomScrollView(slivers: [
@@ -79,7 +99,7 @@ class _CallEntryState extends State<CallEntry> {
         callInviteeTextField(),
         const SizedBox(height: 20),
         startCallButton(),
-        const SizedBox(height: 20),
+        const SizedBox(height: 30),
       ],
     );
   }
@@ -220,7 +240,7 @@ class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
         hostJoinLivePageButton(),
         const SizedBox(height: 20),
         audienceJoinLivePageButton(),
-        const SizedBox(height: 20),
+        const SizedBox(height: 30),
       ],
     );
   }
@@ -302,7 +322,7 @@ class _AudioRoomEntryState extends State<AudioRoomEntry> {
         hostJoinLiveAudioRoomButton(),
         const SizedBox(height: 20),
         audienceJoinLiveAudioRoomButton(),
-        const SizedBox(height: 20),
+        const SizedBox(height: 30),
       ],
     );
   }
@@ -345,7 +365,7 @@ class _AudioRoomEntryState extends State<AudioRoomEntry> {
         ? ZegoTokenUtils.generateToken(
             SDKKeyCenter.appID, SDKKeyCenter.serverSecret, ZEGOSDKManager.instance.currentUser!.userID)
         : null;
-    ZegoLiveAudioRoomManager.instance.initWithConfig(ZegoLiveAudioRoomLayoutConfig(), ZegoLiveRole.host);
+    ZegoLiveAudioRoomManager().initWithConfig(ZegoLiveRole.host);
     ZEGOSDKManager.instance
         .loginRoom(roomIDController.text, ZegoScenario.HighQualityChatroom, token: token)
         .then((value) {
@@ -383,7 +403,7 @@ class _AudioRoomEntryState extends State<AudioRoomEntry> {
         ? ZegoTokenUtils.generateToken(
             SDKKeyCenter.appID, SDKKeyCenter.serverSecret, ZEGOSDKManager.instance.currentUser!.userID)
         : null;
-    ZegoLiveAudioRoomManager.instance.initWithConfig(ZegoLiveAudioRoomLayoutConfig(), ZegoLiveRole.audience);
+    ZegoLiveAudioRoomManager().initWithConfig(ZegoLiveRole.audience);
     ZEGOSDKManager.instance
         .loginRoom(roomIDController.text, ZegoScenario.HighQualityChatroom, token: token)
         .then((value) {
