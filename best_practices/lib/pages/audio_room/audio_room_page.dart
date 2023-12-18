@@ -5,12 +5,10 @@ import 'package:flutter/material.dart';
 
 import '../../components/audio_room/seat_item_view.dart';
 import '../../components/common/zego_apply_cohost_list_page.dart';
+import '../../internal/business/audioRoom/layout_config.dart';
 import '../../internal/business/audioRoom/live_audio_room_seat.dart';
-import '../../internal/sdk/zim/Define/zim_define.dart';
-import '../../internal/sdk/zim/Define/zim_room_request.dart';
 import '../../live_audio_room_manager.dart';
 import '../../zego_sdk_manager.dart';
-import '../../internal/business/audioRoom/layout_config.dart';
 
 class AudioRoomPage extends StatefulWidget {
   const AudioRoomPage({super.key, required this.roomID, required this.role});

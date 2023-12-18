@@ -42,7 +42,7 @@ class _ZegoToggleCameraButtonState extends State<ZegoToggleCameraButton> {
 
     return ValueListenableBuilder<bool>(
         valueListenable: cameraStateNoti,
-        builder: ((context, cameraState, _) {
+        builder: (context, cameraState, _) {
           return GestureDetector(
             onTap: () {
               if (widget.onPressed != null) {
@@ -71,6 +71,6 @@ class _ZegoToggleCameraButtonState extends State<ZegoToggleCameraButton> {
               ),
             ),
           );
-        }));
+        });
   }
 }

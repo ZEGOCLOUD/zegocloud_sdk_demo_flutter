@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
 import '../../internal/business/pk/pk_user.dart';
 import '../../internal/sdk/utils/flutter_extension.dart';
 import '../../zego_live_streaming_manager.dart';
