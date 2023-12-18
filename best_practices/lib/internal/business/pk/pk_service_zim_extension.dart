@@ -1,9 +1,7 @@
 import 'dart:convert';
-import 'dart:ffi';
 
 import '../../../zego_live_streaming_manager.dart';
 import '../../../zego_sdk_manager.dart';
-import '../../internal_defines.dart';
 import '../../sdk/zim/Define/zim_define.dart';
 import 'pk_extended.dart';
 import 'pk_info.dart';

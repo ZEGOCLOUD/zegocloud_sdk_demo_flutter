@@ -2,8 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'internal/business/audioRoom/live_audio_room_seat.dart';
+
 import 'internal/business/audioRoom/layout_config.dart';
+import 'internal/business/audioRoom/live_audio_room_seat.dart';
 import 'internal/business/audioRoom/room_seat_service.dart';
 import 'main.dart';
 import 'zego_sdk_manager.dart';
@@ -37,7 +38,7 @@ class ZegoLiveAudioRoomManager {
     return roomSeatService?.seatList ?? [];
   }
 
-  get currentUserRoleNoti => null;
+  void get currentUserRoleNoti {}
 
   void initWithConfig(ZegoLiveAudioRoomLayoutConfig config, ZegoLiveRole role) {
     roomSeatService = RoomSeatService();
@@ -206,7 +207,7 @@ class ZegoLiveAudioRoomManager {
   }
 
   void onRoomCommandReceived(OnRoomCommandReceivedEvent event) {
-    Map<String, dynamic> messageMap = jsonDecode(event.command);
+    final Map<String, dynamic> messageMap = jsonDecode(event.command);
     if (messageMap.keys.contains('room_command_type')) {
       final type = messageMap['room_command_type'];
       final receiverID = messageMap['receiver_id'];

@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import '../../zego_sdk_manager.dart';
 
 class RoomRequestType {
@@ -79,6 +77,7 @@ class PKBattleTimeoutEvent {
     return 'PKBattleTimeoutEvent{userID: $userID, extendedData: $extendedData}';
   }
 }
+
 class PKBattleUserQuitEvent {
   final String userID;
   final String extendedData;

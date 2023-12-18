@@ -1,8 +1,6 @@
-import 'dart:async';
 
 import 'package:flutter/material.dart';
 import '../../../zego_sdk_manager.dart';
-import '../../sdk/basic/zego_sdk_user.dart';
 import '../../sdk/utils/flutter_extension.dart';
 
 bool isHostStreamID(String streamID) {

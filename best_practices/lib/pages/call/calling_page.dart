@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -11,8 +12,8 @@ import '../../components/common/zego_audio_video_view.dart';
 import '../../internal/business/call/call_data.dart';
 import '../../utils/zegocloud_token.dart';
 import '../../zego_call_manager.dart';
-import '../../zego_sdk_manager.dart';
 import '../../zego_sdk_key_center.dart';
+import '../../zego_sdk_manager.dart';
 
 class CallingPage extends StatefulWidget {
   const CallingPage({required this.callData, required this.otherUserInfo, super.key});
@@ -83,7 +84,7 @@ class _CallingPageState extends State<CallingPage> {
       subscription?.cancel();
     }
     ZegoCallManager().clearCallData();
-    for (String streamID in streamIDList) {
+    for (final streamID in streamIDList) {
       ZEGOSDKManager.instance.expressService.stopPlayingStream(streamID);
     }
     ZEGOSDKManager.instance.expressService.stopPreview();
@@ -256,7 +257,7 @@ class _CallingPageState extends State<CallingPage> {
   // }
 
   void onRoomUserListUpdate(ZegoRoomUserListUpdateEvent event) {
-    for (var user in event.userList) {
+    for (final user in event.userList) {
       if (event.updateType == ZegoUpdateType.Delete) {
         if (user.userID == widget.otherUserInfo.userID) {
           otherUserInfoNoti.value = null;

@@ -1,10 +1,8 @@
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 
 import '../../../zego_sdk_manager.dart';
-import '../call/call_data.dart';
 
 class PKUser {
   final String userID;

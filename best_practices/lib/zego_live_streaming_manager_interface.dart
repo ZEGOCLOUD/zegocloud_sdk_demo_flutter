@@ -1,5 +1,4 @@
 import 'internal/business/pk/pk_define.dart';
-import 'zego_live_streaming_manager.dart';
 import 'zego_sdk_manager.dart';
 
 abstract class ZegoLiveStreamingManagerInterface {

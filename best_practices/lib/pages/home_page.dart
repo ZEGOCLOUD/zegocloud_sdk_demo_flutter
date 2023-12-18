@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../internal/business/audioRoom/layout_config.dart';
 import '../internal/business/call/call_data.dart';
 import '../live_audio_room_manager.dart';
 import '../utils/zegocloud_token.dart';
@@ -12,7 +12,6 @@ import '../zego_call_manager.dart';
 import '../zego_sdk_key_center.dart';
 import '../zego_sdk_manager.dart';
 import 'audio_room/audio_room_page.dart';
-import '../internal/business/audioRoom/layout_config.dart';
 import 'call/calling_page.dart';
 import 'call/waiting_page.dart';
 import 'live_streaming/live_page.dart';
@@ -29,10 +28,10 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Home Page')),
-      body: Padding(
-        padding: const EdgeInsets.only(top: 50, left: 30, right: 30),
+      body: const Padding(
+        padding: EdgeInsets.only(top: 50, left: 30, right: 30),
         child: Column(
-          children: const [
+          children: [
             CallEntry(),
             LiveStreamingEntry(),
             AudioRoomEntry(),

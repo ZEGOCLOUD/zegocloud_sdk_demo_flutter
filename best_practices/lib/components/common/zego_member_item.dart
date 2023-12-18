@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import '../../internal/sdk/zim/Define/zim_define.dart';
+
 import '../../zego_sdk_manager.dart';
 
 class ZegoMemberItem extends StatefulWidget {
