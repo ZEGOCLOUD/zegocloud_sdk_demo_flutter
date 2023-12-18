@@ -1,3 +1,5 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../internal/business/audioRoom/live_audio_room_seat.dart';
@@ -46,37 +48,39 @@ class ZegoSeatItemView extends StatelessWidget {
       width: 60,
       height: 60,
       child: ValueListenableBuilder<String?>(
-          valueListenable: userInfo.avatarUrlNotifier,
-          builder: (context, avatarUrl, _) {
-            if (avatarUrl != null && avatarUrl.isNotEmpty) {
-              return ClipRRect(
-                borderRadius: const BorderRadius.all(Radius.circular(30)),
-                child: Image.network(avatarUrl, fit: BoxFit.cover),
-              );
-            } else {
-              return ClipRRect(
-                borderRadius: const BorderRadius.all(Radius.circular(30)),
-                child: Container(
-                  decoration: const BoxDecoration(color: Colors.grey, border: Border(bottom: BorderSide.none)),
-                  child: Center(
-                    child: SizedBox(
-                      height: 20,
-                      child: Text(
-                        userInfo.userID.substring(0, 1),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          decoration: TextDecoration.none,
-                          color: Colors.black,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
+        valueListenable: userInfo.avatarUrlNotifier,
+        builder: (context, avatarUrl, child) {
+          return ClipRRect(
+            borderRadius: const BorderRadius.all(Radius.circular(30)),
+            child: (avatarUrl != null && avatarUrl.isNotEmpty)
+                ? CachedNetworkImage(
+                    imageUrl: avatarUrl,
+                    fit: BoxFit.cover,
+                    progressIndicatorBuilder: (context, url, _) => const CupertinoActivityIndicator(),
+                    errorWidget: (context, url, error) => child!,
+                  )
+                : child,
+          );
+        },
+        child: Container(
+          decoration: const BoxDecoration(color: Colors.grey, border: Border(bottom: BorderSide.none)),
+          child: Center(
+            child: SizedBox(
+              height: 20,
+              child: Text(
+                userInfo.userID.substring(0, 1),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  decoration: TextDecoration.none,
+                  color: Colors.black,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
-              );
-            }
-          }),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 

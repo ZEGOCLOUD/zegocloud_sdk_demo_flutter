@@ -3,15 +3,14 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
-import 'internal/business/audioRoom/layout_config.dart';
 import 'internal/business/audioRoom/live_audio_room_seat.dart';
 import 'internal/business/audioRoom/room_seat_service.dart';
 import 'main.dart';
 import 'zego_sdk_manager.dart';
 
 class ZegoLiveAudioRoomManager {
+  factory ZegoLiveAudioRoomManager() => instance;
   ZegoLiveAudioRoomManager._internal();
-
   static final ZegoLiveAudioRoomManager instance = ZegoLiveAudioRoomManager._internal();
 
   static const String roomKey = 'audioRoom';
@@ -25,10 +24,6 @@ class ZegoLiveAudioRoomManager {
 
   RoomSeatService? roomSeatService;
 
-  ZegoLiveAudioRoomLayoutConfig? get layoutConfig {
-    return roomSeatService?.layoutConfig;
-  }
-
   int get hostSeatIndex {
     return roomSeatService?.hostSeatIndex ?? 0;
   }
@@ -39,7 +34,7 @@ class ZegoLiveAudioRoomManager {
 
   void get currentUserRoleNoti {}
 
-  void initWithConfig(ZegoLiveAudioRoomLayoutConfig config, ZegoLiveRole role) {
+  void initWithConfig(ZegoLiveRole role) {
     roomSeatService = RoomSeatService();
     roleNoti.value = role;
     final expressService = ZEGOSDKManager.instance.expressService;
@@ -49,7 +44,7 @@ class ZegoLiveAudioRoomManager {
       expressService.roomUserListUpdateStreamCtrl.stream.listen(onRoomUserListUpdate),
       zimService.onRoomCommandReceivedEventStreamCtrl.stream.listen(onRoomCommandReceived)
     ]);
-    roomSeatService?.initWithConfig(config, role);
+    roomSeatService?.initWithConfig(role);
   }
 
   void unInit() {

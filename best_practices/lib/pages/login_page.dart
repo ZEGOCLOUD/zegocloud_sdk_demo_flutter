@@ -91,8 +91,8 @@ class _LoginPageState extends State<LoginPage> {
                   }
                   await ZEGOSDKManager.instance
                       .connectUser(userIDController.text, userNameController.text, token: token);
-                  ZegoLiveAudioRoomManager.instance
-                      .updateUserAvatarUrl('https://storage.zego.im/IMKit/avatar/avatar-0.png');
+                  ZegoLiveAudioRoomManager()
+                      .updateUserAvatarUrl('https://robohash.org/${userIDController.text}.png?set=set4');
                 },
                 child: const Text('Login'),
               ),

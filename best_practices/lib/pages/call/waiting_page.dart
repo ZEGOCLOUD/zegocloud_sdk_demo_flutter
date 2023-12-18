@@ -92,10 +92,8 @@ class _CallWaitingPageState extends State<CallWaitingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        return false;
-      },
+    return PopScope(
+      canPop: false,
       child: SafeArea(
         child: Scaffold(
           body: Stack(
