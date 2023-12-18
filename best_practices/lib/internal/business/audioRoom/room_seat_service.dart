@@ -1,23 +1,18 @@
-
 import 'dart:async';
 
 import '../../../live_audio_room_manager.dart';
 import '../../../zego_sdk_manager.dart';
-import 'layout_config.dart';
 import 'live_audio_room_seat.dart';
 
 class RoomSeatService {
-
+  final seatCount = 8;
   int hostSeatIndex = 0;
-  List<ZegoLiveAudioRoomSeat> seatList = [];
+  late List<ZegoLiveAudioRoomSeat> seatList = List.generate(seatCount, (index) => ZegoLiveAudioRoomSeat(index));
   bool isBatchOperation = false;
 
   List<StreamSubscription<dynamic>> subscriptions = [];
 
-  ZegoLiveAudioRoomLayoutConfig? layoutConfig;
-
-  void initWithConfig(ZegoLiveAudioRoomLayoutConfig config, ZegoLiveRole role) {
-    layoutConfig = config;
+  void initWithConfig(ZegoLiveRole role) {
     final expressService = ZEGOSDKManager.instance.expressService;
     final zimService = ZEGOSDKManager.instance.zimService;
     subscriptions.addAll([
@@ -25,17 +20,6 @@ class RoomSeatService {
       zimService.roomAttributeUpdateStreamCtrl.stream.listen(onRoomAttributeUpdate),
       zimService.roomAttributeBatchUpdatedStreamCtrl.stream.listen(onRoomAttributeBatchUpdate)
     ]);
-    initSeat(config);
-  }
-
-  void initSeat(ZegoLiveAudioRoomLayoutConfig config) {
-    for (var columIndex = 0; columIndex < config.rowConfigs.length; columIndex++) {
-      final rowConfig = config.rowConfigs[columIndex];
-      for (var rowIndex = 0; rowIndex < rowConfig.count; rowIndex++) {
-        final seat = ZegoLiveAudioRoomSeat(seatList.length, rowIndex, columIndex);
-        seatList.add(seat);
-      }
-    }
   }
 
   Future<ZIMRoomAttributesOperatedCallResult?> takeSeat(int seatIndex) async {
@@ -113,7 +97,6 @@ class RoomSeatService {
     unInit();
   }
 
-
   void onRoomUserListUpdate(ZegoRoomUserListUpdateEvent event) {
     if (event.updateType == ZegoUpdateType.Add) {
       final userIDList = <String>[];
@@ -176,7 +159,7 @@ class RoomSeatService {
         break;
       }
     }
-    final liveAudioRoomManager = ZegoLiveAudioRoomManager.instance;
+    final liveAudioRoomManager = ZegoLiveAudioRoomManager();
     if (isFindSelf) {
       if (liveAudioRoomManager.roleNoti.value != ZegoLiveRole.host) {
         liveAudioRoomManager.roleNoti.value = ZegoLiveRole.coHost;
@@ -185,7 +168,5 @@ class RoomSeatService {
       liveAudioRoomManager.roleNoti.value = ZegoLiveRole.audience;
       ZEGOSDKManager().expressService.stopPublishingStream();
     }
-    
   }
-  
 }

@@ -10,74 +10,70 @@ class ApplyCoHostListView {
         context: context,
         builder: (BuildContext context) {
           return ValueListenableBuilder(
-              valueListenable:
-                  ZEGOSDKManager.instance.zimService.roomRequestMapNoti,
+              valueListenable: ZEGOSDKManager.instance.zimService.roomRequestMapNoti,
               builder: (context, Map<String, dynamic> requestMap, _) {
                 final requestList = requestMap.values.toList();
-                return ListView.builder(
-                  itemBuilder: (BuildContext context, int index) {
-                    final roomRequest = requestList[index];
-                    return Column(
-                      children: [
-                        SizedBox(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text((roomRequest as RoomRequest).senderID),
-                                ],
-                              ),
-                              SizedBox(
-                                child: Row(
+                return Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: ListView.builder(
+                    itemBuilder: (BuildContext context, int index) {
+                      final roomRequest = requestList[index];
+                      return Column(
+                        children: [
+                          SizedBox(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
                                   children: [
-                                    OutlinedButton(
-                                        onPressed: () {
-                                          ZEGOSDKManager.instance.zimService
-                                              .acceptRoomRequest(
-                                                  roomRequest.requestID ?? '')
-                                              .then((value) {})
-                                              .catchError((error) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(SnackBar(
-                                                    content: Text(
-                                                        'Agree cohost failed: $error')));
-                                          });
-                                        },
-                                        child: const Text(
-                                          'agree',
-                                          style: TextStyle(color: Colors.black),
-                                        )),
-                                    const SizedBox(
-                                      width: 10,
-                                    ),
-                                    OutlinedButton(
-                                        onPressed: () {
-                                          ZEGOSDKManager.instance.zimService
-                                              .rejectRoomRequest(
-                                                  roomRequest.requestID ?? '');
-                                        },
-                                        child: const Text(
-                                          'disAgree',
-                                          style: TextStyle(color: Colors.black),
-                                        )),
+                                    const SizedBox(width: 10),
+                                    Text((roomRequest as RoomRequest).senderID),
                                   ],
                                 ),
-                              ),
-                            ],
+                                SizedBox(
+                                  child: Row(
+                                    children: [
+                                      OutlinedButton(
+                                          onPressed: () {
+                                            ZEGOSDKManager.instance.zimService
+                                                .acceptRoomRequest(roomRequest.requestID ?? '')
+                                                .then((value) {})
+                                                .catchError((error) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(SnackBar(content: Text('Agree cohost failed: $error')));
+                                            });
+                                          },
+                                          child: const Text(
+                                            'agree',
+                                            style: TextStyle(color: Colors.black),
+                                          )),
+                                      const SizedBox(
+                                        width: 10,
+                                      ),
+                                      OutlinedButton(
+                                          onPressed: () {
+                                            ZEGOSDKManager.instance.zimService
+                                                .rejectRoomRequest(roomRequest.requestID ?? '');
+                                          },
+                                          child: const Text(
+                                            'disAgree',
+                                            style: TextStyle(color: Colors.black),
+                                          )),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        Container(
-                          color: Colors.black,
-                          height: 0.5,
-                        ),
-                      ],
-                    );
-                  },
-                  itemCount: requestMap.values.toList().length,
+                          Container(
+                            color: Colors.black,
+                            height: 0.5,
+                          ),
+                        ],
+                      );
+                    },
+                    itemCount: requestMap.values.toList().length,
+                  ),
                 );
               });
         });

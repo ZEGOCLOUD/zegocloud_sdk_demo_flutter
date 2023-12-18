@@ -3,17 +3,15 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
-import 'internal/business/audioRoom/layout_config.dart';
 import 'internal/business/audioRoom/live_audio_room_seat.dart';
 import 'internal/business/audioRoom/room_seat_service.dart';
 import 'main.dart';
 import 'zego_sdk_manager.dart';
 
 class ZegoLiveAudioRoomManager {
+  factory ZegoLiveAudioRoomManager() => instance;
   ZegoLiveAudioRoomManager._internal();
-
-  static final ZegoLiveAudioRoomManager instance =
-      ZegoLiveAudioRoomManager._internal();
+  static final ZegoLiveAudioRoomManager instance = ZegoLiveAudioRoomManager._internal();
 
   static const String roomKey = 'audioRoom';
 
@@ -26,10 +24,6 @@ class ZegoLiveAudioRoomManager {
 
   RoomSeatService? roomSeatService;
 
-  ZegoLiveAudioRoomLayoutConfig? get layoutConfig {
-    return roomSeatService?.layoutConfig;
-  }
-
   int get hostSeatIndex {
     return roomSeatService?.hostSeatIndex ?? 0;
   }
@@ -40,20 +34,17 @@ class ZegoLiveAudioRoomManager {
 
   void get currentUserRoleNoti {}
 
-  void initWithConfig(ZegoLiveAudioRoomLayoutConfig config, ZegoLiveRole role) {
+  void initWithConfig(ZegoLiveRole role) {
     roomSeatService = RoomSeatService();
     roleNoti.value = role;
     final expressService = ZEGOSDKManager.instance.expressService;
     final zimService = ZEGOSDKManager.instance.zimService;
     subscriptions.addAll([
-      expressService.roomExtraInfoUpdateCtrl.stream
-          .listen(onRoomExtraInfoUpdate),
-      expressService.roomUserListUpdateStreamCtrl.stream
-          .listen(onRoomUserListUpdate),
-      zimService.onRoomCommandReceivedEventStreamCtrl.stream
-          .listen(onRoomCommandReceived)
+      expressService.roomExtraInfoUpdateCtrl.stream.listen(onRoomExtraInfoUpdate),
+      expressService.roomUserListUpdateStreamCtrl.stream.listen(onRoomUserListUpdate),
+      zimService.onRoomCommandReceivedEventStreamCtrl.stream.listen(onRoomCommandReceived)
     ]);
-    roomSeatService?.initWithConfig(config, role);
+    roomSeatService?.initWithConfig(role);
   }
 
   void unInit() {
@@ -72,8 +63,7 @@ class ZegoLiveAudioRoomManager {
     roomExtraInfoDict['lockseat'] = !isLockSeat.value;
     final dataJson = jsonEncode(roomExtraInfoDict);
 
-    final result = await ZEGOSDKManager.instance.expressService
-        .setRoomExtraInfo(roomKey, dataJson);
+    final result = await ZEGOSDKManager.instance.expressService.setRoomExtraInfo(roomKey, dataJson);
     if (result.errorCode == 0) {
       isLockSeat.value = !isLockSeat.value;
     }
@@ -97,8 +87,7 @@ class ZegoLiveAudioRoomManager {
     return result;
   }
 
-  Future<ZIMRoomAttributesBatchOperatedResult?> switchSeat(
-      int fromSeatIndex, int toSeatIndex) async {
+  Future<ZIMRoomAttributesBatchOperatedResult?> switchSeat(int fromSeatIndex, int toSeatIndex) async {
     return roomSeatService?.switchSeat(fromSeatIndex, toSeatIndex);
   }
 
@@ -106,32 +95,20 @@ class ZegoLiveAudioRoomManager {
     return roomSeatService?.leaveSeat(seatIndex);
   }
 
-  Future<ZIMRoomAttributesOperatedCallResult?> removeSpeakerFromSeat(
-      String userID) async {
+  Future<ZIMRoomAttributesOperatedCallResult?> removeSpeakerFromSeat(String userID) async {
     return roomSeatService?.removeSpeakerFromSeat(userID);
   }
 
   Future<ZIMMessageSentResult> muteSpeaker(String userID, bool isMute) async {
-    final messageType =
-        isMute ? RoomCommandType.muteSpeaker : RoomCommandType.unMuteSpeaker;
-    final commandMap = {
-      'room_command_type': messageType,
-      'receiver_id': userID
-    };
-    final result = await ZEGOSDKManager()
-        .zimService
-        .sendRoomCommand(jsonEncode(commandMap));
+    final messageType = isMute ? RoomCommandType.muteSpeaker : RoomCommandType.unMuteSpeaker;
+    final commandMap = {'room_command_type': messageType, 'receiver_id': userID};
+    final result = await ZEGOSDKManager().zimService.sendRoomCommand(jsonEncode(commandMap));
     return result;
   }
 
   Future<ZIMMessageSentResult> kickOutRoom(String userID) async {
-    final commandMap = {
-      'room_command_type': RoomCommandType.kickOutRoom,
-      'receiver_id': userID
-    };
-    final result = await ZEGOSDKManager()
-        .zimService
-        .sendRoomCommand(jsonEncode(commandMap));
+    final commandMap = {'room_command_type': RoomCommandType.kickOutRoom, 'receiver_id': userID};
+    final result = await ZEGOSDKManager().zimService.sendRoomCommand(jsonEncode(commandMap));
     return result;
   }
 
@@ -157,10 +134,10 @@ class ZegoLiveAudioRoomManager {
     }
     roomExtraInfoDict['host'] = ZEGOSDKManager.instance.currentUser!.userID;
     final dataJson = jsonEncode(roomExtraInfoDict);
-    final result = await ZEGOSDKManager.instance.expressService
-        .setRoomExtraInfo(roomKey, dataJson);
+    final result = await ZEGOSDKManager.instance.expressService.setRoomExtraInfo(roomKey, dataJson);
     if (result.errorCode == 0) {
       roleNoti.value = ZegoLiveRole.host;
+      hostUserNoti.value = ZEGOSDKManager.instance.currentUser;
     }
     return result;
   }
@@ -169,8 +146,7 @@ class ZegoLiveAudioRoomManager {
     return ZEGOSDKManager.instance.zimService.updateUserAvatarUrl(url);
   }
 
-  Future<ZIMUsersInfoQueriedResult> queryUsersInfo(
-      List<String> userIDList) async {
+  Future<ZIMUsersInfoQueriedResult> queryUsersInfo(List<String> userIDList) async {
     return ZEGOSDKManager.instance.zimService.queryUsersInfo(userIDList);
   }
 
@@ -213,14 +189,12 @@ class ZegoLiveAudioRoomManager {
       final receiverID = messageMap['receiver_id'];
       if (receiverID == ZEGOSDKManager().currentUser?.userID) {
         if (type == RoomCommandType.muteSpeaker) {
-          ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-              const SnackBar(
-                  content: Text('You have been mute speaker by the host')));
+          ScaffoldMessenger.of(navigatorKey.currentContext!)
+              .showSnackBar(const SnackBar(content: Text('You have been mute speaker by the host')));
           ZEGOSDKManager().expressService.turnMicrophoneOn(false);
         } else if (type == RoomCommandType.unMuteSpeaker) {
-          ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-              const SnackBar(
-                  content: Text('You have been kick out of the room by the host')));
+          ScaffoldMessenger.of(navigatorKey.currentContext!)
+              .showSnackBar(const SnackBar(content: Text('You have been kick out of the room by the host')));
           ZEGOSDKManager().expressService.turnMicrophoneOn(true);
         } else if (type == RoomCommandType.kickOutRoom) {
           leaveRoom();

@@ -8,15 +8,15 @@ import 'zego_reject_button.dart';
 class ZegoCallInvitationDialog extends StatefulWidget {
   const ZegoCallInvitationDialog({
     required this.invitationData,
-    this.onRejectCallback,
-    this.onAcceptCallback,
+    required this.onRejectCallback,
+    required this.onAcceptCallback,
     super.key,
   });
 
   final ZegoCallData invitationData;
 
-  final Function? onRejectCallback;
-  final Function? onAcceptCallback;
+  final Function() onRejectCallback;
+  final Function() onAcceptCallback;
 
   @override
   ZegoCallInvitationDialogState createState() => ZegoCallInvitationDialogState();
@@ -116,9 +116,7 @@ class ZegoCallInvitationDialogState extends State<ZegoCallInvitationDialog> {
             ? ButtonIcon(icon: const Image(image: AssetImage('assets/icons/invite_video.png')))
             : ButtonIcon(icon: const Image(image: AssetImage('assets/icons/invite_voice.png'))),
         iconSize: const Size(40, 40),
-        onPressed: () {
-          widget.onAcceptCallback!();
-        },
+        onPressed: widget.onAcceptCallback,
       ),
     );
   }
@@ -129,9 +127,7 @@ class ZegoCallInvitationDialogState extends State<ZegoCallInvitationDialog> {
       height: 40,
       child: ZegoRejectButton(
         iconSize: const Size(40, 40),
-        onPressed: () {
-          widget.onRejectCallback!();
-        },
+        onPressed: widget.onRejectCallback,
       ),
     );
   }
