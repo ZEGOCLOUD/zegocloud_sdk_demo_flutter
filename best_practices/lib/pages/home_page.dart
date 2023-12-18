@@ -26,16 +26,28 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Home Page')),
-      body: const Padding(
-        padding: EdgeInsets.only(top: 50, left: 30, right: 30),
-        child: Column(
-          children: [
-            CallEntry(),
-            LiveStreamingEntry(),
-            AudioRoomEntry(),
-          ],
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Home Page')),
+        body: const Padding(
+          padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: CustomScrollView(slivers: [
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Column(
+                children: [
+                  Divider(),
+                  CallEntry(),
+                  Divider(),
+                  LiveStreamingEntry(),
+                  Divider(),
+                  AudioRoomEntry(),
+                  Divider(),
+                ],
+              ),
+            ),
+          ]),
         ),
       ),
     );
@@ -59,14 +71,16 @@ class _CallEntryState extends State<CallEntry> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        children: [
-          callInviteeTextField(),
-          const SizedBox(height: 20),
-          startCallButton(),
-        ],
-      ),
+    return Column(
+      children: [
+        const Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+          Text('Call Demo:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400)),
+        ]),
+        callInviteeTextField(),
+        const SizedBox(height: 20),
+        startCallButton(),
+        const SizedBox(height: 20),
+      ],
     );
   }
 
@@ -195,16 +209,19 @@ class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
   final roomIDController = TextEditingController(text: Random().nextInt(9999999).toString());
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        children: [
-          roomIDTextField(),
-          const SizedBox(height: 20),
-          hostJoinLivePageButton(),
-          const SizedBox(height: 20),
-          audienceJoinLivePageButton(),
-        ],
-      ),
+    return Column(
+      children: [
+        const Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+          Text('LiveStreaming Demo:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400)),
+        ]),
+        const SizedBox(height: 10),
+        roomIDTextField(),
+        const SizedBox(height: 20),
+        hostJoinLivePageButton(),
+        const SizedBox(height: 20),
+        audienceJoinLivePageButton(),
+        const SizedBox(height: 20),
+      ],
     );
   }
 
@@ -275,16 +292,18 @@ class _AudioRoomEntryState extends State<AudioRoomEntry> {
   final roomIDController = TextEditingController(text: Random().nextInt(9999999).toString());
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        children: [
-          roomIDTextField(),
-          const SizedBox(height: 20),
-          hostJoinLiveAudioRoomButton(),
-          const SizedBox(height: 20),
-          audienceJoinLiveAudioRoomButton(),
-        ],
-      ),
+    return Column(
+      children: [
+        const Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+          Text('LiveAudioRoom Demo:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400)),
+        ]),
+        roomIDTextField(),
+        const SizedBox(height: 20),
+        hostJoinLiveAudioRoomButton(),
+        const SizedBox(height: 20),
+        audienceJoinLiveAudioRoomButton(),
+        const SizedBox(height: 20),
+      ],
     );
   }
 
@@ -327,7 +346,9 @@ class _AudioRoomEntryState extends State<AudioRoomEntry> {
             SDKKeyCenter.appID, SDKKeyCenter.serverSecret, ZEGOSDKManager.instance.currentUser!.userID)
         : null;
     ZegoLiveAudioRoomManager.instance.initWithConfig(ZegoLiveAudioRoomLayoutConfig(), ZegoLiveRole.host);
-    ZEGOSDKManager.instance.loginRoom(roomIDController.text, ZegoScenario.HighQualityChatroom, token: token).then((value) {
+    ZEGOSDKManager.instance
+        .loginRoom(roomIDController.text, ZegoScenario.HighQualityChatroom, token: token)
+        .then((value) {
       if (value.errorCode == 0) {
         Navigator.push(
           context,
@@ -363,7 +384,9 @@ class _AudioRoomEntryState extends State<AudioRoomEntry> {
             SDKKeyCenter.appID, SDKKeyCenter.serverSecret, ZEGOSDKManager.instance.currentUser!.userID)
         : null;
     ZegoLiveAudioRoomManager.instance.initWithConfig(ZegoLiveAudioRoomLayoutConfig(), ZegoLiveRole.audience);
-    ZEGOSDKManager.instance.loginRoom(roomIDController.text, ZegoScenario.HighQualityChatroom,token: token).then((value) {
+    ZEGOSDKManager.instance
+        .loginRoom(roomIDController.text, ZegoScenario.HighQualityChatroom, token: token)
+        .then((value) {
       if (value.errorCode == 0) {
         Navigator.push(
           context,
