@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../internal/sdk/zim/Define/zim_room_request.dart';
 import '../../zego_live_streaming_manager.dart';
 import '../../zego_sdk_manager.dart';
 import 'live_page.dart';

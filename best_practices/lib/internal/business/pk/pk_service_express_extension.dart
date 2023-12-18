@@ -1,11 +1,9 @@
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 
 import '../../../zego_live_streaming_manager.dart';
 import '../../../zego_sdk_manager.dart';
-import '../../internal_defines.dart';
 import '../coHost/cohost_service.dart';
 import 'pk_service.dart';
 import 'pk_service_zim_extension.dart';

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 
@@ -10,8 +9,8 @@ import 'pk_define.dart';
 import 'pk_extended.dart';
 import 'pk_info.dart';
 import 'pk_service_express_extension.dart';
-import 'pk_service_zim_extension.dart';
 import 'pk_service_interface.dart';
+import 'pk_service_zim_extension.dart';
 import 'pk_user.dart';
 
 class PKService implements PKServiceInterface {
@@ -93,6 +92,7 @@ class PKService implements PKServiceInterface {
       pkStateNoti.value = RoomPKState.isRequestPK;
       final result = await sendUserRequest(targetUserIDList, jsonEncode(pkExtendedMap), true).catchError((error) {
         pkStateNoti.value = RoomPKState.isNoPK;
+        throw error;
       });
       pkInfo!.requestID = result.callID;
       return PKInviteSentResult(requestID: result.callID, errorUserList: result.info.errorUserList);
@@ -325,12 +325,7 @@ class PKService implements PKServiceInterface {
       task = ZegoMixerTask(mixStreamID);
       task!.videoConfig = videoConfig;
       task!.inputList = inputList;
-
-      final mixerOutput = ZegoMixerOutput(mixStreamID);
-      final outputList = <ZegoMixerOutput>[];
-      outputList.add(mixerOutput);
-      task!.outputList = outputList;
-
+      task!.outputList = [ZegoMixerOutput(mixStreamID)];
       task!.enableSoundLevel = true;
     } else {
       task!.inputList = inputList;
@@ -347,10 +342,10 @@ class PKService implements PKServiceInterface {
     final inputList = <ZegoMixerInput>[];
     if (streamList.length == 2) {
       for (var i = 0; i < 2; i++) {
-        double left = (videoConfig.width / streamList.length) * i;
-        double top = 0;
-        double width = 972 / 2;
-        double height = 864;
+        final left = (videoConfig.width / streamList.length) * i;
+        const top = 0.0;
+        const width = 972 / 2;
+        const height = 864.0;
         final rect = Rect.fromLTRB(left, top, width * (i + 1), height);
         final input = ZegoMixerInput.defaultConfig()
           ..streamID = streamList[i]
@@ -361,12 +356,12 @@ class PKService implements PKServiceInterface {
       }
     } else if (streamList.length == 3) {
       for (var i = 0; i < 3; i++) {
-        double left = i == 0 ? 0 : (videoConfig.width / 2);
-        double top = i == 2 ? (videoConfig.height / 2) : 0;
-        double width = 972 / 2;
-        double height = i == 0 ? 864 : 432;
-        double right = i == 0 ? width : 972;
-        double bottom = i == 1 ? 432 : 864;
+        final left = i == 0 ? 0.0 : (videoConfig.width / 2.0);
+        final top = i == 2.0 ? (videoConfig.height / 2) : 0.0;
+        const width = 972.0 / 2.0;
+        // final height = i == 0 ? 864.0 : 432.0;
+        final right = i == 0 ? width : 972.0;
+        final bottom = i == 1 ? 432.0 : 864.0;
         final rect = Rect.fromLTRB(left, top, right, bottom);
         final input = ZegoMixerInput.defaultConfig()
           ..streamID = streamList[i]
@@ -376,10 +371,10 @@ class PKService implements PKServiceInterface {
         inputList.add(input);
       }
     } else if (streamList.length == 4) {
-      int row = 2;
-      int column = 2;
-      double cellWidth = 972 / column;
-      double cellHeight = 864 / row;
+      const row = 2;
+      const column = 2;
+      const cellWidth = 972 / column;
+      const cellHeight = 864 / row;
       double left, top, right, bottom;
       for (var i = 0; i < streamList.length; i++) {
         left = cellWidth * (i % column);
@@ -394,18 +389,18 @@ class PKService implements PKServiceInterface {
         inputList.add(input);
       }
     } else if (streamList.length == 5) {
-      double lastLeft = 0;
-      double lastTop = 0;
-      double height = 432;
+      var lastLeft = 0.0;
+      // var lastTop = 0.0;
+      const height = 432.0;
       for (var i = 0; i < 5; i++) {
         if (i == 2) {
-          lastLeft = 0;
+          lastLeft = 0.0;
         }
-        double width = i < 2 ? (videoConfig.width / 2) : (videoConfig.width / 3);
-        double left = lastLeft + (width * (i < 2 ? i : (i - 2)));
-        double right = left + width;
-        double top = i > 1 ? height : 0;
-        double bottom = top + height;
+        final width = i < 2 ? (videoConfig.width / 2.0) : (videoConfig.width / 3.0);
+        final left = lastLeft + (width * (i < 2 ? i : (i - 2)));
+        final right = left + width;
+        final top = i > 1 ? height : 0.0;
+        final bottom = top + height;
         final rect = Rect.fromLTRB(left, top, right, bottom);
         final input = ZegoMixerInput.defaultConfig()
           ..streamID = streamList[i]
@@ -415,10 +410,10 @@ class PKService implements PKServiceInterface {
         inputList.add(input);
       }
     } else if (streamList.length > 5) {
-      int row = streamList.length % 3 == 0 ? (streamList.length ~/ 3) : (streamList.length ~/ 3) + 1;
-      int column = 3;
-      double cellWidth = videoConfig.width / column;
-      double cellHeight = videoConfig.height / row;
+      final row = streamList.length % 3 == 0 ? (streamList.length ~/ 3) : (streamList.length ~/ 3) + 1;
+      const column = 3;
+      final cellWidth = videoConfig.width / column;
+      final cellHeight = videoConfig.height / row;
       double left, top, right, bottom;
       for (var i = 0; i < streamList.length; i++) {
         left = cellWidth * (i % column);

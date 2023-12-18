@@ -6,15 +6,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import '../utils/flutter_extension.dart';
 import '../../../zego_sdk_manager.dart';
+import '../utils/flutter_extension.dart';
 import 'Define/zim_define.dart';
 import 'Define/zim_room_request.dart';
 
 part 'zim_service_avatar.dart';
-part 'zim_service_user_request.dart';
 part 'zim_service_room_attributes.dart';
 part 'zim_service_room_request.dart';
+part 'zim_service_user_request.dart';
 
 class ZIMService {
   ZIMService._internal();

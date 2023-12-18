@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:convert' as convert;
-import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -12,9 +10,6 @@ import '../../components/common/zego_member_button.dart';
 import '../../components/live_streaming/zego_live_bottom_bar.dart';
 import '../../components/pk/pk_button.dart';
 import '../../components/pk/pk_container.dart';
-import '../../internal/business/coHost/cohost_service.dart';
-import '../../internal/sdk/zim/Define/zim_define.dart';
-import '../../internal/sdk/utils/flutter_extension.dart';
 import '../../internal/sdk/zim/Define/zim_room_request.dart';
 import '../../utils/zegocloud_token.dart';
 import '../../zego_live_streaming_manager.dart';
@@ -369,6 +364,11 @@ class ZegoLivePageState extends State<ZegoLivePage> {
             'onExpressRoomStateChanged: reason:${event.reason.name}, errorCode:${event.errorCode}'),
       ),
     );
+    if ((event.reason == ZegoRoomStateChangedReason.KickOut) ||
+        (event.reason == ZegoRoomStateChangedReason.ReconnectFailed) ||
+        (event.reason == ZegoRoomStateChangedReason.LoginFailed)) {
+      Navigator.pop(context);
+    }
   }
 
   void onZIMRoomStateChanged(ZIMServiceRoomStateChangedEvent event) {
@@ -379,6 +379,9 @@ class ZegoLivePageState extends State<ZegoLivePage> {
         content: Text('onZIMRoomStateChanged: $event'),
       ),
     );
+    if (event.state == ZIMRoomState.disconnected) {
+      Navigator.pop(context);
+    }
   }
 
   void onZIMConnectionStateChanged(
