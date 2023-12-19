@@ -111,63 +111,50 @@ class _ZegoLiveBottomBarState extends State<ZegoLiveBottomBar> {
   }
 
   Widget applyCoHostButton() {
-    return SizedBox(
-      width: 120,
-      height: 40,
-      child: OutlinedButton(
-          style: OutlinedButton.styleFrom(side: const BorderSide(width: 1, color: Colors.white)),
-          onPressed: () {
-            final signaling = jsonEncode({
-              'room_request_type': RoomRequestType.audienceApplyToBecomeCoHost,
-            });
-            ZEGOSDKManager.instance.zimService
-                .sendRoomRequest(ZegoLiveStreamingManager.instance.hostNoti.value?.userID ?? '', signaling)
-                .then((value) {
-              widget.applying?.value = true;
-              myRoomRequest = ZEGOSDKManager.instance.zimService.roomRequestMapNoti.value[value.requestID];
-            }).catchError((error) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('apply to co-host failed: $error')));
-            });
-          },
-          child: const Text(
-            'Apply to co-host',
-            style: TextStyle(color: Colors.white),
-          )),
-    );
+    return OutlinedButton(
+        style: OutlinedButton.styleFrom(side: const BorderSide(width: 1, color: Colors.white)),
+        onPressed: () {
+          final signaling = jsonEncode({
+            'room_request_type': RoomRequestType.audienceApplyToBecomeCoHost,
+          });
+          ZEGOSDKManager.instance.zimService
+              .sendRoomRequest(ZegoLiveStreamingManager.instance.hostNoti.value?.userID ?? '', signaling)
+              .then((value) {
+            widget.applying?.value = true;
+            myRoomRequest = ZEGOSDKManager.instance.zimService.roomRequestMapNoti.value[value.requestID];
+          }).catchError((error) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('apply to co-host failed: $error')));
+          });
+        },
+        child: const Text(
+          'Apply to co-host',
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ));
   }
 
   Widget cancelApplyCohostButton() {
-    return SizedBox(
-      width: 120,
-      height: 40,
-      child: OutlinedButton(
-          style: OutlinedButton.styleFrom(side: const BorderSide(width: 1, color: Colors.white)),
-          onPressed: () {
-            ZEGOSDKManager.instance.zimService.cancelRoomRequest(myRoomRequest?.requestID ?? '').then((value) {
-              widget.applying?.value = false;
-            }).catchError((error) {
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text('Cancel the application failed: $error')));
-            });
-          },
-          child: const Text(
-            'Cancel the application',
-            style: TextStyle(color: Colors.white),
-          )),
-    );
+    return OutlinedButton(
+        style: OutlinedButton.styleFrom(side: const BorderSide(width: 1, color: Colors.white)),
+        onPressed: () {
+          ZEGOSDKManager.instance.zimService.cancelRoomRequest(myRoomRequest?.requestID ?? '').then((value) {
+            widget.applying?.value = false;
+          }).catchError((error) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text('Cancel the application failed: $error')));
+          });
+        },
+        child: const Text('Cancel the application', style: TextStyle(color: Colors.white)));
   }
 
   Widget endCohostButton() {
-    return SizedBox(
-      width: 120,
-      height: 40,
-      child: OutlinedButton(
-        style: OutlinedButton.styleFrom(side: const BorderSide(width: 1, color: Colors.white)),
-        onPressed: () {
-          ZegoLiveStreamingManager.instance.endCoHost();
-        },
-        child: const Text('End co-host', style: TextStyle(color: Colors.white)),
-      ),
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(side: const BorderSide(width: 1, color: Colors.white)),
+      onPressed: () {
+        ZegoLiveStreamingManager.instance.endCoHost();
+      },
+      child: const Text('End co-host', style: TextStyle(color: Colors.white)),
     );
   }
 }
