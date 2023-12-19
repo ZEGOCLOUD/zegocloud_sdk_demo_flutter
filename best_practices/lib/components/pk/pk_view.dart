@@ -23,7 +23,7 @@ class _PKViewState extends State<PKView> {
     super.initState();
     subscriptions.add(ZegoLiveStreamingManager().onPKUserConnectingCtrl.stream.listen(onPKUserConnecting));
 
-    if (widget.pkUser.userID == ZEGOSDKManager().currentUser?.userID) {
+    if (widget.pkUser.userID == ZEGOSDKManager().currentUser!.userID) {
     } else {
       ZEGOSDKManager().expressService.startPlayingAnotherHostStream(widget.pkUser.pkUserStream, widget.pkUser.sdkUser);
     }
@@ -125,8 +125,8 @@ class _PKViewState extends State<PKView> {
   }
 
   Widget foregroundView() {
-    if (ZEGOSDKManager().currentUser?.userID == widget.pkUser.userID) {
-      return Container();
+    if (ZEGOSDKManager().currentUser!.userID == widget.pkUser.userID) {
+      return const SizedBox.shrink();
     } else {
       return LayoutBuilder(builder: (context, constraints) {
         return Stack(

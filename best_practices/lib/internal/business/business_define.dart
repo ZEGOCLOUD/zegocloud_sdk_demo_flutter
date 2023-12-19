@@ -22,10 +22,16 @@ class RoomCommandType {
   static const int kickOutRoom = 20002;
 }
 
-enum ZegoLiveRole {
+enum ZegoLiveStreamingRole {
   audience,
   host,
   coHost,
+}
+
+enum ZegoLiveAudioRoomRole {
+  audience,
+  host,
+  speaker,
 }
 
 enum RoomPKState { isNoPK, isRequestPK, isStartPK }

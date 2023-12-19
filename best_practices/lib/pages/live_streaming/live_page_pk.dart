@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../zego_live_streaming_manager.dart';
 import '../../zego_sdk_manager.dart';
 import 'live_page.dart';
@@ -28,7 +29,7 @@ extension ZegoLiveStreamingPKBattleManagerEventConv on ZegoLivePageState {
 
   void onPKUserConnecting(PKBattleUserConnectingEvent event) {
     if (event.duration > 60000) {
-      if (event.userID != ZEGOSDKManager().currentUser?.userID) {
+      if (event.userID != ZEGOSDKManager().currentUser!.userID) {
         liveStreamingManager.removeUserFromPKBattle(event.userID);
       } else {
         liveStreamingManager.quitPKBattle();
@@ -38,10 +39,10 @@ extension ZegoLiveStreamingPKBattleManagerEventConv on ZegoLivePageState {
 
   void onPKStart(dynamic event) {
     //stop cohost
-    if (!ZegoLiveStreamingManager().isLocalUserHost()) {
+    if (!ZegoLiveStreamingManager().iamHost()) {
       liveStreamingManager.endCoHost();
     }
-    if (ZegoLiveStreamingManager().isLocalUserHost()) {
+    if (ZegoLiveStreamingManager().iamHost()) {
       ZEGOSDKManager().zimService.roomRequestMapNoti.value.values.toList().forEach((element) {
         refuseApplyCohost(element);
       });

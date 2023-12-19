@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+
 import '../../../zego_sdk_manager.dart';
 import '../../sdk/utils/flutter_extension.dart';
 
@@ -31,8 +31,8 @@ class CoHostService {
     return true;
   }
 
-  bool isLocalUserHost() {
-    return isHost(ZEGOSDKManager().currentUser?.userID ?? '');
+  bool iamHost() {
+    return isHost(ZEGOSDKManager().currentUser!.userID);
   }
 
   void clearData() {
@@ -46,7 +46,7 @@ class CoHostService {
 
   void endCoHost() {
     coHostUserListNoti.removeWhere((element) {
-      return element.userID == ZEGOSDKManager().currentUser?.userID;
+      return element.userID == ZEGOSDKManager().currentUser!.userID;
     });
   }
 
@@ -78,8 +78,7 @@ class CoHostService {
   void onRoomUserListUpdate(ZegoRoomUserListUpdateEvent event) {
     for (final user in event.userList) {
       if (event.updateType == ZegoUpdateType.Delete) {
-        coHostUserListNoti
-            .removeWhere((element) => element.userID == ZEGOSDKManager().currentUser?.userID);
+        coHostUserListNoti.removeWhere((element) => element.userID == ZEGOSDKManager().currentUser!.userID);
         if (hostNoti.value?.userID == user.userID) {
           hostNoti.value = null;
         }

@@ -2,7 +2,6 @@ import 'internal/business/pk/pk_define.dart';
 import 'zego_sdk_manager.dart';
 
 abstract class ZegoLiveStreamingManagerInterface {
-
   void init();
   void uninit();
   Future<ZegoRoomLoginResult> startLive(String roomID);
@@ -26,7 +25,7 @@ abstract class ZegoLiveStreamingManagerInterface {
   void clearData();
   void stopPKBattle();
 
-  bool isLocalUserHost();
+  bool iamHost();
   bool isHost(String userID);
   bool isCoHost(String userID);
   bool isAudience(String userID);

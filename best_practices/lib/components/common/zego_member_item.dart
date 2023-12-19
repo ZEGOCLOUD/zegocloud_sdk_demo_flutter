@@ -33,7 +33,7 @@ class _ZegoMemberItemState extends State<ZegoMemberItem> {
                       final signaling = jsonEncode({
                         'room_request_type': RoomRequestType.hostRefuseAudienceCoHostApply,
                       });
-                      ZEGOSDKManager.instance.zimService.sendRoomRequest(widget.userInfo.userID, signaling);
+                      ZEGOSDKManager().zimService.sendRoomRequest(widget.userInfo.userID, signaling);
                       widget.applyCohostList.value.removeWhere((element) {
                         return element == widget.userInfo.userID;
                       });
@@ -47,7 +47,7 @@ class _ZegoMemberItemState extends State<ZegoMemberItem> {
                       final signaling = jsonEncode({
                         'room_request_type': RoomRequestType.hostAcceptAudienceCoHostApply,
                       });
-                      ZEGOSDKManager.instance.zimService.sendRoomRequest(widget.userInfo.userID, signaling);
+                      ZEGOSDKManager().zimService.sendRoomRequest(widget.userInfo.userID, signaling);
                       widget.applyCohostList.value.removeWhere((element) {
                         return element == widget.userInfo.userID;
                       });

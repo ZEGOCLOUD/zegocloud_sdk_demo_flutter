@@ -31,25 +31,24 @@ class _CallWaitingPageState extends State<CallWaitingPage> {
     super.initState();
 
     subscriptions.addAll([
-      ZEGOSDKManager.instance.zimService.outgoingUserRequestRejectedStreamCtrl.stream
-          .listen(onOutgoingCallInvitationRejected),
-      ZEGOSDKManager.instance.zimService.outgoingUserRequestAcceptedStreamCtrl.stream.listen(
-        onOutgoingCallInvitationAccepted,
-      ),
-      ZEGOSDKManager.instance.zimService.outgoingUserRequestTimeoutStreamCtrl.stream.listen(
-        onOutgoingCallInvitationTimeout,
-      ),
-      ZEGOSDKManager.instance.zimService.incomingUserRequestCancelledStreamCtrl.stream.listen(
-        onIncomingCallInvitationCanceled,
-      ),
-      ZEGOSDKManager.instance.zimService.incomingUserRequestTimeoutStreamCtrl.stream.listen(
-        onIncomingCallInvitationTimeout,
-      ),
+      ZEGOSDKManager().zimService.outgoingUserRequestRejectedStreamCtrl.stream.listen(onOutgoingCallInvitationRejected),
+      ZEGOSDKManager().zimService.outgoingUserRequestAcceptedStreamCtrl.stream.listen(
+            onOutgoingCallInvitationAccepted,
+          ),
+      ZEGOSDKManager().zimService.outgoingUserRequestTimeoutStreamCtrl.stream.listen(
+            onOutgoingCallInvitationTimeout,
+          ),
+      ZEGOSDKManager().zimService.incomingUserRequestCancelledStreamCtrl.stream.listen(
+            onIncomingCallInvitationCanceled,
+          ),
+      ZEGOSDKManager().zimService.incomingUserRequestTimeoutStreamCtrl.stream.listen(
+            onIncomingCallInvitationTimeout,
+          ),
     ]);
 
     if (widget.callData.callType == ZegoCallType.video) {
-      ZEGOSDKManager.instance.expressService.turnCameraOn(true);
-      ZEGOSDKManager.instance.expressService.startPreview();
+      ZEGOSDKManager().expressService.turnCameraOn(true);
+      ZEGOSDKManager().expressService.startPreview();
     }
   }
 
@@ -110,7 +109,7 @@ class _CallWaitingPageState extends State<CallWaitingPage> {
   }
 
   Widget buttonView() {
-    if (widget.callData.inviter.userID == ZEGOSDKManager.instance.currentUser?.userID) {
+    if (widget.callData.inviter.userID == ZEGOSDKManager().currentUser!.userID) {
       return LayoutBuilder(builder: (context, containers) {
         return Padding(
           padding: EdgeInsets.only(left: 0, right: 0, top: containers.maxHeight - 70),
@@ -148,7 +147,7 @@ class _CallWaitingPageState extends State<CallWaitingPage> {
 
   Widget videoView() {
     return ValueListenableBuilder<Widget?>(
-        valueListenable: ZEGOSDKManager.instance.currentUser!.videoViewNotifier,
+        valueListenable: ZEGOSDKManager().currentUser!.videoViewNotifier,
         builder: (context, view, _) {
           if (view != null) {
             return view;
@@ -215,10 +214,10 @@ class _CallWaitingPageState extends State<CallWaitingPage> {
   }
 
   void pushToCallingPage() {
-    ZEGOSDKManager.instance.expressService.stopPreview();
+    ZEGOSDKManager().expressService.stopPreview();
     if (ZegoCallManager().callData != null) {
       ZegoSDKUser otherUser;
-      if (callManager.callData?.inviter.userID != ZEGOSDKManager.instance.currentUser?.userID) {
+      if (callManager.callData?.inviter.userID != ZEGOSDKManager().currentUser!.userID) {
         otherUser = callManager.callData!.inviter;
       } else {
         otherUser = callManager.callData!.invitee;

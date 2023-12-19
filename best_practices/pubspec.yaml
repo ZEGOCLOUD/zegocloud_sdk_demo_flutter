@@ -12,10 +12,11 @@ dependencies:
 
   cupertino_icons: ^1.0.2
   zego_express_engine: ^3.11.0
-  permission_handler: ^10.4.5
+  permission_handler: ^11.1.0
   encrypt: ^5.0.3
   zego_zim: ^2.12.1
   cached_network_image: ^3.3.0
+  faker: ^2.1.0
 
 dev_dependencies:
   flutter_test:
@@ -27,3 +28,4 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icons/
+    - assets/images/

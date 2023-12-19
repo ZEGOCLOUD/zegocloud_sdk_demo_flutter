@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:faker/faker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -23,16 +24,18 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final userIDController = TextEditingController(text: Random().nextInt(100000).toString());
-  final userNameController = TextEditingController();
-
   List<StreamSubscription> subscriptions = [];
+  final userIDController = TextEditingController(text: Random().nextInt(100000).toString());
+  final userNameController = TextEditingController(text: faker.person.name());
 
   @override
   void initState() {
     super.initState();
     subscriptions.addAll([
-      ZEGOSDKManager.instance.zimService.connectionStateStreamCtrl.stream
+      ZEGOSDKManager()
+          .zimService
+          .connectionStateStreamCtrl
+          .stream
           .listen((ZIMServiceConnectionStateChangedEvent event) {
         debugPrint('connectionStateStreamCtrl: $event');
         if (event.state == ZIMConnectionState.connected) {
@@ -44,7 +47,6 @@ class _LoginPageState extends State<LoginPage> {
       })
     ]);
     requestPermission();
-    userNameController.text = 'user_${userIDController.text}';
   }
 
   @override
@@ -58,28 +60,22 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
+      appBar: AppBar(title: Text(widget.title)),
       body: Padding(
         padding: const EdgeInsets.only(top: 100, left: 20, right: 20),
         child: Column(
           children: [
             userIDInputView(),
-            const SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
             userNameInputView(),
-            const SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
             SizedBox(
               width: 200,
               height: 40,
               child: ElevatedButton(
                 onPressed: () async {
                   // init SDK
-                  await ZEGOSDKManager.instance.init(SDKKeyCenter.appID, kIsWeb ? null : SDKKeyCenter.appSign);
+                  await ZEGOSDKManager().init(SDKKeyCenter.appID, kIsWeb ? null : SDKKeyCenter.appSign);
                   ZegoCallManager().addListener();
                   ZegoCallController().initService();
                   String? token;

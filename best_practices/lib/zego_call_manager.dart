@@ -57,10 +57,11 @@ class ZegoCallManager {
   Future<ZIMCallInvitationSentResult> sendCall(String targetUserID, ZegoCallType callType) async {
     final extendedData = jsonEncode({
       'type': callType.index,
-      'inviterName': ZEGOSDKManager().currentUser?.userName ?? '',
+      'inviterName': ZEGOSDKManager().currentUser!.userName,
     });
 
-    final result = await ZEGOSDKManager.instance.zimService
+    final result = await ZEGOSDKManager()
+        .zimService
         .sendUserRequest([targetUserID], config: ZIMCallInviteConfig()..extendedData = extendedData);
     var inviteFail = false;
     for (final element in result.info.errorInvitees) {
@@ -98,7 +99,7 @@ class ZegoCallManager {
   Future<ZIMCallRejectionSentResult> rejectCallRequest(String requestID) async {
     final extendedData = jsonEncode({
       'type': callData?.callType.index ?? ZegoCallType.video.index,
-      'inviterName': ZEGOSDKManager().currentUser?.userName ?? '',
+      'inviterName': ZEGOSDKManager().currentUser!.userName,
     });
     if (requestID == callData?.callID) {
       clearCallData();
@@ -116,11 +117,11 @@ class ZegoCallManager {
   }
 
   Future<void> leaveRoom() async {
-    ZEGOSDKManager.instance.logoutRoom();
+    ZEGOSDKManager().logoutRoom();
   }
 
   String getMainStreamID() {
-    return '${ZEGOSDKManager.instance.expressService.currentRoomID}_${ZEGOSDKManager.instance.currentUser?.userID ?? ''}_main';
+    return '${ZEGOSDKManager().expressService.currentRoomID}_${ZEGOSDKManager().currentUser!.userID}_main';
   }
 
   bool isCallBusiness(dynamic type) {
@@ -196,7 +197,6 @@ class ZegoCallManager {
   }
 }
 
-
 class IncomingCallInvitationReceivedEvent {
   final String callID;
   final ZegoCallInvitationReceivedInfo info;
@@ -209,7 +209,6 @@ class IncomingCallInvitationReceivedEvent {
 }
 
 class ZegoCallInvitationReceivedInfo {
-
   /// Description: Inviter ID.
   String inviter = '';
 

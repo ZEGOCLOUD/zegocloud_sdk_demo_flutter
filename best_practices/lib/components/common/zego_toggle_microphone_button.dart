@@ -27,7 +27,7 @@ class _ZegoToggleMicrophoneButtonState extends State<ZegoToggleMicrophoneButton>
         builder: (context, isMicOn, _) {
           return GestureDetector(
             onTap: () {
-              ZEGOSDKManager.instance.expressService.turnMicrophoneOn(!isMicOn);
+              ZEGOSDKManager().expressService.turnMicrophoneOn(!isMicOn);
               isMicOnNotifier.value = !isMicOn;
             },
             child: Container(

@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:zego_express_engine/zego_express_engine.dart';
-import 'utils/zegocloud_token.dart';
 
 import 'key_center.dart';
+import 'utils/zegocloud_token.dart';
 
 class LivePage extends StatefulWidget {
   const LivePage({
@@ -49,7 +49,7 @@ class _LivePageState extends State<LivePage> {
       appBar: AppBar(title: const Text("Live page")),
       body: Stack(
         children: [
-          (widget.isHost ? localView : remoteView) ?? Container(),
+          (widget.isHost ? localView : remoteView) ?? SizedBox.shrink(),
           Positioned(
             bottom: MediaQuery.of(context).size.height / 20,
             left: 0,

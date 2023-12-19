@@ -2,33 +2,31 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../../internal/business/audioRoom/live_audio_room_seat.dart';
 import '../../internal/sdk/express/express_service.dart';
+import '../../live_audio_room_manager.dart';
 
 class ZegoSeatItemView extends StatelessWidget {
-  const ZegoSeatItemView({super.key, required this.seat, required this.lockSeatNoti, this.onPressed});
-  final ZegoLiveAudioRoomSeat seat;
-  final ValueNotifier<bool> lockSeatNoti;
-  final void Function(ZegoLiveAudioRoomSeat seat)? onPressed;
+  const ZegoSeatItemView({super.key, required this.onPressed, required this.seatIndex});
+  final int seatIndex;
+  final void Function() onPressed;
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<ZegoSDKUser?>(
-        valueListenable: seat.currentUser,
-        builder: (context, user, _) {
-          if (user != null) {
-            return userSeatView(user);
-          } else {
-            return emptySeatView();
-          }
-        });
+      valueListenable: ZegoLiveAudioRoomManager().seatList[seatIndex].currentUser,
+      builder: (context, user, _) {
+        if (user != null) {
+          return userSeatView(user);
+        } else {
+          return emptySeatView();
+        }
+      },
+    );
   }
 
   Widget userSeatView(ZegoSDKUser userInfo) {
     return GestureDetector(
-      onTap: () {
-        if (onPressed != null) onPressed!(seat);
-      },
+      onTap: () => onPressed,
       child: Column(
         children: [
           userAvatar(userInfo),
@@ -85,27 +83,22 @@ class ZegoSeatItemView extends StatelessWidget {
   }
 
   Widget emptySeatView() {
-    return GestureDetector(
-      onTap: () {
-        if (onPressed != null && !lockSeatNoti.value) {
-          onPressed!(seat);
-        }
-      },
-      child: Column(children: [
-        SizedBox(
-          width: 60,
-          height: 60,
-          child: ValueListenableBuilder<bool>(
-            valueListenable: lockSeatNoti,
-            builder: (context, isLock, _) {
-              return isLock
-                  ? Image.asset('assets/icons/seat_lock_icon.png', fit: BoxFit.fill)
-                  : Image.asset('assets/icons/seat_icon_normal.png', fit: BoxFit.fill);
-            },
-          ),
-        ),
-        const Text(''),
-      ]),
-    );
+    return ValueListenableBuilder<bool>(
+        valueListenable: ZegoLiveAudioRoomManager().isLockSeat,
+        builder: (context, isLock, _) {
+          return GestureDetector(
+            onTap: isLock ? null : onPressed,
+            child: Column(children: [
+              SizedBox(
+                width: 60,
+                height: 60,
+                child: isLock
+                    ? Image.asset('assets/icons/seat_lock_icon.png', fit: BoxFit.fill)
+                    : Image.asset('assets/icons/seat_icon_normal.png', fit: BoxFit.fill),
+              ),
+              const Text(''),
+            ]),
+          );
+        });
   }
 }

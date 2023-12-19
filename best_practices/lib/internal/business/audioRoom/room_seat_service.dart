@@ -2,6 +2,7 @@ import 'dart:async';
 
 import '../../../live_audio_room_manager.dart';
 import '../../../zego_sdk_manager.dart';
+import '../../sdk/zim/Define/zim_room_request.dart';
 import 'live_audio_room_seat.dart';
 
 class RoomSeatService {
@@ -12,9 +13,9 @@ class RoomSeatService {
 
   List<StreamSubscription<dynamic>> subscriptions = [];
 
-  void initWithConfig(ZegoLiveRole role) {
-    final expressService = ZEGOSDKManager.instance.expressService;
-    final zimService = ZEGOSDKManager.instance.zimService;
+  void initWithConfig(ZegoLiveAudioRoomRole role) {
+    final expressService = ZEGOSDKManager().expressService;
+    final zimService = ZEGOSDKManager().zimService;
     subscriptions.addAll([
       expressService.roomUserListUpdateStreamCtrl.stream.listen(onRoomUserListUpdate),
       zimService.roomAttributeUpdateStreamCtrl.stream.listen(onRoomAttributeUpdate),
@@ -23,18 +24,20 @@ class RoomSeatService {
   }
 
   Future<ZIMRoomAttributesOperatedCallResult?> takeSeat(int seatIndex) async {
-    final attributes = {seatIndex.toString(): ZEGOSDKManager.instance.currentUser?.userID ?? ''};
-    final result = await ZEGOSDKManager.instance.zimService.setRoomAttributes(
-      attributes,
-      isForce: false,
-      isUpdateOwner: true,
-      isDeleteAfterOwnerLeft: true,
-    );
+    final currentUserID = ZEGOSDKManager().currentUser!.userID;
+    final attributes = {seatIndex.toString(): currentUserID};
+    final result = await ZEGOSDKManager().zimService.setRoomAttributes(
+          attributes,
+          isForce: false,
+          isUpdateOwner: true,
+          isDeleteAfterOwnerLeft: true,
+        );
     if (result != null) {
       if (!result.errorKeys.contains(seatIndex.toString())) {
         for (final element in seatList) {
           if (element.seatIndex == seatIndex) {
-            element.currentUser.value = ZEGOSDKManager.instance.currentUser;
+            ZIMService().roomRequestMapNoti.removeWhere((String k, RoomRequest v) => v.senderID == currentUserID);
+            element.currentUser.value = ZEGOSDKManager().currentUser;
             break;
           }
         }
@@ -45,15 +48,15 @@ class RoomSeatService {
 
   Future<ZIMRoomAttributesBatchOperatedResult?> switchSeat(int fromSeatIndex, int toSeatIndex) async {
     if (!isBatchOperation) {
-      ZEGOSDKManager.instance.zimService.beginRoomAttributesBatchOperation(
-        isForce: false,
-        isUpdateOwner: true,
-        isDeleteAfterOwnerLeft: true,
-      );
+      ZEGOSDKManager().zimService.beginRoomAttributesBatchOperation(
+            isForce: false,
+            isUpdateOwner: true,
+            isDeleteAfterOwnerLeft: true,
+          );
       isBatchOperation = true;
       takeSeat(toSeatIndex);
       leaveSeat(fromSeatIndex);
-      final result = await ZEGOSDKManager.instance.zimService.endRoomPropertiesBatchOperation();
+      final result = await ZEGOSDKManager().zimService.endRoomPropertiesBatchOperation();
       isBatchOperation = false;
       return result;
     }
@@ -61,7 +64,7 @@ class RoomSeatService {
   }
 
   Future<ZIMRoomAttributesOperatedCallResult?> leaveSeat(int seatIndex) async {
-    final result = await ZEGOSDKManager.instance.zimService.deleteRoomAttributes([seatIndex.toString()]);
+    final result = await ZEGOSDKManager().zimService.deleteRoomAttributes([seatIndex.toString()]);
     if (result != null) {
       if (result.errorKeys.contains(seatIndex.toString())) {
         for (final element in seatList) {
@@ -102,11 +105,11 @@ class RoomSeatService {
       final userIDList = <String>[];
       for (final element in event.userList) {
         userIDList.add(element.userID);
-        ZEGOSDKManager.instance.zimService.roomAttributesMap.forEach((key, value) {
+        ZEGOSDKManager().zimService.roomAttributesMap.forEach((key, value) {
           if (element.userID == value) {
             for (final seat in seatList) {
               if (seat.seatIndex.toString() == key) {
-                seat.currentUser.value = ZEGOSDKManager.instance.getUser(value);
+                seat.currentUser.value = ZEGOSDKManager().getUser(value);
                 break;
               }
             }
@@ -131,10 +134,11 @@ class RoomSeatService {
       updateInfo.roomAttributes.forEach((key, value) {
         for (final element in seatList) {
           if (element.seatIndex.toString() == key) {
-            if (value == ZEGOSDKManager.instance.currentUser?.userID) {
-              element.currentUser.value = ZEGOSDKManager.instance.currentUser;
+            if (value == ZEGOSDKManager().currentUser!.userID) {
+              element.currentUser.value = ZEGOSDKManager().currentUser;
             } else {
-              element.currentUser.value = ZEGOSDKManager.instance.getUser(value);
+              ZIMService().roomRequestMapNoti.removeWhere((String k, RoomRequest v) => v.senderID == value);
+              element.currentUser.value = ZEGOSDKManager().getUser(value);
             }
           }
         }
@@ -154,18 +158,18 @@ class RoomSeatService {
   void updateCurrentUserRole() {
     var isFindSelf = false;
     for (final seat in seatList) {
-      if (seat.currentUser.value != null && seat.currentUser.value?.userID == ZEGOSDKManager().currentUser?.userID) {
+      if (seat.currentUser.value != null && seat.currentUser.value?.userID == ZEGOSDKManager().currentUser!.userID) {
         isFindSelf = true;
         break;
       }
     }
     final liveAudioRoomManager = ZegoLiveAudioRoomManager();
     if (isFindSelf) {
-      if (liveAudioRoomManager.roleNoti.value != ZegoLiveRole.host) {
-        liveAudioRoomManager.roleNoti.value = ZegoLiveRole.coHost;
+      if (liveAudioRoomManager.roleNoti.value != ZegoLiveAudioRoomRole.host) {
+        liveAudioRoomManager.roleNoti.value = ZegoLiveAudioRoomRole.speaker;
       }
     } else {
-      liveAudioRoomManager.roleNoti.value = ZegoLiveRole.audience;
+      liveAudioRoomManager.roleNoti.value = ZegoLiveAudioRoomRole.audience;
       ZEGOSDKManager().expressService.stopPublishingStream();
     }
   }

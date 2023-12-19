@@ -3,14 +3,10 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../internal/business/call/call_data.dart';
-import '../live_audio_room_manager.dart';
-import '../utils/zegocloud_token.dart';
 import '../zego_call_manager.dart';
-import '../zego_sdk_key_center.dart';
 import '../zego_sdk_manager.dart';
 import 'audio_room/audio_room_page.dart';
 import 'call/calling_page.dart';
@@ -34,7 +30,7 @@ class _HomePageState extends State<HomePage> {
           title: const Text('Home Page'),
           actions: [
             ValueListenableBuilder(
-              valueListenable: ZEGOSDKManager.instance.currentUser!.avatarUrlNotifier,
+              valueListenable: ZEGOSDKManager().currentUser!.avatarUrlNotifier,
               builder: (BuildContext context, String? avatarUrl, Widget? child) {
                 return avatarUrl?.isNotEmpty ?? false
                     ? CachedNetworkImage(
@@ -46,7 +42,7 @@ class _HomePageState extends State<HomePage> {
                     : const SizedBox.shrink();
               },
             ),
-            Text('ID:${ZEGOSDKManager.instance.currentUser!.userID}'),
+            Text('ID:${ZEGOSDKManager().currentUser!.userID}'),
             const SizedBox(width: 10),
           ],
         ),
@@ -130,24 +126,14 @@ class _CallEntryState extends State<CallEntry> {
       child: Row(
         children: [
           Expanded(
-              flex: 3,
-              child: ElevatedButton(
-                  onPressed: () {
-                    startCall(ZegoCallType.voice);
-                  },
-                  child: const Text('voice call'))),
-          const Expanded(
-              flex: 1,
-              child: SizedBox(
-                width: 20,
-              )),
+            flex: 3,
+            child: ElevatedButton(onPressed: () => startCall(ZegoCallType.voice), child: const Text('voice call')),
+          ),
+          const Expanded(flex: 1, child: SizedBox(width: 20)),
           Expanded(
-              flex: 3,
-              child: ElevatedButton(
-                  onPressed: () {
-                    startCall(ZegoCallType.video);
-                  },
-                  child: const Text('video call')))
+            flex: 3,
+            child: ElevatedButton(onPressed: () => startCall(ZegoCallType.video), child: const Text('video call')),
+          )
         ],
       ),
     );
@@ -202,7 +188,7 @@ class _CallEntryState extends State<CallEntry> {
   void pushToCallingPage() {
     if (ZegoCallManager().callData != null) {
       ZegoSDKUser otherUser;
-      if (ZegoCallManager().callData!.inviter.userID != ZEGOSDKManager().currentUser?.userID) {
+      if (ZegoCallManager().callData!.inviter.userID != ZEGOSDKManager().currentUser!.userID) {
         otherUser = ZegoCallManager().callData!.inviter;
       } else {
         otherUser = ZegoCallManager().callData!.invitee;
@@ -235,37 +221,17 @@ class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
           Text('LiveStreaming Demo:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400)),
         ]),
         const SizedBox(height: 10),
-        roomIDTextField(),
+        roomIDTextField(roomIDController),
         const SizedBox(height: 20),
-        hostJoinLivePageButton(),
+        hostJoinLivePageButton(ZegoLiveStreamingRole.host),
         const SizedBox(height: 20),
-        audienceJoinLivePageButton(),
+        hostJoinLivePageButton(ZegoLiveStreamingRole.audience),
         const SizedBox(height: 30),
       ],
     );
   }
 
-  Widget roomIDTextField() {
-    return SizedBox(
-      width: 350,
-      child: Row(
-        children: [
-          const Text('RoomID:'),
-          const SizedBox(width: 10, height: 20),
-          Flexible(
-            child: TextField(
-              controller: roomIDController,
-              decoration: const InputDecoration(
-                labelText: 'please input roomID',
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget hostJoinLivePageButton() {
+  Widget hostJoinLivePageButton(ZegoLiveStreamingRole role) {
     return SizedBox(
       width: 200,
       height: 50,
@@ -274,29 +240,14 @@ class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ZegoLivePage(roomID: roomIDController.text, role: ZegoLiveRole.host),
+              builder: (context) => ZegoLivePage(roomID: roomIDController.text, role: ZegoLiveStreamingRole.host),
             ),
           );
         },
-        child: const Text('Start a Live Streaming'),
+        child: role == ZegoLiveStreamingRole.host
+            ? const Text('Start a Live Streaming')
+            : const Text('Watch a Live Streaming'),
       ),
-    );
-  }
-
-  Widget audienceJoinLivePageButton() {
-    return SizedBox(
-      width: 200,
-      height: 50,
-      child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ZegoLivePage(roomID: roomIDController.text, role: ZegoLiveRole.audience),
-              ),
-            );
-          },
-          child: const Text('Watch a Live Streaming')),
     );
   }
 }
@@ -317,109 +268,45 @@ class _AudioRoomEntryState extends State<AudioRoomEntry> {
         const Row(mainAxisAlignment: MainAxisAlignment.start, children: [
           Text('LiveAudioRoom Demo:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400)),
         ]),
-        roomIDTextField(),
+        roomIDTextField(roomIDController),
         const SizedBox(height: 20),
-        hostJoinLiveAudioRoomButton(),
+        liveAudioRoomButton(ZegoLiveAudioRoomRole.host),
         const SizedBox(height: 20),
-        audienceJoinLiveAudioRoomButton(),
+        liveAudioRoomButton(ZegoLiveAudioRoomRole.audience),
         const SizedBox(height: 30),
       ],
     );
   }
 
-  Widget roomIDTextField() {
-    return SizedBox(
-      width: 350,
-      child: Row(
-        children: [
-          const Text('RoomID:'),
-          const SizedBox(width: 10, height: 20),
-          Flexible(
-            child: TextField(
-              controller: roomIDController,
-              decoration: const InputDecoration(
-                labelText: 'please input roomID',
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget hostJoinLiveAudioRoomButton() {
+  Widget liveAudioRoomButton(ZegoLiveAudioRoomRole role) {
     return SizedBox(
       width: 200,
       height: 50,
       child: ElevatedButton(
-        onPressed: hostPress,
-        child: const Text('Start a Audio Room'),
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => AudioRoomPage(roomID: roomIDController.text, role: role)),
+        ),
+        child: role == ZegoLiveAudioRoomRole.host ? const Text('Start a Audio Room') : const Text('Watch a Audio Room'),
       ),
     );
   }
+}
 
-  void hostPress() {
-    // ! ** Warning: ZegoTokenUtils is only for use during testing. When your application goes live,
-    // ! ** tokens must be generated by the server side. Please do not generate tokens on the client side!
-    final token = kIsWeb
-        ? ZegoTokenUtils.generateToken(
-            SDKKeyCenter.appID, SDKKeyCenter.serverSecret, ZEGOSDKManager.instance.currentUser!.userID)
-        : null;
-    ZegoLiveAudioRoomManager().initWithConfig(ZegoLiveRole.host);
-    ZEGOSDKManager.instance
-        .loginRoom(roomIDController.text, ZegoScenario.HighQualityChatroom, token: token)
-        .then((value) {
-      if (value.errorCode == 0) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AudioRoomPage(
-              roomID: roomIDController.text,
-              role: ZegoLiveRole.host,
-            ),
+Widget roomIDTextField(TextEditingController controller) {
+  return SizedBox(
+    width: 350,
+    child: Row(
+      children: [
+        const Text('RoomID:'),
+        const SizedBox(width: 10, height: 20),
+        Flexible(
+          child: TextField(
+            controller: controller,
+            decoration: const InputDecoration(labelText: 'Please Input RoomID'),
           ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('login room failed: ${value.errorCode}')));
-      }
-    });
-  }
-
-  Widget audienceJoinLiveAudioRoomButton() {
-    return SizedBox(
-      width: 200,
-      height: 50,
-      child: ElevatedButton(
-        onPressed: audiencePress,
-        child: const Text('Join a Audio Room'),
-      ),
-    );
-  }
-
-  void audiencePress() {
-    // ! ** Warning: ZegoTokenUtils is only for use during testing. When your application goes live,
-    // ! ** tokens must be generated by the server side. Please do not generate tokens on the client side!
-    final token = kIsWeb
-        ? ZegoTokenUtils.generateToken(
-            SDKKeyCenter.appID, SDKKeyCenter.serverSecret, ZEGOSDKManager.instance.currentUser!.userID)
-        : null;
-    ZegoLiveAudioRoomManager().initWithConfig(ZegoLiveRole.audience);
-    ZEGOSDKManager.instance
-        .loginRoom(roomIDController.text, ZegoScenario.HighQualityChatroom, token: token)
-        .then((value) {
-      if (value.errorCode == 0) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AudioRoomPage(
-              roomID: roomIDController.text,
-              role: ZegoLiveRole.audience,
-            ),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('login room failed: ${value.errorCode}')));
-      }
-    });
-  }
+        ),
+      ],
+    ),
+  );
 }

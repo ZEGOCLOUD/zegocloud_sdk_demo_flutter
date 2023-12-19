@@ -51,12 +51,14 @@ class ExpressService {
     ZegoScenario scenario = ZegoScenario.Default,
   }) async {
     initEventHandle();
-    final profile = ZegoEngineProfile(appID, scenario, appSign: appSign)..scenario = scenario;
+    ZegoExpressEngine.setEngineConfig(ZegoEngineConfig(advancedConfig: {'vcap_external_mem_class': '1'}));
+    final profile = ZegoEngineProfile(appID, scenario, appSign: appSign);
     currentScenario = scenario;
     await ZegoExpressEngine.createEngineWithProfile(profile);
     ZegoExpressEngine.setEngineConfig(ZegoEngineConfig(advancedConfig: {
       'notify_remote_device_unknown_status': 'true',
       'notify_remote_device_init_status': 'true',
+      'keep_audio_session_active': 'true',
     }));
   }
 
@@ -109,11 +111,11 @@ class ExpressService {
   }
 
   void clearLocalUserData() {
-    currentUser?.streamID = null;
-    currentUser?.isCamerOnNotifier.value = false;
-    currentUser?.isMicOnNotifier.value = false;
-    currentUser?.videoViewNotifier.value = null;
-    currentUser?.viewID = -1;
+    currentUser!.streamID = null;
+    currentUser!.isCamerOnNotifier.value = false;
+    currentUser!.isMicOnNotifier.value = false;
+    currentUser!.videoViewNotifier.value = null;
+    currentUser!.viewID = -1;
   }
 
   void useFrontCamera(bool isFrontFacing) {
@@ -141,7 +143,7 @@ class ExpressService {
   }
 
   void turnCameraOn(bool isOn) {
-    currentUser?.isCamerOnNotifier.value = isOn;
+    currentUser!.isCamerOnNotifier.value = isOn;
     final extraInfo = jsonEncode({
       'mic': currentUser!.isMicOnNotifier.value ? 'on' : 'off',
       'cam': currentUser!.isCamerOnNotifier.value ? 'on' : 'off',
@@ -151,7 +153,7 @@ class ExpressService {
   }
 
   void turnMicrophoneOn(bool isOn) {
-    currentUser?.isMicOnNotifier.value = isOn;
+    currentUser!.isMicOnNotifier.value = isOn;
     final extraInfo = jsonEncode({
       'mic': currentUser!.isMicOnNotifier.value ? 'on' : 'off',
       'cam': currentUser!.isCamerOnNotifier.value ? 'on' : 'off',

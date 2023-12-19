@@ -17,7 +17,7 @@ extension PKServiceZIMExtension on PKService {
     }
     if (inviterExtendedData.type == PKExtendedData.START_PK) {
       final currentRoomID = ZEGOSDKManager().expressService.currentRoomID;
-      final userNotHost = currentRoomID.isEmpty || ZegoLiveStreamingManager().isLocalUserHost();
+      final userNotHost = currentRoomID.isEmpty || ZegoLiveStreamingManager().iamHost();
       if (pkInfo != null && userNotHost) {
         rejectPKBattle(event.requestID);
         return;
@@ -275,13 +275,13 @@ extension PKServiceZIMExtension on PKService {
     for (final userMap in pkUsers) {
       final userString = jsonEncode(userMap);
       final pkUser = PKUser.parse(userString);
-      if (!ZegoLiveStreamingManager().isLocalUserHost()) {
+      if (!ZegoLiveStreamingManager().iamHost()) {
         pkUser.callUserState = ZIMCallUserState.accepted;
       }
       pkUserList.add(pkUser);
     }
 
-    if (ZegoLiveStreamingManager().isLocalUserHost()) {
+    if (ZegoLiveStreamingManager().iamHost()) {
       if (pkInfo == null) {
         delectPKAttributes();
       }
