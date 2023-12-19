@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../internal/internal_defines.dart';
 import '../../zego_live_streaming_manager.dart';
+import '../common/common_button.dart';
 
 class PKButton extends StatefulWidget {
   const PKButton({super.key});
@@ -17,36 +18,33 @@ class _PKButtonState extends State<PKButton> {
   ValueNotifier<bool> isSendPKingNoti = ValueNotifier(false);
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<RoomPKState>(
         valueListenable: ZegoLiveStreamingManager().pkStateNoti,
         builder: (context, pkState, _) {
-          if (pkState == RoomPKState.isNoPK) {
-            return ElevatedButton(onPressed: startPK, child: const Text('Start PK'));
-          } else if (pkState == RoomPKState.isRequestPK) {
-            return ElevatedButton(onPressed: endPK, child: const Text('End PK'));
-          } else {
-            return ElevatedButton(
-                onPressed: () {
-                  ZegoLiveStreamingManager().quitPKBattle();
-                },
-                child: const Text('Quit PK'));
-          }
+          return CommonButton(
+            onTap: () {
+              if (pkState == RoomPKState.isNoPK) {
+                startPK();
+              } else if (pkState == RoomPKState.isRequestPK) {
+                ZegoLiveStreamingManager().endPKBattle();
+              } else {
+                ZegoLiveStreamingManager().quitPKBattle();
+              }
+            },
+            child: Builder(
+              builder: (context) {
+                if (pkState == RoomPKState.isNoPK) {
+                  return const Text('Start PK');
+                } else if (pkState == RoomPKState.isRequestPK) {
+                  return const Text('End PK');
+                } else {
+                  return const Text('Quit PK');
+                }
+              },
+            ),
+          );
         });
-  }
-
-  void endPK() {
-    ZegoLiveStreamingManager().endPKBattle();
   }
 
   void startPK() {
