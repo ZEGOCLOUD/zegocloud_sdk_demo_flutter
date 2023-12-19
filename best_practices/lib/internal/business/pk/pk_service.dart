@@ -114,8 +114,8 @@ class PKService implements PKServiceInterface {
 
   @override
   Future<ZIMCallQuitSentResult> quitPKBattle(String requestID) async {
-    if (isPKUser(ZEGOSDKManager().currentUser?.userID ?? '')) {
-      if (ZegoLiveStreamingManager().isLocalUserHost()) {
+    if (isPKUser(ZEGOSDKManager().currentUser!.userID)) {
+      if (ZegoLiveStreamingManager().iamHost()) {
         stopPlayAnotherHostStream();
       }
       return quitUserRequest(requestID, '');
@@ -127,7 +127,7 @@ class PKService implements PKServiceInterface {
   Future<ZIMCallEndSentResult> endPKBattle(String requestID) async {
     final extendedData = getPKExtendedData(PKExtendedData.START_PK) ?? '';
     ZIMCallEndSentResult result;
-    if (isPKUser(ZEGOSDKManager().currentUser?.userID ?? '')) {
+    if (isPKUser(ZEGOSDKManager().currentUser!.userID)) {
       result = await endUserRequest(requestID, extendedData);
     } else {
       result = ZIMCallEndSentResult(callID: requestID, info: ZIMCallEndedSentInfo());
@@ -209,7 +209,7 @@ class PKService implements PKServiceInterface {
 
   @override
   void stopPKBattle() {
-    if (ZegoLiveStreamingManager.instance.isLocalUserHost()) {
+    if (ZegoLiveStreamingManager.instance.iamHost()) {
       delectPKAttributes();
       stopMixTask();
       //...
@@ -456,10 +456,10 @@ class PKService implements PKServiceInterface {
   }
 
   String? getPKExtendedData(int type) {
-    final currentRoomID = ZEGOSDKManager.instance.expressService.currentRoomID;
+    final currentRoomID = ZEGOSDKManager().expressService.currentRoomID;
     final data = PKExtendedData()
       ..roomID = currentRoomID
-      ..userName = ZEGOSDKManager().currentUser?.userName ?? ''
+      ..userName = ZEGOSDKManager().currentUser!.userName
       ..type = type;
     return data.toJsonString();
   }
@@ -470,17 +470,17 @@ class PKService implements PKServiceInterface {
       config.mode = ZIMCallInvitationMode.advanced;
     }
     config.extendedData = extendedData;
-    return ZEGOSDKManager.instance.zimService.sendUserRequest(userIDList, config: config);
+    return ZEGOSDKManager().zimService.sendUserRequest(userIDList, config: config);
   }
 
   Future<ZIMCallingInvitationSentResult> addUserToRequest(List<String> invitees, String requestID) async {
     final config = ZIMCallingInviteConfig();
-    return ZEGOSDKManager.instance.zimService.addUserToRequest(invitees, requestID, config);
+    return ZEGOSDKManager().zimService.addUserToRequest(invitees, requestID, config);
   }
 
   Future<ZIMCallAcceptanceSentResult> acceptUserRequest(String requestID, String extendedData) async {
     final config = ZIMCallAcceptConfig()..extendedData = extendedData;
-    return ZEGOSDKManager.instance.zimService.acceptUserRequest(requestID, config: config);
+    return ZEGOSDKManager().zimService.acceptUserRequest(requestID, config: config);
   }
 
   Future<ZIMCallQuitSentResult> quitUserRequest(String requestID, String extendedData) async {
@@ -516,12 +516,12 @@ class PKService implements PKServiceInterface {
     if (pkInfo == null) {
       return;
     }
-    final selfPKUser = getPKUser(pkInfo!, ZEGOSDKManager().currentUser?.userID ?? '');
+    final selfPKUser = getPKUser(pkInfo!, ZEGOSDKManager().currentUser!.userID);
     if (selfPKUser != null) {
       if (selfPKUser.hasAccepted) {
         var hasWaitingUser = false;
         for (final pkuser in pkInfo!.pkUserList.value) {
-          if (pkuser.userID != ZEGOSDKManager().currentUser?.userID) {
+          if (pkuser.userID != ZEGOSDKManager().currentUser!.userID) {
             // except self
             if (pkuser.hasAccepted || pkuser.isWaiting) {
               hasWaitingUser = true;
@@ -553,13 +553,13 @@ class PKService implements PKServiceInterface {
 
   void clearData() {
     cleanPKState();
-    if (ZegoLiveStreamingManager.instance.isLocalUserHost() && pkRoomAttribute.keys.isNotEmpty) {
+    if (ZegoLiveStreamingManager.instance.iamHost() && pkRoomAttribute.keys.isNotEmpty) {
       ZEGOSDKManager().zimService.deleteRoomAttributes(pkRoomAttribute.keys.toList());
     }
   }
 
   String hostStreamID() {
-    return '${ZEGOSDKManager().expressService.currentRoomID}_${ZEGOSDKManager().currentUser?.userID ?? ''}_main_host';
+    return '${ZEGOSDKManager().expressService.currentRoomID}_${ZEGOSDKManager().currentUser!.userID}_main_host';
   }
 
   String anotherHostStreamID() {

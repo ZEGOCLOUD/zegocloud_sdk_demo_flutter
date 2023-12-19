@@ -62,8 +62,8 @@ class ListNotifier<T> extends ValueNotifier<List<T>> {
   void triggerNotifierfy() => notifyListeners();
 }
 
-class MapNotifier<T> extends ValueNotifier<Map<String, dynamic>> {
-  MapNotifier(Map<String, dynamic> value) : super(value);
+class MapNotifier<T> extends ValueNotifier<Map<String, T>> {
+  MapNotifier(Map<String, T> value) : super(value);
 
   int get length => value.length;
   bool get isEmpty => value.isEmpty;
@@ -79,12 +79,17 @@ class MapNotifier<T> extends ValueNotifier<Map<String, dynamic>> {
     if (notify) notifyListeners();
   }
 
+  void removeWhere(bool Function(String key, T value) test, {bool notify = true}) {
+    value.removeWhere(test);
+    if (notify) notifyListeners();
+  }
+
   void clear({bool notify = true}) {
     value.clear();
     if (notify) notifyListeners();
   }
 
-  void addAll(Map<String, dynamic> other, {bool notify = true}) {
+  void addAll(Map<String, T> other, {bool notify = true}) {
     value.addAll(other);
     if (notify) notifyListeners();
   }

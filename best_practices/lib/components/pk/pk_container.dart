@@ -42,10 +42,10 @@ class _ZegoPKContainerViewState extends State<ZegoPKContainerView> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<ZegoLiveRole>(
+    return ValueListenableBuilder<ZegoLiveStreamingRole>(
         valueListenable: liveManager.currentUserRoleNoti,
         builder: (context, role, _) {
-          if (role == ZegoLiveRole.host) {
+          if (role == ZegoLiveStreamingRole.host) {
             //is host
             return hostPKView();
           } else {
@@ -94,7 +94,7 @@ class _ZegoPKContainerViewState extends State<ZegoPKContainerView> {
           child: Container(
             width: newRect.right - newRect.left,
             height: newRect.bottom - newRect.top,
-            color: pkuser.userID == ZEGOSDKManager().currentUser?.userID ? Colors.yellow : Colors.blue,
+            color: pkuser.userID == ZEGOSDKManager().currentUser!.userID ? Colors.yellow : Colors.blue,
             child: PKView(pkUser: pkuser),
           ));
       views.add(positioned);

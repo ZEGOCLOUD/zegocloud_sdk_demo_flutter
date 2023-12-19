@@ -31,7 +31,7 @@ class _ZegoSwitchCameraButtonState extends State<ZegoSwitchCameraButton> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        ZEGOSDKManager.instance.expressService.useFrontCamera(!usingFacingCamera);
+        ZEGOSDKManager().expressService.useFrontCamera(!usingFacingCamera);
         usingFacingCamera = !usingFacingCamera;
       },
       child: Container(
