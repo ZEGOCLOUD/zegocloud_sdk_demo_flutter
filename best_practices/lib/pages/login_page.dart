@@ -5,7 +5,6 @@ import 'package:faker/faker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../live_audio_room_manager.dart';
 import '../utils/permission.dart';
 import '../utils/zegocloud_token.dart';
 import '../zego_call_manager.dart';
@@ -85,10 +84,15 @@ class _LoginPageState extends State<LoginPage> {
                     token = ZegoTokenUtils.generateToken(
                         SDKKeyCenter.appID, SDKKeyCenter.serverSecret, userIDController.text);
                   }
-                  await ZEGOSDKManager.instance
-                      .connectUser(userIDController.text, userNameController.text, token: token);
-                  ZegoLiveAudioRoomManager()
-                      .updateUserAvatarUrl('https://robohash.org/${userIDController.text}.png?set=set4');
+                  ZEGOSDKManager.instance
+                      .connectUser(userIDController.text, userNameController.text, token: token)
+                      .then((_) {
+                    ZEGOSDKManager()
+                        .zimService
+                        .updateUserAvatarUrl('https://robohash.org/${userIDController.text}.png?set=set4');
+                  }).catchError((error) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('connectUser failed: $error')));
+                  });
                 },
                 child: const Text('Login'),
               ),
