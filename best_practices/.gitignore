@@ -77,3 +77,4 @@
 **/pubspec_overrides.yaml
 **/.fvm
 **/.settings
+**/*.xcworkspace

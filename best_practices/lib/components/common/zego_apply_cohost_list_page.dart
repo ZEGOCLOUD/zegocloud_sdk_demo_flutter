@@ -37,38 +37,31 @@ class ApplyCoHostListView {
                                           onPressed: () {
                                             ZEGOSDKManager.instance.zimService
                                                 .acceptRoomRequest(roomRequest.requestID ?? '')
-                                                .then((value) {})
-                                                .catchError((error) {
+                                                .then((value) {
+                                              Navigator.pop(context);
+                                            }).catchError((error) {
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(SnackBar(content: Text('Agree cohost failed: $error')));
                                             });
                                           },
-                                          child: const Text(
-                                            'agree',
-                                            style: TextStyle(color: Colors.black),
-                                          )),
-                                      const SizedBox(
-                                        width: 10,
-                                      ),
+                                          child: const Text('agree', style: TextStyle(color: Colors.black))),
+                                      const SizedBox(width: 10),
                                       OutlinedButton(
                                           onPressed: () {
                                             ZEGOSDKManager.instance.zimService
-                                                .rejectRoomRequest(roomRequest.requestID ?? '');
+                                                .rejectRoomRequest(roomRequest.requestID ?? '')
+                                                .then((value) {
+                                              Navigator.pop(context);
+                                            });
                                           },
-                                          child: const Text(
-                                            'disAgree',
-                                            style: TextStyle(color: Colors.black),
-                                          )),
+                                          child: const Text('disAgree', style: TextStyle(color: Colors.black))),
                                     ],
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          Container(
-                            color: Colors.black,
-                            height: 0.5,
-                          ),
+                          Container(color: Colors.black, height: 0.5),
                         ],
                       );
                     },
