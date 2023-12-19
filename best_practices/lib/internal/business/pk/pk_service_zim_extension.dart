@@ -154,10 +154,10 @@ extension PKServiceZIMExtension on PKService {
 
   void _onReceivePKUserAccepted(ZIMCallUserInfo userInfo) {
     final pkExtendedData = PKExtendedData.parse(userInfo.extendedData);
-    if (pkExtendedData == null && pkInfo == null) {
+    if (pkExtendedData == null || pkInfo == null) {
       return;
     }
-    if (pkExtendedData!.type == PKExtendedData.START_PK) {
+    if (pkExtendedData.type == PKExtendedData.START_PK) {
       var moreThanOneAcceptedExceptMe = false;
       var meHasAccepted = false;
       for (final pkuser in pkInfo!.pkUserList.value) {
