@@ -112,19 +112,19 @@ class ZegoLivePageState extends State<ZegoLivePage> {
       builder: (context, isLiveing, _) {
         return ValueListenableBuilder<RoomPKState>(
           valueListenable: ZegoLiveStreamingManager().pkStateNoti,
-          builder: (context, pkState, child) {
+          builder: (context, RoomPKState pkState, child) {
             return Scaffold(
               body: Stack(
                 children: [
                   backgroundImage(),
-                  hostVideoView(),
-                  if (pkState != RoomPKState.isStartPK) coHostVideoView(),
-                  if (!isLiveing && widget.role == ZegoLiveRole.host) startLiveButton(),
+                  hostVideoView(isLiveing, pkState),
+                  coHostVideoView(isLiveing, pkState),
+                  startLiveButton(isLiveing, pkState),
                   hostText(),
                   leaveButton(),
-                  if (isLiveing && widget.role == ZegoLiveRole.host) memberButton(),
-                  if (isLiveing && widget.role == ZegoLiveRole.host) pkButton(),
-                  if (isLiveing) bottomBar(),
+                  cohostRequestListButton(isLiveing, pkState),
+                  pkButton(isLiveing, pkState),
+                  bottomBar(isLiveing, pkState),
                 ],
               ),
             );
@@ -134,69 +134,58 @@ class ZegoLivePageState extends State<ZegoLivePage> {
     );
   }
 
-  Widget bottomBar() {
-    return ValueListenableBuilder(
-        valueListenable: ZegoLiveStreamingManager().pkStateNoti,
-        builder: (context, RoomPKState pkState, _) {
-          if (pkState != RoomPKState.isStartPK || ZegoLiveStreamingManager().isLocalUserHost()) {
-            return LayoutBuilder(
-              builder: (context, containers) {
-                return Padding(
-                  padding: EdgeInsets.only(left: 0, right: 0, top: containers.maxHeight - 70),
-                  child: ZegoLiveBottomBar(applying: applying),
-                );
-              },
-            );
-          } else {
-            return const SizedBox.shrink();
-          }
-        });
+  Widget bottomBar(bool isLiveing, RoomPKState pkState) {
+    if (!isLiveing) return const SizedBox.shrink();
+
+    if (pkState != RoomPKState.isStartPK || ZegoLiveStreamingManager().isLocalUserHost()) {
+      return LayoutBuilder(
+        builder: (context, containers) {
+          return Padding(
+            padding: EdgeInsets.only(left: 0, right: 0, top: containers.maxHeight - 70),
+            child: ZegoLiveBottomBar(applying: applying),
+          );
+        },
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
   }
 
   Widget backgroundImage() {
-    return Image.asset(
-      'assets/icons/bg.png',
-      width: double.infinity,
-      height: double.infinity,
-      fit: BoxFit.fill,
-    );
+    return Image.asset('assets/icons/bg.png', width: double.infinity, height: double.infinity, fit: BoxFit.fill);
   }
 
-  Widget hostVideoView() {
+  Widget hostVideoView(bool isLiveing, RoomPKState pkState) {
     return ValueListenableBuilder(
-        valueListenable: liveStreamingManager.pkStateNoti,
-        builder: (context, RoomPKState pkState, _) {
-          return ValueListenableBuilder(
-              valueListenable: liveStreamingManager.onPKViewAvaliableNoti,
-              builder: (context, bool showPKView, _) {
-                if (pkState == RoomPKState.isStartPK) {
-                  if (showPKView || liveStreamingManager.isLocalUserHost()) {
-                    return LayoutBuilder(builder: (context, constraints) {
-                      return Stack(
-                        children: [
-                          Positioned(
-                              top: 100,
-                              child: SizedBox(
-                                width: constraints.maxWidth,
-                                height: constraints.maxWidth * 16 / 18,
-                                child: const ZegoPKContainerView(),
-                              )),
-                        ],
-                      );
-                    });
-                  } else {
-                    if (liveStreamingManager.hostNoti.value == null) {
-                      return Container();
-                    }
-                    return ZegoAudioVideoView(userInfo: liveStreamingManager.hostNoti.value!);
-                  }
-                } else {
-                  if (liveStreamingManager.hostNoti.value == null) {
-                    return Container();
-                  }
-                  return ZegoAudioVideoView(userInfo: liveStreamingManager.hostNoti.value!);
-                }
+        valueListenable: liveStreamingManager.onPKViewAvaliableNoti,
+        builder: (context, bool showPKView, _) {
+          if (pkState == RoomPKState.isStartPK) {
+            if (showPKView || liveStreamingManager.isLocalUserHost()) {
+              return LayoutBuilder(builder: (context, constraints) {
+                return Stack(
+                  children: [
+                    Positioned(
+                        top: 100,
+                        child: SizedBox(
+                          width: constraints.maxWidth,
+                          height: constraints.maxWidth * 16 / 18,
+                          child: const ZegoPKContainerView(),
+                        )),
+                  ],
+                );
               });
+            } else {
+              if (liveStreamingManager.hostNoti.value == null) {
+                return Container();
+              }
+              return ZegoAudioVideoView(userInfo: liveStreamingManager.hostNoti.value!);
+            }
+          } else {
+            if (liveStreamingManager.hostNoti.value == null) {
+              return Container();
+            }
+            return ZegoAudioVideoView(userInfo: liveStreamingManager.hostNoti.value!);
+          }
         });
   }
 
@@ -215,57 +204,65 @@ class ZegoLivePageState extends State<ZegoLivePage> {
     return null;
   }
 
-  Widget coHostVideoView() {
-    return Positioned(
-      right: 20,
-      top: 100,
-      child: Builder(builder: (context) {
-        final height = (MediaQuery.of(context).size.height - kButtonSize - 100) / 4;
-        final width = height * (9 / 16);
+  Widget coHostVideoView(bool isLiveing, RoomPKState pkState) {
+    if (pkState != RoomPKState.isStartPK) {
+      return Positioned(
+        right: 20,
+        top: 100,
+        child: Builder(builder: (context) {
+          final height = (MediaQuery.of(context).size.height - kButtonSize - 100) / 4;
+          final width = height * (9 / 16);
 
-        return ValueListenableBuilder<List<ZegoSDKUser>>(
-          valueListenable: liveStreamingManager.coHostUserListNoti,
-          builder: (context, cohostList, _) {
-            final videoList = liveStreamingManager.coHostUserListNoti.value.map((user) {
-              return ZegoAudioVideoView(userInfo: user);
-            }).toList();
+          return ValueListenableBuilder<List<ZegoSDKUser>>(
+            valueListenable: liveStreamingManager.coHostUserListNoti,
+            builder: (context, cohostList, _) {
+              final videoList = liveStreamingManager.coHostUserListNoti.value.map((user) {
+                return ZegoAudioVideoView(userInfo: user);
+              }).toList();
 
-            return SizedBox(
-              width: width,
-              height: MediaQuery.of(context).size.height - kButtonSize - 150,
-              child: ListView.separated(
-                reverse: true,
-                itemCount: videoList.length,
-                itemBuilder: (context, index) {
-                  return SizedBox(width: width, height: height, child: videoList[index]);
-                },
-                separatorBuilder: (context, index) {
-                  return const SizedBox(height: 10);
-                },
-              ),
-            );
-          },
-        );
-      }),
-    );
+              return SizedBox(
+                width: width,
+                height: MediaQuery.of(context).size.height - kButtonSize - 150,
+                child: ListView.separated(
+                  reverse: true,
+                  itemCount: videoList.length,
+                  itemBuilder: (context, index) {
+                    return SizedBox(width: width, height: height, child: videoList[index]);
+                  },
+                  separatorBuilder: (context, index) {
+                    return const SizedBox(height: 10);
+                  },
+                ),
+              );
+            },
+          );
+        }),
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
   }
 
-  Widget startLiveButton() {
-    return LayoutBuilder(
-      builder: (context, containers) {
-        return Padding(
-          padding: EdgeInsets.only(top: containers.maxHeight - 110, left: (containers.maxWidth - 100) / 2),
-          child: SizedBox(
-            width: 120,
-            height: 40,
-            child: ElevatedButton(
-              onPressed: startLive,
-              child: const Text('Start Live'),
+  Widget startLiveButton(bool isLiveing, RoomPKState pkState) {
+    if (!isLiveing && widget.role == ZegoLiveRole.host) {
+      return LayoutBuilder(
+        builder: (context, containers) {
+          return Padding(
+            padding: EdgeInsets.only(top: containers.maxHeight - 110, left: (containers.maxWidth - 100) / 2),
+            child: SizedBox(
+              width: 120,
+              height: 40,
+              child: ElevatedButton(
+                onPressed: startLive,
+                child: const Text('Start Live'),
+              ),
             ),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
   }
 
   void startLive() {
@@ -300,8 +297,12 @@ class ZegoLivePageState extends State<ZegoLivePage> {
     );
   }
 
-  Widget memberButton() {
-    return const Positioned(bottom: 160, right: 30, child: ZegoMemberButton());
+  Widget cohostRequestListButton(bool isLiveing, RoomPKState pkState) {
+    if (isLiveing && (widget.role == ZegoLiveRole.host) && (pkState != RoomPKState.isStartPK)) {
+      return const Positioned(bottom: 160, left: 30, child: CoHostRequestListButton());
+    } else {
+      return const SizedBox.shrink();
+    }
   }
 
   Widget hostText() {
@@ -320,12 +321,12 @@ class ZegoLivePageState extends State<ZegoLivePage> {
     );
   }
 
-  Widget pkButton() {
-    return const Positioned(
-      bottom: 80,
-      right: 30,
-      child: PKButton(),
-    );
+  Widget pkButton(bool isLiveing, RoomPKState pkState) {
+    if (isLiveing && widget.role == ZegoLiveRole.host) {
+      return const Positioned(bottom: 80, left: 30, child: PKButton());
+    } else {
+      return const SizedBox.shrink();
+    }
   }
 
   void onExpressRoomStateChanged(ZegoRoomStateEvent event) {
