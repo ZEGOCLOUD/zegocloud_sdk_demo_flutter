@@ -8,8 +8,7 @@ import 'zego_beauty_icon_button.dart';
 import 'zego_beauty_slider.dart';
 
 final selectedEffectTypeNotifier = ValueNotifier<ZegoBeautyType?>(null);
-final selectedModelNotifier =
-    ValueNotifier<ZegoEffectModel>(ZegoBeautyData.data()[0]);
+final selectedModelNotifier = ValueNotifier<ZegoEffectModel>(ZegoBeautyData.data()[0]);
 final Map<ZegoEffectModelType, ZegoBeautyType> modelSelectedTypeMap = {};
 
 class ZegoBeautyEffectSheet extends StatefulWidget {
@@ -51,9 +50,8 @@ class _ZegoBeautyEffectSheetState extends State<ZegoBeautyEffectSheet> {
                   width: 30,
                   height: 4.0,
                   child: Container(
-                    decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(2.0)),
-                        color: Colors.white),
+                    decoration:
+                        const BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(2.0)), color: Colors.white),
                   ),
                 ),
                 Container(height: 5.0),
@@ -137,12 +135,10 @@ class _ZegoBeautyEffectSheetState extends State<ZegoBeautyEffectSheet> {
             itemBuilder: (context, index) {
               final model = ZegoBeautyData.data()[index];
               final isSelected = model.type == selectedModel.type;
-              final textColor =
-                  isSelected ? Colors.white : const Color(0xffcccccc);
+              final textColor = isSelected ? Colors.white : const Color(0xffcccccc);
               final textStyle = isSelected
                   ? const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600)
-                  : const TextStyle(
-                      fontSize: 14.0, fontWeight: FontWeight.w400);
+                  : const TextStyle(fontSize: 14.0, fontWeight: FontWeight.w400);
 
               final itemKey = GlobalKey();
               titleItemKeys[model.type] = itemKey;
@@ -194,16 +190,11 @@ class _ZegoBeautyEffectSheetState extends State<ZegoBeautyEffectSheet> {
                   key: itemKey,
                   buttonSize: const Size(74, 74),
                   iconSize: const Size(48, 48),
-                  icon: item.type == selectedEffectTypeNotifier.value
-                      ? item.selectIcon
-                      : item.icon,
+                  icon: item.type == selectedEffectTypeNotifier.value ? item.selectIcon : item.icon,
                   text: item.iconText,
-                  textStyle: item.type == selectedEffectTypeNotifier.value
-                      ? item.selectedTextStyle
-                      : item.textStyle,
+                  textStyle: item.type == selectedEffectTypeNotifier.value ? item.selectedTextStyle : item.textStyle,
                   onPressed: () {
-                    final ability =
-                        EffectsService.instance.beautyAbilities[item.type]!;
+                    final ability = EffectsService.instance.beautyAbilities[item.type]!;
                     ability.editor.enable(true);
                     ability.editor.apply(ability.currentValue);
                     updateSelectedModelType(item.type);
@@ -227,13 +218,14 @@ class _ZegoBeautyEffectSheetState extends State<ZegoBeautyEffectSheet> {
     final modelType = selectedModelNotifier.value.type;
     modelSelectedTypeMap[modelType] = type;
     if (modelType == ZegoEffectModelType.style) {
-      modelSelectedTypeMap.remove(ZegoEffectModelType.lipstick);
-      modelSelectedTypeMap.remove(ZegoEffectModelType.blusher);
-      modelSelectedTypeMap.remove(ZegoEffectModelType.eyelash);
-      modelSelectedTypeMap.remove(ZegoEffectModelType.eyeliner);
-      modelSelectedTypeMap.remove(ZegoEffectModelType.eyeshadow);
-      modelSelectedTypeMap.remove(ZegoEffectModelType.coloredContacts);
-      modelSelectedTypeMap.remove(ZegoEffectModelType.sticker);
+      modelSelectedTypeMap
+        ..remove(ZegoEffectModelType.lipstick)
+        ..remove(ZegoEffectModelType.blusher)
+        ..remove(ZegoEffectModelType.eyelash)
+        ..remove(ZegoEffectModelType.eyeliner)
+        ..remove(ZegoEffectModelType.eyeshadow)
+        ..remove(ZegoEffectModelType.coloredContacts)
+        ..remove(ZegoEffectModelType.sticker);
     } else if (modelType.index >= ZegoEffectModelType.lipstick.index ||
         modelType.index <= ZegoEffectModelType.coloredContacts.index) {
       modelSelectedTypeMap.remove(ZegoEffectModelType.style);
@@ -257,8 +249,7 @@ class _ZegoBeautyEffectSheetState extends State<ZegoBeautyEffectSheet> {
     final itemPosition = itemBox.localToGlobal(Offset.zero);
     final itemWidth = itemBox.size.width;
 
-    var offset =
-        (MediaQuery.of(context).size.width - itemWidth) / 2 - itemPosition.dx;
+    var offset = (MediaQuery.of(context).size.width - itemWidth) / 2 - itemPosition.dx;
 
     offset = controller.offset - offset;
     if (offset < 0) {
@@ -269,8 +260,7 @@ class _ZegoBeautyEffectSheetState extends State<ZegoBeautyEffectSheet> {
     }
 
     if (animated) {
-      controller.animateTo(offset,
-          duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
+      controller.animateTo(offset, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
     } else {
       controller.jumpTo(offset);
     }

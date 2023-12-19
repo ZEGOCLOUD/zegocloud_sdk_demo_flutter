@@ -15,8 +15,7 @@ class EffectsHelper {
 
   static String resourcesFolder = '';
 
-  static String portraitSegmentationImagePath =
-      '$resourcesFolder//BackgroundImages/image1.jpg';
+  static String portraitSegmentationImagePath = '$resourcesFolder//BackgroundImages/image1.jpg';
 
   static Future<void> setResources() async {
     final folderPath = await EffectsService.instance.getResourcesFolder() ?? '';
@@ -32,25 +31,21 @@ class EffectsHelper {
     final stickerPath = '$folderPath/StickerBaseResources.bundle';
     final segmentationPath = '$folderPath/BackgroundSegmentation.model';
 
-    final param = ZegoEffectsResourcesPathParam();
-    param.common = commonPath;
-    param.rosy = rosyPath;
-    param.faceWhitening = faceWhiteningPath;
-    param.teeth = teethPath;
-    param.faceDetection = faceDetectionPath;
-    param.pendant = stickerPath;
-    param.segmentation = segmentationPath;
-    await ZegoEffectsPlugin.instance.setResourcesPath(param);
+    await ZegoEffectsPlugin.instance.setResourcesPath(ZegoEffectsResourcesPathParam()
+      ..common = commonPath
+      ..rosy = rosyPath
+      ..faceWhitening = faceWhiteningPath
+      ..teeth = teethPath
+      ..faceDetection = faceDetectionPath
+      ..pendant = stickerPath
+      ..segmentation = segmentationPath);
   }
 
-  static Future<String> getLicence(
-      String baseUrl, int appID, String authInfo) async {
+  static Future<String> getLicence(String baseUrl, int appID, String authInfo) async {
     final prefs = await SharedPreferences.getInstance();
     final lastLicenseTime = prefs.getInt(licenseTimeKey) ?? 0;
     final lastLicense = prefs.getString(licenseKey) ?? '';
-    if (lastLicense.isNotEmpty &&
-        lastLicenseTime > 0 &&
-        (currentTime() - lastLicenseTime < 24 * 3600 * 1000)) {
+    if (lastLicense.isNotEmpty && lastLicenseTime > 0 && (currentTime() - lastLicenseTime < 24 * 3600 * 1000)) {
       return lastLicense;
     }
 
@@ -59,9 +54,11 @@ class EffectsHelper {
     data = await httpGet(url);
 
     if (data['Code'] == 0) {
+      // ignore: avoid_dynamic_calls
       final String license = data['Data']['License'];
-      prefs.setString(licenseKey, license);
-      prefs.setInt(licenseTimeKey, currentTime());
+      prefs
+        ..setString(licenseKey, license)
+        ..setInt(licenseTimeKey, currentTime());
 
       debugPrint('Request license succuss, license: $license');
       return license;

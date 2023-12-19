@@ -16,9 +16,7 @@ class ZegoSmoothingEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsSmoothParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setSmoothParam(param);
+    ZegoEffectsPlugin.instance.setSmoothParam(ZegoEffectsSmoothParam()..intensity = value);
   }
 }
 
@@ -30,9 +28,7 @@ class ZegoSkinToneEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsWhitenParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setWhitenParam(param);
+    ZegoEffectsPlugin.instance.setWhitenParam(ZegoEffectsWhitenParam()..intensity = value);
   }
 }
 
@@ -44,8 +40,7 @@ class ZegoBlusherEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsRosyParam();
-    param.intensity = value;
+    final param = ZegoEffectsRosyParam()..intensity = value;
     ZegoEffectsPlugin.instance.setRosyParam(param);
   }
 }
@@ -58,9 +53,7 @@ class ZegoSharpeningEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsSharpenParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setSharpenParam(param);
+    ZegoEffectsPlugin.instance.setSharpenParam(ZegoEffectsSharpenParam()..intensity = value);
   }
 }
 
@@ -72,9 +65,7 @@ class ZegoWrinklesEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsWrinklesRemovingParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setWrinklesRemovingParam(param);
+    ZegoEffectsPlugin.instance.setWrinklesRemovingParam(ZegoEffectsWrinklesRemovingParam()..intensity = value);
   }
 }
 
@@ -86,9 +77,7 @@ class ZegoDarkCirclesEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsDarkCirclesRemovingParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setDarkCirclesRemovingParam(param);
+    ZegoEffectsPlugin.instance.setDarkCirclesRemovingParam(ZegoEffectsDarkCirclesRemovingParam()..intensity = value);
   }
 }
 
@@ -101,9 +90,7 @@ class ZegoFaceSlimmingEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsFaceLiftingParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setFaceLiftingParam(param);
+    ZegoEffectsPlugin.instance.setFaceLiftingParam(ZegoEffectsFaceLiftingParam()..intensity = value);
   }
 }
 
@@ -115,9 +102,7 @@ class ZegoEyesEnlargingEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsBigEyesParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setBigEyesParam(param);
+    ZegoEffectsPlugin.instance.setBigEyesParam(ZegoEffectsBigEyesParam()..intensity = value);
   }
 }
 
@@ -129,9 +114,7 @@ class ZegoEyesBrighteningEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsEyesBrighteningParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setEyesBrighteningParam(param);
+    ZegoEffectsPlugin.instance.setEyesBrighteningParam(ZegoEffectsEyesBrighteningParam()..intensity = value);
   }
 }
 
@@ -143,9 +126,7 @@ class ZegoChinLengtheningEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsLongChinParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setLongChinParam(param);
+    ZegoEffectsPlugin.instance.setLongChinParam(ZegoEffectsLongChinParam()..intensity = value);
   }
 }
 
@@ -157,9 +138,7 @@ class ZegoMouthReshapeEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsSmallMouthParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setSmallMouthParam(param);
+    ZegoEffectsPlugin.instance.setSmallMouthParam(ZegoEffectsSmallMouthParam()..intensity = value);
   }
 }
 
@@ -171,9 +150,7 @@ class ZegoTeethWhiteningEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsTeethWhiteningParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setTeethWhiteningParam(param);
+    ZegoEffectsPlugin.instance.setTeethWhiteningParam(ZegoEffectsTeethWhiteningParam()..intensity = value);
   }
 }
 
@@ -185,9 +162,7 @@ class ZegoNoseSlimmingEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsNoseNarrowingParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setNoseNarrowingParam(param);
+    ZegoEffectsPlugin.instance.setNoseNarrowingParam(ZegoEffectsNoseNarrowingParam()..intensity = value);
   }
 }
 
@@ -199,9 +174,7 @@ class ZegoNoseLengtheningEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsNoseLengtheningParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setNoseLengtheningParam(param);
+    ZegoEffectsPlugin.instance.setNoseLengtheningParam(ZegoEffectsNoseLengtheningParam()..intensity = value);
   }
 }
 
@@ -213,9 +186,7 @@ class ZegoFaceShorteningEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsFaceShorteningParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setFaceShorteningParam(param);
+    ZegoEffectsPlugin.instance.setFaceShorteningParam(ZegoEffectsFaceShorteningParam()..intensity = value);
   }
 }
 
@@ -227,9 +198,7 @@ class ZegoMandibleSlimmingEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsMandibleSlimmingParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setMandibleSlimmingParam(param);
+    ZegoEffectsPlugin.instance.setMandibleSlimmingParam(ZegoEffectsMandibleSlimmingParam()..intensity = value);
   }
 }
 
@@ -241,9 +210,7 @@ class ZegoCheekboneSlimmingEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsCheekboneSlimmingParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setCheekboneSlimmingParam(param);
+    ZegoEffectsPlugin.instance.setCheekboneSlimmingParam(ZegoEffectsCheekboneSlimmingParam()..intensity = value);
   }
 }
 
@@ -255,9 +222,7 @@ class ZegoForeheadSlimmingEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsForeheadShorteningParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setForeheadShorteningParam(param);
+    ZegoEffectsPlugin.instance.setForeheadShorteningParam(ZegoEffectsForeheadShorteningParam()..intensity = value);
   }
 }
 
@@ -275,9 +240,7 @@ class ZegoFilterEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsFilterParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setFilterParam(param);
+    ZegoEffectsPlugin.instance.setFilterParam(ZegoEffectsFilterParam()..intensity = value);
   }
 }
 
@@ -294,9 +257,7 @@ class ZegoLipstickEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsLipstickParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setLipstickParam(param);
+    ZegoEffectsPlugin.instance.setLipstickParam(ZegoEffectsLipstickParam()..intensity = value);
   }
 }
 
@@ -312,9 +273,7 @@ class ZegoBlusherMakeupEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsBlusherParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setBlusherParam(param);
+    ZegoEffectsPlugin.instance.setBlusherParam(ZegoEffectsBlusherParam()..intensity = value);
   }
 }
 
@@ -325,15 +284,12 @@ class ZegoEyelashesEditor implements ZegoBeautyEditor {
   @override
   void enable(bool enable) {
     ZegoEffectsPlugin.instance.setEyelashesPath(enable ? path : '');
-    debugPrint(
-        'setEyelashesPath() called with: enable = [$enable], path: $path');
+    debugPrint('setEyelashesPath() called with: enable = [$enable], path: $path');
   }
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsEyelashesParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setEyelashesParam(param);
+    ZegoEffectsPlugin.instance.setEyelashesParam(ZegoEffectsEyelashesParam()..intensity = value);
   }
 }
 
@@ -344,15 +300,12 @@ class ZegoEyelinerEditor implements ZegoBeautyEditor {
   @override
   void enable(bool enable) {
     ZegoEffectsPlugin.instance.setEyelinerPath(enable ? path : '');
-    debugPrint(
-        'setEyelinerPath() called with: enable = [$enable], path: $path');
+    debugPrint('setEyelinerPath() called with: enable = [$enable], path: $path');
   }
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsEyelinerParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setEyelinerParam(param);
+    ZegoEffectsPlugin.instance.setEyelinerParam(ZegoEffectsEyelinerParam()..intensity = value);
   }
 }
 
@@ -363,15 +316,12 @@ class ZegoEyeshadowEditor implements ZegoBeautyEditor {
   @override
   void enable(bool enable) {
     ZegoEffectsPlugin.instance.setEyeshadowPath(enable ? path : '');
-    debugPrint(
-        'setEyeshadowPath() called with: enable = [$enable], path: $path');
+    debugPrint('setEyeshadowPath() called with: enable = [$enable], path: $path');
   }
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsEyeshadowParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setEyeshadowParam(param);
+    ZegoEffectsPlugin.instance.setEyeshadowParam(ZegoEffectsEyeshadowParam()..intensity = value);
   }
 }
 
@@ -382,15 +332,12 @@ class ZegoColoredContactsEditor implements ZegoBeautyEditor {
   @override
   void enable(bool enable) {
     ZegoEffectsPlugin.instance.setColoredcontactsPath(enable ? path : '');
-    debugPrint(
-        'setColoredcontactsPath() called with: enable = [$enable], path: $path');
+    debugPrint('setColoredcontactsPath() called with: enable = [$enable], path: $path');
   }
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsColoredcontactsParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setColoredcontactsParam(param);
+    ZegoEffectsPlugin.instance.setColoredcontactsParam(ZegoEffectsColoredcontactsParam()..intensity = value);
   }
 }
 
@@ -407,9 +354,7 @@ class ZegoStyleMakeupEditor implements ZegoBeautyEditor {
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsMakeupParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance.setMakeupParam(param);
+    ZegoEffectsPlugin.instance.setMakeupParam(ZegoEffectsMakeupParam()..intensity = value);
   }
 }
 
@@ -437,12 +382,11 @@ class ZegoPortraitSegmentationEditor implements ZegoBeautyEditor {
 
   @override
   void enable(bool enable) {
-    ZegoEffectsPlugin.instance.setPortraitSegmentationBackgroundPath(
-        enable ? path : '', ZegoEffectsScaleMode.AspectFill);
+    ZegoEffectsPlugin.instance
+        .setPortraitSegmentationBackgroundPath(enable ? path : '', ZegoEffectsScaleMode.AspectFill);
     ZegoEffectsPlugin.instance.enablePortraitSegmentation(enable);
     ZegoEffectsPlugin.instance.enablePortraitSegmentationBackground(enable);
-    debugPrint(
-        'enablePortraitSegmentationBackground() called with: enable = [$enable], path: $path');
+    debugPrint('enablePortraitSegmentationBackground() called with: enable = [$enable], path: $path');
   }
 
   @override
@@ -453,19 +397,15 @@ class ZegoMosaicEditor implements ZegoBeautyEditor {
   @override
   void enable(bool enable) {
     ZegoEffectsPlugin.instance.enablePortraitSegmentation(enable);
-    ZegoEffectsPlugin.instance
-        .enablePortraitSegmentationBackgroundMosaic(enable);
-    debugPrint(
-        'enablePortraitSegmentationBackgroundMosaic() called with: enable = [$enable]');
+    ZegoEffectsPlugin.instance.enablePortraitSegmentationBackgroundMosaic(enable);
+    debugPrint('enablePortraitSegmentationBackgroundMosaic() called with: enable = [$enable]');
   }
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsMosaicParam();
-    param.intesity = value;
-    param.type = ZegoEffectsMosaicType.Square;
-    ZegoEffectsPlugin.instance
-        .setPortraitSegmentationBackgroundMosaicParam(param);
+    ZegoEffectsPlugin.instance.setPortraitSegmentationBackgroundMosaicParam(ZegoEffectsMosaicParam()
+      ..intesity = value
+      ..type = ZegoEffectsMosaicType.Square);
   }
 }
 
@@ -474,16 +414,12 @@ class ZegoBlurEditor implements ZegoBeautyEditor {
   void enable(bool enable) {
     ZegoEffectsPlugin.instance.enablePortraitSegmentation(enable);
     ZegoEffectsPlugin.instance.enablePortraitSegmentationBackgroundBlur(enable);
-    debugPrint(
-        'enablePortraitSegmentationBackgroundBlur() called with: enable = [$enable]');
+    debugPrint('enablePortraitSegmentationBackgroundBlur() called with: enable = [$enable]');
   }
 
   @override
   void apply(int value) {
-    final param = ZegoEffectsBlurParam();
-    param.intensity = value;
-    ZegoEffectsPlugin.instance
-        .setPortraitSegmentationBackgroundBlurParam(param);
+    ZegoEffectsPlugin.instance.setPortraitSegmentationBackgroundBlurParam(ZegoEffectsBlurParam()..intensity = value);
   }
 }
 
@@ -509,8 +445,7 @@ class ZegoBackgroundResetEditor implements ZegoBeautyEditor {
   void enable(bool enable) {
     ZegoEffectsPlugin.instance.enablePortraitSegmentation(false);
     ZegoEffectsPlugin.instance.enablePortraitSegmentationBackground(false);
-    ZegoEffectsPlugin.instance
-        .enablePortraitSegmentationBackgroundMosaic(false);
+    ZegoEffectsPlugin.instance.enablePortraitSegmentationBackgroundMosaic(false);
     ZegoEffectsPlugin.instance.enablePortraitSegmentationBackgroundBlur(false);
   }
 
