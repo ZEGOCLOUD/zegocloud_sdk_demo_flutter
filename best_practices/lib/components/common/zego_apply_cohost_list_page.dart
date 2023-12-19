@@ -61,10 +61,7 @@ class ApplyCoHostListView {
                               ],
                             ),
                           ),
-                          Container(
-                            color: Colors.black,
-                            height: 0.5,
-                          ),
+                          Container(color: Colors.black, height: 0.5),
                         ],
                       );
                     },
