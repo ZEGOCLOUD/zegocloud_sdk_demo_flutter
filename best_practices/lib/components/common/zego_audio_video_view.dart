@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../internal/sdk/express/express_service.dart';
 
 class ZegoAudioVideoView extends StatefulWidget {
@@ -28,7 +29,7 @@ class _ZegoAudioVideoViewState extends State<ZegoAudioVideoView> {
       if (widget.userInfo.streamID != null) {
         return coHostNomalView();
       } else {
-        return Container();
+        return const SizedBox.shrink();
       }
     }
   }
@@ -103,7 +104,7 @@ class _ZegoAudioVideoViewState extends State<ZegoAudioVideoView> {
         if (view != null) {
           return view;
         } else {
-          return Container();
+          return const SizedBox.shrink();
         }
       },
     );

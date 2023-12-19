@@ -43,7 +43,7 @@ class _CallPageState extends State<CallPage> {
       appBar: AppBar(title: const Text("Call Page")),
       body: Stack(
         children: [
-          localView ?? Container(),
+          localView ?? SizedBox.shrink(),
           Positioned(
             top: MediaQuery.of(context).size.height / 20,
             right: MediaQuery.of(context).size.width / 20,

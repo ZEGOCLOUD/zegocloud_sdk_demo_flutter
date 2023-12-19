@@ -27,7 +27,7 @@ class _ZegoToggleCameraButtonState extends State<ZegoToggleCameraButton> {
         builder: (context, isCameraOn, _) {
           return GestureDetector(
             onTap: () {
-              ZEGOSDKManager.instance.expressService.turnCameraOn(!isCameraOn);
+              ZEGOSDKManager().expressService.turnCameraOn(!isCameraOn);
               isCameraOnNotifier.value = !isCameraOnNotifier.value;
             },
             child: Container(

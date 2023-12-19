@@ -10,13 +10,13 @@ class CoHostRequestListButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: ZEGOSDKManager.instance.zimService.roomRequestMapNoti,
+      valueListenable: ZEGOSDKManager().zimService.roomRequestMapNoti,
       builder: (context, Map<String, dynamic> requestMap, _) {
         return Badge(
           smallSize: 8,
           isLabelVisible: requestMap.isNotEmpty,
           child: CommonButton(
-            onTap: () => ApplyCoHostListView().showBasicModalBottomSheet(context),
+            onTap: () => RoomRequestListView.showBasicModalBottomSheet(context),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

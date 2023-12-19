@@ -28,7 +28,7 @@ class ZegoCallController {
       ZegoCallManager().incomingCallInvitationReceivedStreamCtrl.stream.listen(onIncomingCallInvitationReceived),
       zimService.incomingUserRequestCancelledStreamCtrl.stream.listen(onIncomingCallInvitationCanceled),
       zimService.incomingUserRequestTimeoutStreamCtrl.stream.listen(onIncomingCallInvitationTimeout),
-    ]); 
+    ]);
   }
 
   void onIncomingCallInvitationReceived(IncomingCallInvitationReceivedEvent event) {
@@ -131,7 +131,7 @@ class ZegoCallController {
   void pushToCallingPage() {
     if (ZegoCallManager().callData != null) {
       ZegoSDKUser otherUser;
-      if (ZegoCallManager().callData!.inviter.userID != ZEGOSDKManager.instance.currentUser?.userID) {
+      if (ZegoCallManager().callData!.inviter.userID != ZEGOSDKManager().currentUser!.userID) {
         otherUser = ZegoCallManager().callData!.inviter;
       } else {
         otherUser = ZegoCallManager().callData!.invitee;

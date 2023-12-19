@@ -26,10 +26,10 @@ class _ZegoLiveBottomBarState extends State<ZegoLiveBottomBar> {
 
   @override
   Widget build(BuildContext context) {
-    if (ZEGOSDKManager.instance.currentUser == null) {
-      return Container();
+    if (ZEGOSDKManager().currentUser == null) {
+      return const SizedBox.shrink();
     } else {
-      return ValueListenableBuilder<ZegoLiveRole>(
+      return ValueListenableBuilder<ZegoLiveStreamingRole>(
         valueListenable: ZegoLiveStreamingManager.instance.currentUserRoleNoti,
         builder: (context, role, _) {
           return getBottomBar(role);
@@ -38,12 +38,12 @@ class _ZegoLiveBottomBarState extends State<ZegoLiveBottomBar> {
     }
   }
 
-  Widget getBottomBar(ZegoLiveRole role) {
+  Widget getBottomBar(ZegoLiveStreamingRole role) {
     return buttonView(role);
   }
 
-  Widget buttonView(ZegoLiveRole role) {
-    if (role == ZegoLiveRole.host) {
+  Widget buttonView(ZegoLiveStreamingRole role) {
+    if (role == ZegoLiveStreamingRole.host) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -52,7 +52,7 @@ class _ZegoLiveBottomBarState extends State<ZegoLiveBottomBar> {
           switchCameraButton(),
         ],
       );
-    } else if (role == ZegoLiveRole.audience) {
+    } else if (role == ZegoLiveStreamingRole.audience) {
       return ValueListenableBuilder<bool>(
         valueListenable: widget.applying!,
         builder: (context, state, _) {
@@ -117,11 +117,12 @@ class _ZegoLiveBottomBarState extends State<ZegoLiveBottomBar> {
           final signaling = jsonEncode({
             'room_request_type': RoomRequestType.audienceApplyToBecomeCoHost,
           });
-          ZEGOSDKManager.instance.zimService
+          ZEGOSDKManager()
+              .zimService
               .sendRoomRequest(ZegoLiveStreamingManager.instance.hostNoti.value?.userID ?? '', signaling)
               .then((value) {
             widget.applying?.value = true;
-            myRoomRequest = ZEGOSDKManager.instance.zimService.roomRequestMapNoti.value[value.requestID];
+            myRoomRequest = ZEGOSDKManager().zimService.roomRequestMapNoti.value[value.requestID];
           }).catchError((error) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('apply to co-host failed: $error')));
           });
@@ -138,7 +139,7 @@ class _ZegoLiveBottomBarState extends State<ZegoLiveBottomBar> {
     return OutlinedButton(
         style: OutlinedButton.styleFrom(side: const BorderSide(width: 1, color: Colors.white)),
         onPressed: () {
-          ZEGOSDKManager.instance.zimService.cancelRoomRequest(myRoomRequest?.requestID ?? '').then((value) {
+          ZEGOSDKManager().zimService.cancelRoomRequest(myRoomRequest?.requestID ?? '').then((value) {
             widget.applying?.value = false;
           }).catchError((error) {
             ScaffoldMessenger.of(context)

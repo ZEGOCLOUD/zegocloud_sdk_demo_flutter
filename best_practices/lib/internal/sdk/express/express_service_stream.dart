@@ -30,16 +30,16 @@ extension ExpressServiceStream on ExpressService {
   }
 
   Future<void> stopPreview() async {
-    currentUser?.videoViewNotifier.value = null;
-    currentUser?.viewID = -1;
+    currentUser!.videoViewNotifier.value = null;
+    currentUser!.viewID = -1;
     await ZegoExpressEngine.instance.stopPreview();
   }
 
   Future<void> startPublishingStream(String streamID, {ZegoPublishChannel channel = ZegoPublishChannel.Main}) async {
-    currentUser?.streamID = streamID;
+    currentUser!.streamID = streamID;
     final extraInfo = jsonEncode({
-      'mic': currentUser?.isMicOnNotifier.value ?? false ? 'on' : 'off',
-      'cam': currentUser?.isCamerOnNotifier.value ?? false ? 'on' : 'off',
+      'mic': currentUser!.isMicOnNotifier.value ? 'on' : 'off',
+      'cam': currentUser!.isCamerOnNotifier.value ? 'on' : 'off',
     });
     debugPrint('startPublishingStream:$streamID');
     await ZegoExpressEngine.instance.startPublishingStream(streamID, channel: channel);
@@ -51,9 +51,9 @@ extension ExpressServiceStream on ExpressService {
   }
 
   Future<void> stopPublishingStream({ZegoPublishChannel? channel}) async {
-    currentUser?.streamID = null;
-    currentUser?.isCamerOnNotifier.value = false;
-    currentUser?.isMicOnNotifier.value = false;
+    currentUser!.streamID = null;
+    currentUser!.isCamerOnNotifier.value = false;
+    currentUser!.isMicOnNotifier.value = false;
     await ZegoExpressEngine.instance.stopPublishingStream();
   }
 
