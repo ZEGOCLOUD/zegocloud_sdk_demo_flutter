@@ -122,7 +122,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
                   if (!isLiveing && widget.role == ZegoLiveRole.host) startLiveButton(),
                   hostText(),
                   leaveButton(),
-                  if (widget.role == ZegoLiveRole.host) memberButton(),
+                  if (isLiveing && widget.role == ZegoLiveRole.host) memberButton(),
                   if (isLiveing && widget.role == ZegoLiveRole.host) pkButton(),
                   if (isLiveing) bottomBar(),
                 ],
@@ -256,11 +256,11 @@ class ZegoLivePageState extends State<ZegoLivePage> {
         return Padding(
           padding: EdgeInsets.only(top: containers.maxHeight - 110, left: (containers.maxWidth - 100) / 2),
           child: SizedBox(
-            width: 100,
+            width: 120,
             height: 40,
             child: ElevatedButton(
               onPressed: startLive,
-              child: const Text('Start Live', style: TextStyle(color: Colors.white)),
+              child: const Text('Start Live'),
             ),
           ),
         );
@@ -301,14 +301,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
   }
 
   Widget memberButton() {
-    return LayoutBuilder(
-      builder: (context, containers) {
-        return Padding(
-          padding: EdgeInsets.only(left: containers.maxWidth - 60 - 53 - 10, top: 40),
-          child: const ZegoMemberButton(),
-        );
-      },
-    );
+    return const Positioned(bottom: 160, right: 30, child: ZegoMemberButton());
   }
 
   Widget hostText() {
@@ -319,7 +312,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
           padding: const EdgeInsets.only(left: 20, top: 50),
           child: Text(
             'RoomID: ${widget.roomID}\n'
-            'HostID: ${userInfo?.userName ?? ''}',
+            'HostID: ${userInfo?.userID ?? ''}',
             style: const TextStyle(fontSize: 16, color: Color.fromARGB(255, 104, 94, 94)),
           ),
         );
@@ -334,7 +327,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
       child: PKButton(),
     );
   }
-  
+
   void onExpressRoomStateChanged(ZegoRoomStateEvent event) {
     debugPrint('LivePage:onExpressRoomStateChanged: $event');
     ScaffoldMessenger.of(context).showSnackBar(

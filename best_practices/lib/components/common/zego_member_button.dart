@@ -3,14 +3,9 @@ import 'package:flutter/material.dart';
 import '../../zego_sdk_manager.dart';
 import 'zego_apply_cohost_list_page.dart';
 
-class ZegoMemberButton extends StatefulWidget {
+class ZegoMemberButton extends StatelessWidget {
   const ZegoMemberButton({super.key});
 
-  @override
-  State<ZegoMemberButton> createState() => _ZegoMemberButtonState();
-}
-
-class _ZegoMemberButtonState extends State<ZegoMemberButton> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -45,7 +40,7 @@ class _ZegoMemberButtonState extends State<ZegoMemberButton> {
       width: 24,
       height: 24,
       child: Icon(
-        Icons.person,
+        Icons.link,
         color: Colors.white,
       ),
     );
@@ -80,8 +75,7 @@ class _ZegoMemberButtonState extends State<ZegoMemberButton> {
       height: 28,
       child: Center(
         child: ValueListenableBuilder(
-          valueListenable:
-              ZEGOSDKManager.instance.zimService.roomRequestMapNoti,
+          valueListenable: ZEGOSDKManager.instance.zimService.roomRequestMapNoti,
           builder: (context, Map<String, dynamic> requestMap, _) {
             return Text(
               requestMap.values.toList().length.toString(),
