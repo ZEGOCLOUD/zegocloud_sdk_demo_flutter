@@ -31,6 +31,7 @@ class ExpressService {
   ZegoMixerTask? currentMixerTask;
   ValueNotifier<Widget?> mixerStreamNotifier = ValueNotifier(null);
   ZegoScenario currentScenario = ZegoScenario.Default;
+  ValueNotifier<ZegoPublisherState> publisherState = ValueNotifier<ZegoPublisherState>(ZegoPublisherState.NoPublish);
 
   void clearRoomData() {
     currentScenario = ZegoScenario.Default;
@@ -154,21 +155,13 @@ class ExpressService {
 
   void turnCameraOn(bool isOn) {
     currentUser!.isCamerOnNotifier.value = isOn;
-    final extraInfo = jsonEncode({
-      'mic': currentUser!.isMicOnNotifier.value ? 'on' : 'off',
-      'cam': currentUser!.isCamerOnNotifier.value ? 'on' : 'off',
-    });
-    ZegoExpressEngine.instance.setStreamExtraInfo(extraInfo);
+    updateStreamExtraInfo();
     ZegoExpressEngine.instance.enableCamera(isOn);
   }
 
   void turnMicrophoneOn(bool isOn) {
     currentUser!.isMicOnNotifier.value = isOn;
-    final extraInfo = jsonEncode({
-      'mic': currentUser!.isMicOnNotifier.value ? 'on' : 'off',
-      'cam': currentUser!.isCamerOnNotifier.value ? 'on' : 'off',
-    });
-    ZegoExpressEngine.instance.setStreamExtraInfo(extraInfo);
+    updateStreamExtraInfo();
     ZegoExpressEngine.instance.mutePublishStreamAudio(!isOn);
   }
 
@@ -227,6 +220,7 @@ class ExpressService {
     ZegoExpressEngine.onPlayerRecvAudioFirstFrame = null;
     ZegoExpressEngine.onPlayerRecvVideoFirstFrame = null;
     ZegoExpressEngine.onPlayerRecvSEI = null;
+    ZegoExpressEngine.onPublisherStateUpdate = null;
   }
 
   void initEventHandle() {
@@ -241,6 +235,7 @@ class ExpressService {
     ZegoExpressEngine.onPlayerRecvVideoFirstFrame = ExpressService.instance.onPlayerRecvVideoFirstFrame;
     ZegoExpressEngine.onPlayerRecvSEI = ExpressService.instance.onPlayerRecvSEI;
     ZegoExpressEngine.onRoomExtraInfoUpdate = ExpressService.instance.onRoomExtraInfoUpdate;
+    ZegoExpressEngine.onPublisherStateUpdate = ExpressService.instance.onPublisherStateUpdate;
   }
 
   void onRoomUserUpdate(
