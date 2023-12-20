@@ -20,7 +20,7 @@ class _AudioRoomEntryState extends State<AudioRoomEntry> {
         const SizedBox(height: 20),
         Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
           liveAudioRoomButton(ZegoLiveAudioRoomRole.host),
-          liveAudioRoomButton(ZegoLiveAudioRoomRole.speaker),
+          liveAudioRoomButton(ZegoLiveAudioRoomRole.audience),
         ]),
         const SizedBox(height: 30),
       ],
