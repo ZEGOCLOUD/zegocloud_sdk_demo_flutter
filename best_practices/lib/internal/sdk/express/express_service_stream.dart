@@ -35,19 +35,21 @@ extension ExpressServiceStream on ExpressService {
     await ZegoExpressEngine.instance.stopPreview();
   }
 
-  Future<void> startPublishingStream(String streamID, {ZegoPublishChannel channel = ZegoPublishChannel.Main}) async {
-    currentUser!.streamID = streamID;
+  Future<void> updateStreamExtraInfo() async {
+    if (kIsWeb && (publisherState.value != ZegoPublisherState.Publishing)) return;
     final extraInfo = jsonEncode({
       'mic': currentUser!.isMicOnNotifier.value ? 'on' : 'off',
       'cam': currentUser!.isCamerOnNotifier.value ? 'on' : 'off',
     });
-    debugPrint('startPublishingStream:$streamID');
-    await ZegoExpressEngine.instance.startPublishingStream(streamID, channel: channel);
-    if (kIsWeb) {
-      // delay 1s to set extra info
-      await Future.delayed(const Duration(seconds: 1));
-    }
     await ZegoExpressEngine.instance.setStreamExtraInfo(extraInfo);
+  }
+
+  Future<void> startPublishingStream(String streamID, {ZegoPublishChannel channel = ZegoPublishChannel.Main}) async {
+    currentUser!.streamID = streamID;
+
+    debugPrint('startPublishingStream:$streamID');
+    await updateStreamExtraInfo();
+    await ZegoExpressEngine.instance.startPublishingStream(streamID, channel: channel);
   }
 
   Future<void> stopPublishingStream({ZegoPublishChannel? channel}) async {
@@ -177,5 +179,13 @@ extension ExpressServiceStream on ExpressService {
       }
     }
     roomStreamExtraInfoStreamCtrl.add(ZegoRoomStreamExtraInfoEvent(roomID, streamList));
+  }
+
+  void onPublisherStateUpdate(
+      String streamID, ZegoPublisherState state, int errorCode, Map<String, dynamic> extendedData) {
+    publisherState.value = state;
+    if (kIsWeb && state == ZegoPublisherState.Publishing) {
+      updateStreamExtraInfo();
+    }
   }
 }
