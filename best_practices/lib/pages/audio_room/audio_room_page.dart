@@ -30,7 +30,11 @@ class _AudioRoomPageState extends State<AudioRoomPage> {
   void initState() {
     super.initState();
     final zimService = ZEGOSDKManager().zimService;
+    final expressService = ZEGOSDKManager().expressService;
     subscriptions.addAll([
+      expressService.roomStateChangedStreamCtrl.stream.listen(onExpressRoomStateChanged),
+      zimService.roomStateChangedStreamCtrl.stream.listen(onZIMRoomStateChanged),
+      zimService.connectionStateStreamCtrl.stream.listen(onZIMConnectionStateChanged),
       zimService.onInComingRoomRequestStreamCtrl.stream.listen(onInComingRoomRequest),
       zimService.onOutgoingRoomRequestAcceptedStreamCtrl.stream.listen(onOutgoingRoomRequestAccepted),
       zimService.onOutgoingRoomRequestRejectedStreamCtrl.stream.listen(onOutgoingRoomRequestRejected),
@@ -368,5 +372,46 @@ class _AudioRoomPageState extends State<AudioRoomPage> {
   void onOutgoingRoomRequestRejected(OnOutgoingRoomRequestRejectedEvent event) {
     isApplyStateNoti.value = false;
     currentRequestID = null;
+  }
+
+  void onExpressRoomStateChanged(ZegoRoomStateEvent event) {
+    debugPrint('AudioRoomPage:onExpressRoomStateChanged: $event');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(milliseconds: 1000),
+        content: Text('onExpressRoomStateChanged: reason:${event.reason.name}, errorCode:${event.errorCode}'),
+      ),
+    );
+    if ((event.reason == ZegoRoomStateChangedReason.KickOut) ||
+        (event.reason == ZegoRoomStateChangedReason.ReconnectFailed) ||
+        (event.reason == ZegoRoomStateChangedReason.LoginFailed)) {
+      Navigator.pop(context);
+    }
+  }
+
+  void onZIMRoomStateChanged(ZIMServiceRoomStateChangedEvent event) {
+    debugPrint('AudioRoomPage:onZIMRoomStateChanged: $event');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(milliseconds: 1000),
+        content: Text('onZIMRoomStateChanged: $event'),
+      ),
+    );
+    if (event.state == ZIMRoomState.disconnected) {
+      Navigator.pop(context);
+    }
+  }
+
+  void onZIMConnectionStateChanged(ZIMServiceConnectionStateChangedEvent event) {
+    debugPrint('AudioRoomPage:onZIMConnectionStateChanged: $event');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(milliseconds: 1000),
+        content: Text('onZIMConnectionStateChanged: $event'),
+      ),
+    );
+    if (event.state == ZIMConnectionState.disconnected) {
+      Navigator.pop(context);
+    }
   }
 }

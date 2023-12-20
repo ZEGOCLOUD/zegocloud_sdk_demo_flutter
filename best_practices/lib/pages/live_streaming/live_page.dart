@@ -80,8 +80,8 @@ class ZegoLivePageState extends State<ZegoLivePage> {
       ZEGOSDKManager().loginRoom(widget.roomID, ZegoScenario.Broadcast, token: token).then(
         (value) {
           if (value.errorCode != 0) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text('login room failed: ${value.errorCode}')));
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text('login room failed: ${value.errorCode}')));
           }
         },
       );
@@ -207,8 +207,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
         return ValueListenableBuilder<List<ZegoSDKUser>>(
           valueListenable: liveStreamingManager.coHostUserListNoti,
           builder: (context, cohostList, _) {
-            final videoList =
-                liveStreamingManager.coHostUserListNoti.value.map((user) {
+            final videoList = liveStreamingManager.coHostUserListNoti.value.map((user) {
               return ZegoAudioVideoView(userInfo: user);
             }).toList();
 
@@ -219,8 +218,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
                 reverse: true,
                 itemCount: videoList.length,
                 itemBuilder: (context, index) {
-                  return SizedBox(
-                      width: width, height: height, child: videoList[index]);
+                  return SizedBox(width: width, height: height, child: videoList[index]);
                 },
                 separatorBuilder: (context, index) {
                   return const SizedBox(height: 10);
@@ -246,14 +244,12 @@ class ZegoLivePageState extends State<ZegoLivePage> {
   void startLive() {
     liveStreamingManager.startLive(widget.roomID).then((value) {
       if (value.errorCode != 0) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('login room failed: ${value.errorCode}')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('login room failed: ${value.errorCode}')));
       } else {
         ZEGOSDKManager().expressService.startPublishingStream(liveStreamingManager.hostStreamID());
       }
     }).catchError((error) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('login room failed: $error}')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('login room failed: $error}')));
     });
   }
 
@@ -301,8 +297,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         duration: const Duration(milliseconds: 1000),
-        content: Text(
-            'onExpressRoomStateChanged: reason:${event.reason.name}, errorCode:${event.errorCode}'),
+        content: Text('onExpressRoomStateChanged: reason:${event.reason.name}, errorCode:${event.errorCode}'),
       ),
     );
     if ((event.reason == ZegoRoomStateChangedReason.KickOut) ||
@@ -325,8 +320,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
     }
   }
 
-  void onZIMConnectionStateChanged(
-      ZIMServiceConnectionStateChangedEvent event) {
+  void onZIMConnectionStateChanged(ZIMServiceConnectionStateChangedEvent event) {
     debugPrint('LivePage:onZIMConnectionStateChanged: $event');
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -334,6 +328,9 @@ class ZegoLivePageState extends State<ZegoLivePage> {
         content: Text('onZIMConnectionStateChanged: $event'),
       ),
     );
+    if (event.state == ZIMConnectionState.disconnected) {
+      Navigator.pop(context);
+    }
   }
 
   void onInComingRoomRequest(OnInComingRoomRequestReceivedEvent event) {}
@@ -350,8 +347,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         duration: Duration(milliseconds: 1000),
-        content:
-            Text('Your request to co-host with the host has been refused.'),
+        content: Text('Your request to co-host with the host has been refused.'),
       ),
     );
   }
