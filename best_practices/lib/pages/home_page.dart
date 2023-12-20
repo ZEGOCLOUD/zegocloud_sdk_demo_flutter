@@ -69,19 +69,16 @@ class HomePage extends StatelessWidget {
 }
 
 Widget roomIDTextField(TextEditingController controller) {
-  return SizedBox(
-    width: 350,
-    child: Row(
-      children: [
-        const Text('RoomID:'),
-        const SizedBox(width: 10, height: 20),
-        Flexible(
-          child: TextField(
-            controller: controller,
-            decoration: const InputDecoration(labelText: 'Please Input RoomID'),
-          ),
+  return Row(
+    children: [
+      const Text('RoomID:'),
+      const SizedBox(width: 10, height: 20),
+      Expanded(
+        child: TextField(
+          controller: controller,
+          decoration: const InputDecoration(labelText: 'Please Input RoomID'),
         ),
-      ],
-    ),
+      ),
+    ],
   );
 }

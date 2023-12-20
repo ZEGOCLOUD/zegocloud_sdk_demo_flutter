@@ -34,7 +34,7 @@ class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ZegoLivePage(roomID: roomIDController.text, role: ZegoLiveStreamingRole.host),
+            builder: (context) => ZegoLivePage(roomID: roomIDController.text, role: role),
           ),
         );
       },
