@@ -66,8 +66,6 @@ class ZegoLivePageState extends State<ZegoLivePage> {
       zimService.onOutgoingRoomRequestRejectedStreamCtrl.stream.listen(onOutgoingRoomRequestRejected),
     ]);
 
-    ZEGOSDKManager().initEffects();
-
     if (widget.role == ZegoLiveStreamingRole.audience) {
       //Join room
       liveStreamingManager.currentUserRoleNoti.value = ZegoLiveStreamingRole.audience;
@@ -103,7 +101,6 @@ class ZegoLivePageState extends State<ZegoLivePage> {
       ..leaveRoom()
       ..uninit();
     ZEGOSDKManager().expressService.stopPreview();
-    ZEGOSDKManager.instance.unInitEffects();
     for (final subscription in subscriptions) {
       subscription.cancel();
     }
