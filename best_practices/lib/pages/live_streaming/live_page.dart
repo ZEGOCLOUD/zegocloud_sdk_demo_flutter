@@ -328,6 +328,9 @@ class ZegoLivePageState extends State<ZegoLivePage> {
         content: Text('onZIMConnectionStateChanged: $event'),
       ),
     );
+    if (event.state == ZIMConnectionState.disconnected) {
+      Navigator.pop(context);
+    }
   }
 
   void onInComingRoomRequest(OnInComingRoomRequestReceivedEvent event) {}
