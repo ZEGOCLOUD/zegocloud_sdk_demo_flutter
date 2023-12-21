@@ -9,8 +9,8 @@ class ZEGOSDKManager {
   factory ZEGOSDKManager() => instance;
   static final ZEGOSDKManager instance = ZEGOSDKManager._internal();
 
-  ExpressService expressService = ExpressService.instance;
-  ZIMService zimService = ZIMService.instance;
+  ExpressService expressService = ExpressService();
+  ZIMService zimService = ZIMService();
 
   Future<void> init(int appID, String? appSign, {ZegoScenario scenario = ZegoScenario.Default}) async {
     await expressService.init(appID: appID, appSign: appSign);

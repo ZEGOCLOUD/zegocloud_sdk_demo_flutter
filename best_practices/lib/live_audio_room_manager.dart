@@ -158,14 +158,6 @@ class ZegoLiveAudioRoomManager {
     return result;
   }
 
-  Future<ZIMUserAvatarUrlUpdatedResult> updateUserAvatarUrl(String url) async {
-    return ZEGOSDKManager().zimService.updateUserAvatarUrl(url);
-  }
-
-  Future<ZIMUsersInfoQueriedResult> queryUsersInfo(List<String> userIDList) async {
-    return ZEGOSDKManager().zimService.queryUsersInfo(userIDList);
-  }
-
   String? getUserAvatar(String userID) {
     return ZEGOSDKManager().zimService.getUserAvatar(userID);
   }
@@ -192,7 +184,7 @@ class ZegoLiveAudioRoomManager {
       for (final element in event.userList) {
         userIDList.add(element.userID);
       }
-      queryUsersInfo(userIDList);
+      ZEGOSDKManager().zimService.queryUsersInfo(userIDList);
     } else {
       // empty seat
     }
