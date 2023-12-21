@@ -84,9 +84,7 @@ class _LoginPageState extends State<LoginPage> {
                     token = ZegoTokenUtils.generateToken(
                         SDKKeyCenter.appID, SDKKeyCenter.serverSecret, userIDController.text);
                   }
-                  ZEGOSDKManager.instance
-                      .connectUser(userIDController.text, userNameController.text, token: token)
-                      .then((_) {
+                  ZEGOSDKManager().connectUser(userIDController.text, userNameController.text, token: token).then((_) {
                     ZEGOSDKManager()
                         .zimService
                         .updateUserAvatarUrl('https://robohash.org/${userIDController.text}.png?set=set4');

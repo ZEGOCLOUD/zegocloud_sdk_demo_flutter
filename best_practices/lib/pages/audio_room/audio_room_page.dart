@@ -273,6 +273,7 @@ class _AudioRoomPageState extends State<AudioRoomPage> {
               onPressed: () {
                 final seat = ZegoLiveAudioRoomManager().seatList[seatIndex];
                 if (seatIndex == 0) {
+                  // audience can't take host seat.
                   return;
                 }
                 if (seat.currentUser.value == null) {

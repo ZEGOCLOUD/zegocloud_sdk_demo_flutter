@@ -36,7 +36,10 @@ class RoomSeatService {
       if (!result.errorKeys.contains(seatIndex.toString())) {
         for (final element in seatList) {
           if (element.seatIndex == seatIndex) {
-            ZIMService().roomRequestMapNoti.removeWhere((String k, RoomRequest v) => v.senderID == currentUserID);
+            ZEGOSDKManager()
+                .zimService
+                .roomRequestMapNoti
+                .removeWhere((String k, RoomRequest v) => v.senderID == currentUserID);
             element.currentUser.value = ZEGOSDKManager().currentUser;
             break;
           }

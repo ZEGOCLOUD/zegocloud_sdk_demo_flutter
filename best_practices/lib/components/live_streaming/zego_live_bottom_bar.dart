@@ -30,7 +30,7 @@ class _ZegoLiveBottomBarState extends State<ZegoLiveBottomBar> {
       return const SizedBox.shrink();
     } else {
       return ValueListenableBuilder<ZegoLiveStreamingRole>(
-        valueListenable: ZegoLiveStreamingManager.instance.currentUserRoleNoti,
+        valueListenable: ZegoLiveStreamingManager().currentUserRoleNoti,
         builder: (context, role, _) {
           return getBottomBar(role);
         },
@@ -119,7 +119,7 @@ class _ZegoLiveBottomBarState extends State<ZegoLiveBottomBar> {
           });
           ZEGOSDKManager()
               .zimService
-              .sendRoomRequest(ZegoLiveStreamingManager.instance.hostNoti.value?.userID ?? '', signaling)
+              .sendRoomRequest(ZegoLiveStreamingManager().hostNoti.value?.userID ?? '', signaling)
               .then((value) {
             widget.applying?.value = true;
             myRoomRequest = ZEGOSDKManager().zimService.roomRequestMapNoti.value[value.requestID];
@@ -153,7 +153,7 @@ class _ZegoLiveBottomBarState extends State<ZegoLiveBottomBar> {
     return OutlinedButton(
       style: OutlinedButton.styleFrom(side: const BorderSide(width: 1, color: Colors.white)),
       onPressed: () {
-        ZegoLiveStreamingManager.instance.endCoHost();
+        ZegoLiveStreamingManager().endCoHost();
       },
       child: const Text('End co-host', style: TextStyle(color: Colors.white)),
     );

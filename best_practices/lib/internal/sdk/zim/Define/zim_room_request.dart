@@ -1,4 +1,3 @@
-
 import 'dart:convert' as convert;
 import 'dart:math';
 
@@ -6,7 +5,6 @@ import '../../../../zego_sdk_manager.dart';
 import 'zim_define.dart';
 
 class RoomRequest {
-
   String? requestID;
   late RoomRequestAction actionType;
   late String senderID;
@@ -27,11 +25,9 @@ class RoomRequest {
   }
 
   String generateProtocolID() {
-    final localUserID = ZIMService.instance.currentZimUserInfo?.userID ?? '';
+    final localUserID = ZIMService().currentZimUserInfo?.userID ?? '';
     final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
     final randomStr = (Random().nextInt(900000) + 100000).toString();
     return '${localUserID}_${timestamp}_$randomStr';
   }
-
-
 }

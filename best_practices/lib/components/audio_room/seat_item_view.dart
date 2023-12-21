@@ -26,7 +26,7 @@ class ZegoSeatItemView extends StatelessWidget {
 
   Widget userSeatView(ZegoSDKUser userInfo) {
     return GestureDetector(
-      onTap: () => onPressed,
+      onTap: onPressed,
       child: Column(
         children: [
           userAvatar(userInfo),

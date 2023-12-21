@@ -214,18 +214,18 @@ class ExpressService {
   }
 
   void initEventHandle() {
-    ZegoExpressEngine.onRoomStreamUpdate = ExpressService.instance.onRoomStreamUpdate;
-    ZegoExpressEngine.onRoomUserUpdate = ExpressService.instance.onRoomUserUpdate;
-    ZegoExpressEngine.onRoomStreamExtraInfoUpdate = ExpressService.instance.onRoomStreamExtraInfoUpdate;
-    ZegoExpressEngine.onRoomStateChanged = ExpressService.instance.onRoomStateChanged;
-    ZegoExpressEngine.onCapturedSoundLevelUpdate = ExpressService.instance.onCapturedSoundLevelUpdate;
-    ZegoExpressEngine.onRemoteSoundLevelUpdate = ExpressService.instance.onRemoteSoundLevelUpdate;
-    ZegoExpressEngine.onMixerSoundLevelUpdate = ExpressService.instance.onMixerSoundLevelUpdate;
-    ZegoExpressEngine.onPlayerRecvAudioFirstFrame = ExpressService.instance.onPlayerRecvAudioFirstFrame;
-    ZegoExpressEngine.onPlayerRecvVideoFirstFrame = ExpressService.instance.onPlayerRecvVideoFirstFrame;
-    ZegoExpressEngine.onPlayerRecvSEI = ExpressService.instance.onPlayerRecvSEI;
-    ZegoExpressEngine.onRoomExtraInfoUpdate = ExpressService.instance.onRoomExtraInfoUpdate;
-    ZegoExpressEngine.onPublisherStateUpdate = ExpressService.instance.onPublisherStateUpdate;
+    ZegoExpressEngine.onRoomStreamUpdate = ExpressService().onRoomStreamUpdate;
+    ZegoExpressEngine.onRoomUserUpdate = ExpressService().onRoomUserUpdate;
+    ZegoExpressEngine.onRoomStreamExtraInfoUpdate = ExpressService().onRoomStreamExtraInfoUpdate;
+    ZegoExpressEngine.onRoomStateChanged = ExpressService().onRoomStateChanged;
+    ZegoExpressEngine.onCapturedSoundLevelUpdate = ExpressService().onCapturedSoundLevelUpdate;
+    ZegoExpressEngine.onRemoteSoundLevelUpdate = ExpressService().onRemoteSoundLevelUpdate;
+    ZegoExpressEngine.onMixerSoundLevelUpdate = ExpressService().onMixerSoundLevelUpdate;
+    ZegoExpressEngine.onPlayerRecvAudioFirstFrame = ExpressService().onPlayerRecvAudioFirstFrame;
+    ZegoExpressEngine.onPlayerRecvVideoFirstFrame = ExpressService().onPlayerRecvVideoFirstFrame;
+    ZegoExpressEngine.onPlayerRecvSEI = ExpressService().onPlayerRecvSEI;
+    ZegoExpressEngine.onRoomExtraInfoUpdate = ExpressService().onRoomExtraInfoUpdate;
+    ZegoExpressEngine.onPublisherStateUpdate = ExpressService().onPublisherStateUpdate;
   }
 
   void onRoomUserUpdate(

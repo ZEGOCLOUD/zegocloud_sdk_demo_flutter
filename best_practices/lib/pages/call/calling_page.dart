@@ -51,7 +51,7 @@ class _CallingPageState extends State<CallingPage> {
           SDKKeyCenter.appID, SDKKeyCenter.serverSecret, ZEGOSDKManager().currentUser!.userID);
     }
     final roomID = widget.callData.callID;
-    ZEGOSDKManager.instance
+    ZEGOSDKManager()
         .loginRoom(
             roomID,
             widget.callData.callType == ZegoCallType.voice
