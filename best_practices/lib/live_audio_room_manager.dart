@@ -69,8 +69,8 @@ class ZegoLiveAudioRoomManager {
     return result;
   }
 
-  Future<ZIMRoomAttributesOperatedCallResult?> takeSeat(int seatIndex) async {
-    final result = await roomSeatService?.takeSeat(seatIndex);
+  Future<ZIMRoomAttributesOperatedCallResult?> takeSeat(int seatIndex, {bool? isForce}) async {
+    final result = await roomSeatService?.takeSeat(seatIndex, isForce: isForce);
     if (result != null) {
       if (!result.errorKeys.contains(seatIndex.toString())) {
         for (final element in seatList) {
@@ -83,7 +83,24 @@ class ZegoLiveAudioRoomManager {
         }
       }
     }
+    if (result != null && !result.errorKeys.contains(ZEGOSDKManager().currentUser!.userID)) {
+      openMicAndStartPublishStream();
+    }
     return result;
+  }
+
+  void openMicAndStartPublishStream() {
+    ZEGOSDKManager().expressService.turnCameraOn(false);
+    ZEGOSDKManager().expressService.turnMicrophoneOn(true);
+    ZEGOSDKManager().expressService.startPublishingStream(generateStreamID());
+  }
+
+  String generateStreamID() {
+    final userID = ZEGOSDKManager().currentUser!.userID;
+    final roomID = ZEGOSDKManager().expressService.currentRoomID;
+    final streamID =
+        '${roomID}_${userID}_${ZegoLiveAudioRoomManager().roleNoti.value == ZegoLiveAudioRoomRole.host ? 'host' : 'speaker'}';
+    return streamID;
   }
 
   Future<ZIMRoomAttributesBatchOperatedResult?> switchSeat(int fromSeatIndex, int toSeatIndex) async {
@@ -141,14 +158,6 @@ class ZegoLiveAudioRoomManager {
     return result;
   }
 
-  Future<ZIMUserAvatarUrlUpdatedResult> updateUserAvatarUrl(String url) async {
-    return ZEGOSDKManager().zimService.updateUserAvatarUrl(url);
-  }
-
-  Future<ZIMUsersInfoQueriedResult> queryUsersInfo(List<String> userIDList) async {
-    return ZEGOSDKManager().zimService.queryUsersInfo(userIDList);
-  }
-
   String? getUserAvatar(String userID) {
     return ZEGOSDKManager().zimService.getUserAvatar(userID);
   }
@@ -175,7 +184,7 @@ class ZegoLiveAudioRoomManager {
       for (final element in event.userList) {
         userIDList.add(element.userID);
       }
-      queryUsersInfo(userIDList);
+      ZEGOSDKManager().zimService.queryUsersInfo(userIDList);
     } else {
       // empty seat
     }

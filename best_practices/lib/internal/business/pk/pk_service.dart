@@ -209,7 +209,7 @@ class PKService implements PKServiceInterface {
 
   @override
   void stopPKBattle() {
-    if (ZegoLiveStreamingManager.instance.iamHost()) {
+    if (ZegoLiveStreamingManager().iamHost()) {
       delectPKAttributes();
       stopMixTask();
       //...
@@ -553,7 +553,7 @@ class PKService implements PKServiceInterface {
 
   void clearData() {
     cleanPKState();
-    if (ZegoLiveStreamingManager.instance.iamHost() && pkRoomAttribute.keys.isNotEmpty) {
+    if (ZegoLiveStreamingManager().iamHost() && pkRoomAttribute.keys.isNotEmpty) {
       ZEGOSDKManager().zimService.deleteRoomAttributes(pkRoomAttribute.keys.toList());
     }
   }

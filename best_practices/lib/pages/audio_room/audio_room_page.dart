@@ -73,25 +73,14 @@ class _AudioRoomPageState extends State<AudioRoomPage> {
     if (widget.role == ZegoLiveAudioRoomRole.host) {
       //take seat
       await ZegoLiveAudioRoomManager().setSelfHost();
-      final result = await ZegoLiveAudioRoomManager().takeSeat(0);
-      if (result != null && !result.errorKeys.contains(ZEGOSDKManager().currentUser!.userID)) {
-        openMicAndStartPublishStream();
-      }
+      await ZegoLiveAudioRoomManager().takeSeat(0, isForce: true).then((result) {
+        if (mounted && ((result == null) || result.errorKeys.contains(ZEGOSDKManager().currentUser!.userID))) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('take seat failed: $result')));
+        }
+      }).catchError((error) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('take seat failed: $error')));
+      });
     }
-  }
-
-  void openMicAndStartPublishStream() {
-    ZEGOSDKManager().expressService.turnCameraOn(false);
-    ZEGOSDKManager().expressService.turnMicrophoneOn(true);
-    ZEGOSDKManager().expressService.startPublishingStream(generateStreamID());
-  }
-
-  String generateStreamID() {
-    final userID = ZEGOSDKManager().currentUser!.userID;
-    final roomID = ZEGOSDKManager().expressService.currentRoomID;
-    final streamID =
-        '${roomID}_${userID}_${ZegoLiveAudioRoomManager().roleNoti.value == ZegoLiveAudioRoomRole.host ? 'host' : 'speaker'}';
-    return streamID;
   }
 
   @override
@@ -267,6 +256,8 @@ class _AudioRoomPageState extends State<AudioRoomPage> {
     );
   }
 
+  void takeSeatResult() {}
+
   Widget seatListView() {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
@@ -281,10 +272,18 @@ class _AudioRoomPageState extends State<AudioRoomPage> {
               seatIndex: seatIndex,
               onPressed: () {
                 final seat = ZegoLiveAudioRoomManager().seatList[seatIndex];
+                if (seatIndex == 0) {
+                  // audience can't take host seat.
+                  return;
+                }
                 if (seat.currentUser.value == null) {
                   if (ZegoLiveAudioRoomManager().roleNoti.value == ZegoLiveAudioRoomRole.audience) {
-                    ZegoLiveAudioRoomManager().takeSeat(seat.seatIndex).then((value) {
-                      openMicAndStartPublishStream();
+                    ZegoLiveAudioRoomManager().takeSeat(seat.seatIndex).then((result) {
+                      if (mounted &&
+                          ((result == null) || result.errorKeys.contains(ZEGOSDKManager().currentUser!.userID))) {
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(SnackBar(content: Text('take seat failed: $result')));
+                      }
                     }).catchError((error) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('take seat failed: $error')));
                     });
@@ -358,12 +357,17 @@ class _AudioRoomPageState extends State<AudioRoomPage> {
   void onInComingRoomRequestTimeOut() {}
 
   void onOutgoingRoomRequestAccepted(OnOutgoingRoomRequestAcceptedEvent event) {
+    isApplyStateNoti.value = false;
     for (final seat in ZegoLiveAudioRoomManager().seatList) {
       if (seat.currentUser.value == null) {
-        ZegoLiveAudioRoomManager().takeSeat(seat.seatIndex).then((value) {
-          isApplyStateNoti.value = false;
-          openMicAndStartPublishStream();
+        ZegoLiveAudioRoomManager().takeSeat(seat.seatIndex).then((result) {
+          if (mounted && ((result == null) || result.errorKeys.contains(ZEGOSDKManager().currentUser!.userID))) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('take seat failed: $result')));
+          }
+        }).catchError((error) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('take seat failed: $error')));
         });
+
         break;
       }
     }
@@ -376,12 +380,15 @@ class _AudioRoomPageState extends State<AudioRoomPage> {
 
   void onExpressRoomStateChanged(ZegoRoomStateEvent event) {
     debugPrint('AudioRoomPage:onExpressRoomStateChanged: $event');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        duration: const Duration(milliseconds: 1000),
-        content: Text('onExpressRoomStateChanged: reason:${event.reason.name}, errorCode:${event.errorCode}'),
-      ),
-    );
+    if (event.errorCode != 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: const Duration(milliseconds: 1000),
+          content: Text('onExpressRoomStateChanged: reason:${event.reason.name}, errorCode:${event.errorCode}'),
+        ),
+      );
+    }
+
     if ((event.reason == ZegoRoomStateChangedReason.KickOut) ||
         (event.reason == ZegoRoomStateChangedReason.ReconnectFailed) ||
         (event.reason == ZegoRoomStateChangedReason.LoginFailed)) {
@@ -391,12 +398,14 @@ class _AudioRoomPageState extends State<AudioRoomPage> {
 
   void onZIMRoomStateChanged(ZIMServiceRoomStateChangedEvent event) {
     debugPrint('AudioRoomPage:onZIMRoomStateChanged: $event');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        duration: const Duration(milliseconds: 1000),
-        content: Text('onZIMRoomStateChanged: $event'),
-      ),
-    );
+    if ((event.event != ZIMRoomEvent.success) && (event.state != ZIMRoomState.connected)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: const Duration(milliseconds: 1000),
+          content: Text('onZIMRoomStateChanged: $event'),
+        ),
+      );
+    }
     if (event.state == ZIMRoomState.disconnected) {
       Navigator.pop(context);
     }

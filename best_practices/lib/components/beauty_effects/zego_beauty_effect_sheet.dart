@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../internal/sdk/effect/internal/beauty_ability/zego_beauty_item.dart';
 import '../../internal/sdk/effect/internal/beauty_ability/zego_beauty_type.dart';
-import '../../internal/sdk/effect/zego_effects_service.dart';
+import '../../zego_sdk_manager.dart';
 import 'zego_beauty_data.dart';
 import 'zego_beauty_icon_button.dart';
 import 'zego_beauty_slider.dart';
@@ -76,12 +76,12 @@ class _ZegoBeautyEffectSheetState extends State<ZegoBeautyEffectSheet> {
         } else if (type.index >= ZegoBeautyType.beautyBasicReset.index) {
           // reset to default value.
           for (final item in selectedModelNotifier.value.items) {
-            EffectsService.instance.beautyAbilities[item.type]!.reset();
+            ZEGOSDKManager().effectsService.beautyAbilities[item.type]!.reset();
           }
           return Container(height: _besSliderHeight + _besSliderPadding);
         }
 
-        final ability = EffectsService.instance.beautyAbilities[type]!;
+        final ability = ZEGOSDKManager().effectsService.beautyAbilities[type]!;
         return Column(
           children: [
             ZegoBeautyEffectSlider(
@@ -194,7 +194,7 @@ class _ZegoBeautyEffectSheetState extends State<ZegoBeautyEffectSheet> {
                   text: item.iconText,
                   textStyle: item.type == selectedEffectTypeNotifier.value ? item.selectedTextStyle : item.textStyle,
                   onPressed: () {
-                    final ability = EffectsService.instance.beautyAbilities[item.type]!;
+                    final ability = ZEGOSDKManager().effectsService.beautyAbilities[item.type]!;
                     ability.editor.enable(true);
                     ability.editor.apply(ability.currentValue);
                     updateSelectedModelType(item.type);

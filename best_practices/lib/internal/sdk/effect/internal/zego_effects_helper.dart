@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zego_effects_plugin/zego_effects_defines.dart';
 import 'package:zego_effects_plugin/zego_effects_plugin.dart';
 
-import '../zego_effects_service.dart';
+import '../../../../zego_sdk_manager.dart';
 
 class EffectsHelper {
   static const String licenseKey = 'license_key';
@@ -18,7 +18,7 @@ class EffectsHelper {
   static String portraitSegmentationImagePath = '$resourcesFolder//BackgroundImages/image1.jpg';
 
   static Future<void> setResources() async {
-    final folderPath = await EffectsService.instance.getResourcesFolder() ?? '';
+    final folderPath = await ZEGOSDKManager().effectsService.getResourcesFolder() ?? '';
     resourcesFolder = folderPath;
 
     debugPrint('Current Folder Path: $folderPath');

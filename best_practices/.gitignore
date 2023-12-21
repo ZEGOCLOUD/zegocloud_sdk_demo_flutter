@@ -78,3 +78,4 @@
 **/.fvm
 **/.settings
 **/*.xcworkspace
+./zim_flutter_sdk

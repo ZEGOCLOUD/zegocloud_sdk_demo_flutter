@@ -12,9 +12,9 @@ class ZEGOSDKManager {
   factory ZEGOSDKManager() => instance;
   static final ZEGOSDKManager instance = ZEGOSDKManager._internal();
 
-  ExpressService expressService = ExpressService.instance;
-  ZIMService zimService = ZIMService.instance;
-  EffectsService effectsService = EffectsService.instance;
+  ExpressService expressService = ExpressService();
+  ZIMService zimService = ZIMService();
+  EffectsService effectsService = EffectsService();
 
   int appID = 0;
   String appSign = '';
