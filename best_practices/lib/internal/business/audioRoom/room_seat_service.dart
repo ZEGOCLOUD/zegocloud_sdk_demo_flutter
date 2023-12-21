@@ -23,12 +23,12 @@ class RoomSeatService {
     ]);
   }
 
-  Future<ZIMRoomAttributesOperatedCallResult?> takeSeat(int seatIndex) async {
+  Future<ZIMRoomAttributesOperatedCallResult?> takeSeat(int seatIndex, {bool? isForce}) async {
     final currentUserID = ZEGOSDKManager().currentUser!.userID;
     final attributes = {seatIndex.toString(): currentUserID};
     final result = await ZEGOSDKManager().zimService.setRoomAttributes(
           attributes,
-          isForce: false,
+          isForce: isForce ?? false,
           isUpdateOwner: true,
           isDeleteAfterOwnerLeft: true,
         );
@@ -137,8 +137,11 @@ class RoomSeatService {
             if (value == ZEGOSDKManager().currentUser!.userID) {
               element.currentUser.value = ZEGOSDKManager().currentUser;
             } else {
+              // Others made a request to sit, but he took the initiative to sit down on his own.
               ZIMService().roomRequestMapNoti.removeWhere((String k, RoomRequest v) => v.senderID == value);
+              // update seat user.
               element.currentUser.value = ZEGOSDKManager().getUser(value);
+              updateCurrentUserRole();
             }
           }
         }

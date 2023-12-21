@@ -69,8 +69,8 @@ class ZegoLiveAudioRoomManager {
     return result;
   }
 
-  Future<ZIMRoomAttributesOperatedCallResult?> takeSeat(int seatIndex) async {
-    final result = await roomSeatService?.takeSeat(seatIndex);
+  Future<ZIMRoomAttributesOperatedCallResult?> takeSeat(int seatIndex, {bool? isForce}) async {
+    final result = await roomSeatService?.takeSeat(seatIndex, isForce: isForce);
     if (result != null) {
       if (!result.errorKeys.contains(seatIndex.toString())) {
         for (final element in seatList) {
@@ -83,7 +83,24 @@ class ZegoLiveAudioRoomManager {
         }
       }
     }
+    if (result != null && !result.errorKeys.contains(ZEGOSDKManager().currentUser!.userID)) {
+      openMicAndStartPublishStream();
+    }
     return result;
+  }
+
+  void openMicAndStartPublishStream() {
+    ZEGOSDKManager().expressService.turnCameraOn(false);
+    ZEGOSDKManager().expressService.turnMicrophoneOn(true);
+    ZEGOSDKManager().expressService.startPublishingStream(generateStreamID());
+  }
+
+  String generateStreamID() {
+    final userID = ZEGOSDKManager().currentUser!.userID;
+    final roomID = ZEGOSDKManager().expressService.currentRoomID;
+    final streamID =
+        '${roomID}_${userID}_${ZegoLiveAudioRoomManager().roleNoti.value == ZegoLiveAudioRoomRole.host ? 'host' : 'speaker'}';
+    return streamID;
   }
 
   Future<ZIMRoomAttributesBatchOperatedResult?> switchSeat(int fromSeatIndex, int toSeatIndex) async {
