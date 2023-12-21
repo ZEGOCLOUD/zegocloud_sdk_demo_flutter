@@ -294,12 +294,15 @@ class ZegoLivePageState extends State<ZegoLivePage> {
 
   void onExpressRoomStateChanged(ZegoRoomStateEvent event) {
     debugPrint('LivePage:onExpressRoomStateChanged: $event');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        duration: const Duration(milliseconds: 1000),
-        content: Text('onExpressRoomStateChanged: reason:${event.reason.name}, errorCode:${event.errorCode}'),
-      ),
-    );
+    if (event.errorCode != 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: const Duration(milliseconds: 1000),
+          content: Text('onExpressRoomStateChanged: reason:${event.reason.name}, errorCode:${event.errorCode}'),
+        ),
+      );
+    }
+
     if ((event.reason == ZegoRoomStateChangedReason.KickOut) ||
         (event.reason == ZegoRoomStateChangedReason.ReconnectFailed) ||
         (event.reason == ZegoRoomStateChangedReason.LoginFailed)) {
@@ -309,12 +312,14 @@ class ZegoLivePageState extends State<ZegoLivePage> {
 
   void onZIMRoomStateChanged(ZIMServiceRoomStateChangedEvent event) {
     debugPrint('LivePage:onZIMRoomStateChanged: $event');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        duration: const Duration(milliseconds: 1000),
-        content: Text('onZIMRoomStateChanged: $event'),
-      ),
-    );
+    if ((event.event != ZIMRoomEvent.success) && (event.state != ZIMRoomState.connected)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: const Duration(milliseconds: 1000),
+          content: Text('onZIMRoomStateChanged: $event'),
+        ),
+      );
+    }
     if (event.state == ZIMRoomState.disconnected) {
       Navigator.pop(context);
     }
