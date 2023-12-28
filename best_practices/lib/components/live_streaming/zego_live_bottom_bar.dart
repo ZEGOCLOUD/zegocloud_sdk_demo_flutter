@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../internal/sdk/zim/Define/zim_room_request.dart';
@@ -52,7 +53,7 @@ class _ZegoLiveBottomBarState extends State<ZegoLiveBottomBar> {
           beautyEffectButton(),
           toggleMicButton(),
           toggleCameraButton(),
-          switchCameraButton(),
+          if (!kIsWeb) switchCameraButton(),
         ],
       );
     } else if (role == ZegoLiveStreamingRole.audience) {

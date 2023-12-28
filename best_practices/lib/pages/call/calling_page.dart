@@ -162,7 +162,7 @@ class _CallingPageState extends State<CallingPage> {
           toggleCameraButton(),
           endCallButton(),
           speakerButton(),
-          switchCameraButton(),
+          if (!kIsWeb) switchCameraButton(),
         ],
       );
     }
