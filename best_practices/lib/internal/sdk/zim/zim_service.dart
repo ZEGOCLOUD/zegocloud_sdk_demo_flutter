@@ -23,6 +23,7 @@ class ZIMService {
 
   Map<String, String> roomAttributesMap = {};
   Map<String, String> userAvatarUrlMap = {};
+  Map<String, String> userNameMap = {};
   MapNotifier<RoomRequest> roomRequestMapNoti = MapNotifier({});
 
   ZIMUserInfo? currentZimUserInfo;
@@ -118,6 +119,7 @@ class ZIMService {
     currentZimUserInfo = ZIMUserInfo()
       ..userID = userID
       ..userName = userName;
+    userNameMap[userID] = userName;
     await ZIM.getInstance()!.login(currentZimUserInfo!, token);
   }
 

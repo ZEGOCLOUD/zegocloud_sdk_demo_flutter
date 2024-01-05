@@ -10,9 +10,20 @@ class CallEntry extends StatefulWidget {
 class _CallEntryState extends State<CallEntry> {
   final inviteeIDController = TextEditingController();
 
+  List<StreamSubscription> subscriptions = [];
+
   @override
   void initState() {
     super.initState();
+    subscriptions.addAll([]);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    for (final element in subscriptions) {
+      element.cancel();
+    }
   }
 
   @override
@@ -48,38 +59,53 @@ class _CallEntryState extends State<CallEntry> {
   }
 
   Future<void> startCall(ZegoCallType callType) async {
+    final userIDList = inviteeIDController.text.split(',');
     if (callType == ZegoCallType.video) {
-      ZegoCallManager().sendVideoCall(inviteeIDController.text).then((value) {
-        final errorInvitees = value.info.errorInvitees.map((e) => e.userID).toList();
-        if (errorInvitees.contains(inviteeIDController.text)) {
-          ZegoCallManager.instance.clearCallData();
+      if (userIDList.length > 1) {
+        ZegoCallManager().sendGroupVideoCallInvitation(userIDList).then((value) {}).catchError((error) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('user is not online: $value')),
+            SnackBar(content: Text('send call invitation failed: $error')),
           );
-        } else {
-          pushToCallWaitingPage();
-        }
-      }).catchError((error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('send call invitation failed: $error')),
-        );
-      });
+        });
+      } else {
+        ZegoCallManager().sendVideoCallInvitation(inviteeIDController.text).then((value) {
+          final errorInvitees = value.info.errorInvitees.map((e) => e.userID).toList();
+          if (errorInvitees.contains(inviteeIDController.text)) {
+            ZegoCallManager.instance.clearCallData();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('user is not online: $value')),
+            );
+          } else {
+            ZegoCallController().pushToCallWaitingPage();
+            // pushToCallWaitingPage();
+          }
+        }).catchError((error) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('send call invitation failed: $error')),
+          );
+        });
+      }
     } else {
-      ZegoCallManager().sendVoiceCall(inviteeIDController.text).then((value) {
-        final errorInvitees = value.info.errorInvitees.map((e) => e.userID).toList();
-        if (errorInvitees.contains(inviteeIDController.text)) {
-          ZegoCallManager.instance.clearCallData();
+      if (userIDList.length > 1) {
+        ZegoCallManager().sendGroupVoiceCallInvitation(userIDList).then((value) {}).catchError((error) {});
+      } else {
+        ZegoCallManager().sendVoiceCallInvitation(inviteeIDController.text).then((value) {
+          final errorInvitees = value.info.errorInvitees.map((e) => e.userID).toList();
+          if (errorInvitees.contains(inviteeIDController.text)) {
+            ZegoCallManager.instance.clearCallData();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('user is not online: $value')),
+            );
+          } else {
+            ZegoCallController().pushToCallWaitingPage();
+            // pushToCallWaitingPage();
+          }
+        }).catchError((error) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('user is not online: $value')),
+            SnackBar(content: Text('send call invitation failed: $error')),
           );
-        } else {
-          pushToCallWaitingPage();
-        }
-      }).catchError((error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('send call invitation failed: $error')),
-        );
-      });
+        });
+      }
     }
   }
 
@@ -88,24 +114,18 @@ class _CallEntryState extends State<CallEntry> {
       context,
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (context) => CallWaitingPage(callData: ZegoCallManager().callData!),
+        builder: (context) => CallWaitingPage(callData: ZegoCallManager().currentCallData!),
       ),
     );
   }
 
   void pushToCallingPage() {
-    if (ZegoCallManager().callData != null) {
-      ZegoSDKUser otherUser;
-      if (ZegoCallManager().callData!.inviter.userID != ZEGOSDKManager().currentUser!.userID) {
-        otherUser = ZegoCallManager().callData!.inviter;
-      } else {
-        otherUser = ZegoCallManager().callData!.invitee;
-      }
+    if (ZegoCallManager().currentCallData != null) {
       Navigator.push(
         context,
         MaterialPageRoute(
           fullscreenDialog: true,
-          builder: (context) => CallingPage(callData: ZegoCallManager().callData!, otherUserInfo: otherUser),
+          builder: (context) => CallingPage(callData: ZegoCallManager().currentCallData!),
         ),
       );
     }

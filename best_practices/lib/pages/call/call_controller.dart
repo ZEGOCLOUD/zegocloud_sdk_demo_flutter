@@ -7,6 +7,7 @@ import '../../components/call/zego_call_invitation_dialog.dart';
 import '../../internal/business/call/call_data.dart';
 import '../../main.dart';
 import '../../zego_call_manager.dart';
+import '../../zego_call_manager_extension.dart';
 import '../../zego_sdk_manager.dart';
 import 'calling_page.dart';
 import 'waiting_page.dart';
@@ -19,15 +20,18 @@ class ZegoCallController {
   List<StreamSubscription> subscriptions = [];
 
   bool dialogIsShowing = false;
+  bool waitingPageIsShowing = false;
+  bool callingPageIsShowing = false;
 
   BuildContext get context => navigatorKey.currentState!.overlay!.context;
 
   void initService() {
-    final zimService = ZEGOSDKManager().zimService;
+    final callManager = ZegoCallManager();
     subscriptions.addAll([
-      ZegoCallManager().incomingCallInvitationReceivedStreamCtrl.stream.listen(onIncomingCallInvitationReceived),
-      zimService.incomingUserRequestCancelledStreamCtrl.stream.listen(onIncomingCallInvitationCanceled),
-      zimService.incomingUserRequestTimeoutStreamCtrl.stream.listen(onIncomingCallInvitationTimeout),
+      callManager.incomingCallInvitationReceivedStreamCtrl.stream.listen(onIncomingCallInvitationReceived),
+      callManager.incomingCallInvitationTimeoutStreamCtrl.stream.listen(onIncomingCallInvitationTimeout),
+      callManager.onCallStartStreamCtrl.stream.listen(onCallStart),
+      callManager.onCallEndStreamCtrl.stream.listen(onCallEnd),
     ]);
   }
 
@@ -36,11 +40,10 @@ class ZegoCallController {
     if (extendedData is Map && extendedData.containsKey('type')) {
       final callType = extendedData['type'];
       if (ZegoCallManager().isCallBusiness(callType)) {
-        final type = callType == 0 ? ZegoCallType.voice : ZegoCallType.video;
         final inRoom = ZEGOSDKManager().expressService.currentRoomID.isNotEmpty;
-        if (inRoom || (ZegoCallManager().callData?.callID != event.callID)) {
-          final rejectExtendedData = {'type': type.index, 'reason': 'busy', 'callID': event.callID};
-          ZegoCallManager().busyRejectCallRequest(event.callID, jsonEncode(rejectExtendedData), type);
+        if (inRoom || (ZegoCallManager().currentCallData?.callID != event.callID)) {
+          final rejectExtendedData = {'type': callType, 'reason': 'busy', 'callID': event.callID};
+          ZegoCallManager().rejectCallInvitationCauseBusy(event.callID, jsonEncode(rejectExtendedData), callType);
           return;
         }
         dialogIsShowing = true;
@@ -49,7 +52,7 @@ class ZegoCallController {
           GestureDetector(
             onTap: onIncomingCallDialogClicked,
             child: ZegoCallInvitationDialog(
-              invitationData: ZegoCallManager().callData!,
+              invitationData: ZegoCallManager().currentCallData!,
               onAcceptCallback: acceptCall,
               onRejectCallback: rejectCall,
             ),
@@ -60,24 +63,30 @@ class ZegoCallController {
     }
   }
 
-  void onIncomingCallInvitationCanceled(IncomingUserRequestCancelledEvent event) {
+  void onIncomingCallInvitationTimeout(UserRequestTimeOutEvent event) {
     hideIncomingCallDialog();
+    hidenWatingPage();
   }
 
-  void onIncomingCallInvitationTimeout(IncomingUserRequestTimeoutEvent event) {
+  void onCallStart(dynamic event) {
+    hidenWatingPage();
+    pushToCallingPage();
+  }
+
+  void onCallEnd(dynamic event) {
     hideIncomingCallDialog();
+    hidenWatingPage();
+    hidenCallingPage();
   }
 
   Future<void> acceptCall() async {
     hideIncomingCallDialog();
-    ZegoCallManager().acceptCallRequest(ZegoCallManager().callData!.callID).then((value) {
-      pushToCallingPage();
-    });
+    ZegoCallManager().acceptCallInvitation(ZegoCallManager().currentCallData!.callID);
   }
 
   Future<void> rejectCall() async {
     hideIncomingCallDialog();
-    ZegoCallManager().rejectCallRequest(ZegoCallManager().callData!.callID);
+    ZegoCallManager().rejectCallInvitation(ZegoCallManager().currentCallData!.callID);
   }
 
   Future<T?> showTopModalSheet<T>(BuildContext context, Widget widget, {bool barrierDismissible = true}) {
@@ -118,31 +127,43 @@ class ZegoCallController {
   }
 
   void pushToCallWaitingPage() {
+    waitingPageIsShowing = true;
     final context = navigatorKey.currentState!.overlay!.context;
     Navigator.push(
       context,
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (context) => CallWaitingPage(callData: ZegoCallManager().callData!),
+        builder: (context) => CallWaitingPage(callData: ZegoCallManager().currentCallData!),
       ),
     );
   }
 
+  void hidenWatingPage() {
+    if (waitingPageIsShowing) {
+      waitingPageIsShowing = false;
+      final context = navigatorKey.currentState!.overlay!.context;
+      Navigator.of(context).pop();
+    }
+  }
+
   void pushToCallingPage() {
-    if (ZegoCallManager().callData != null) {
-      ZegoSDKUser otherUser;
-      if (ZegoCallManager().callData!.inviter.userID != ZEGOSDKManager().currentUser!.userID) {
-        otherUser = ZegoCallManager().callData!.inviter;
-      } else {
-        otherUser = ZegoCallManager().callData!.invitee;
-      }
+    if (ZegoCallManager().currentCallData != null) {
+      callingPageIsShowing = true;
       Navigator.push(
         context,
         MaterialPageRoute(
           fullscreenDialog: true,
-          builder: (context) => CallingPage(callData: ZegoCallManager().callData!, otherUserInfo: otherUser),
+          builder: (context) => CallingPage(callData: ZegoCallManager().currentCallData!),
         ),
       );
+    }
+  }
+
+  void hidenCallingPage() {
+    if (callingPageIsShowing) {
+      callingPageIsShowing = false;
+      final context = navigatorKey.currentState!.overlay!.context;
+      Navigator.of(context).pop();
     }
   }
 }

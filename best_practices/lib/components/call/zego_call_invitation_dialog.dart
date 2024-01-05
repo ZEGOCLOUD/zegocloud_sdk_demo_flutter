@@ -85,7 +85,9 @@ class ZegoCallInvitationDialogState extends State<ZegoCallInvitationDialog> {
         child: SizedBox(
             height: 20,
             child: Text(
-              widget.invitationData.inviter.userName[0],
+              widget.invitationData.inviter.userName == null
+                  ? widget.invitationData.inviter.userName![0]
+                  : widget.invitationData.inviter.userID[0],
               textAlign: TextAlign.center,
               style: const TextStyle(
                   fontSize: 18, fontWeight: FontWeight.bold, decoration: TextDecoration.none, color: Colors.black),
