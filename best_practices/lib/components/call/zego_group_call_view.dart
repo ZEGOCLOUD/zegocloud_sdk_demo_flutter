@@ -21,6 +21,7 @@ class _GroupCallViewState extends State<GroupCallView> {
         builder: (context, bool isWaiting, _) {
           if (isWaiting) {
             return Container(
+              alignment: Alignment.center,
               color: Colors.black,
               child: const Text(
                 'is waiting...',
@@ -39,7 +40,9 @@ class _GroupCallViewState extends State<GroupCallView> {
                           return ZegoAudioVideoView(userInfo: sdkUser);
                         });
                   } else {
-                    return Container(color: Colors.black,);
+                    return Container(
+                      color: Colors.black,
+                    );
                   }
                 });
           }

@@ -7,10 +7,10 @@ abstract class ZegoCallManagerInterface {
   Future<ZIMCallInvitationSentResult> sendVoiceCallInvitation(String targetUserID);
   Future<ZIMCallInvitationSentResult> sendGroupVideoCallInvitation(targetUserIDs);
   Future<ZIMCallInvitationSentResult> sendGroupVoiceCallInvitation(List<String> targetUserIDs);
-  Future<ZIMCallQuitSentResult> quitCall();
+  Future<void> quitCall();
   Future<ZIMCallEndSentResult> endCall(String requestID);
-  Future<ZIMCallRejectionSentResult> rejectCallInvitation(String requestID);
-  Future<ZIMCallRejectionSentResult> rejectCallInvitationCauseBusy(
+  Future<void> rejectCallInvitation(String requestID);
+  Future<void> rejectCallInvitationCauseBusy(
       String requestID, String extendedData, ZegoCallType type);
   Future<ZIMCallAcceptanceSentResult> acceptCallInvitation(String requestID);
 

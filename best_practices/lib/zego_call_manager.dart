@@ -25,11 +25,13 @@ class ZegoCallManager implements ZegoCallManagerInterface {
   ZegoSDKUser? get localUser => ZEGOSDKManager().currentUser;
 
   final incomingCallInvitationReceivedStreamCtrl = StreamController<IncomingCallInvitationReceivedEvent>.broadcast();
-  final incomingCallInvitationTimeoutStreamCtrl = StreamController<UserRequestTimeOutEvent>.broadcast();
+  final incomingCallInvitationTimeoutStreamCtrl = StreamController<IncomingUserRequestTimeoutEvent>.broadcast();
+  final outgoingCallInvitationTimeoutSreamCtrl = StreamController<OutgoingCallTimeoutEvent>.broadcast();
   final outgoingCallInvitationRejectedStreamCtrl = StreamController<OutgoingCallInvitationRejectedEvent>.broadcast();
   final onOutgoingCallInvitationAccepted = StreamController<OnOutgoingCallAcceptedEvent>.broadcast();
-  final onCallUserQuitStreamCtrl = StreamController<OnCallUserQuitEvent>.broadcast();
+  final onCallUserQuitStreamCtrl = StreamController<CallUserQuitEvent>.broadcast();
   final onCallUserInfoUpdateStreamCtrl = StreamController<OnCallUserInfoUpdateEvent>.broadcast();
+  final onCallUserUpdateStreamCtrl = StreamController<OnCallUserUpdateEvent>.broadcast();
 
   final onCallStartStreamCtrl = StreamController.broadcast();
   final onCallEndStreamCtrl = StreamController.broadcast();
@@ -42,7 +44,7 @@ class ZegoCallManager implements ZegoCallManagerInterface {
       zimService.incomingUserRequestReceivedStreamCtrl.stream.listen(onInComingUserRequestReceived),
       zimService.userRequestStateChangeStreamCtrl.stream.listen(onUserRequestStateChanged),
       zimService.userRequestEndStreamCtrl.stream.listen(onUserRequestEnded),
-      zimService.userRequestTimeOutStreamCtrl.stream.listen(onInComingUserRequestTimeout),
+      zimService.incomingUserRequestTimeoutStreamCtrl.stream.listen(onInComingUserRequestTimeout)
     ]);
   }
 
@@ -95,7 +97,7 @@ class ZegoCallManager implements ZegoCallManagerInterface {
     final config = ZIMCallInviteConfig()
       ..mode = ZIMCallInvitationMode.advanced
       ..extendedData = extendedData
-      ..timeout = 60;
+      ..timeout = 10;
     final result = await ZEGOSDKManager().zimService.sendUserRequest(userList, config: config);
     final errorUser = result.info.errorUserList.map((e) => e.userID).toList();
     final sucessUsers = userList.where((element) => !errorUser.contains(element));
@@ -147,36 +149,28 @@ class ZegoCallManager implements ZegoCallManagerInterface {
   }
 
   @override
-  Future<ZIMCallQuitSentResult> quitCall() async {
+  Future<void> quitCall() async {
     if (currentCallData != null) {
       final extendedData =
           getCallExtendata(currentCallData?.callType == VIDEO_Call ? ZegoCallType.video : ZegoCallType.voice);
-      final result = await quitUserRequest(currentCallData!.callID, extendedData.toJsonString());
+      await quitUserRequest(currentCallData!.callID, extendedData.toJsonString());
       stopCall();
-      return result;
-    } else {
-      throw Exception('current is not calling');
     }
   }
 
   @override
-  Future<ZIMCallRejectionSentResult> rejectCallInvitation(String requestID) async {
+  Future<void> rejectCallInvitation(String requestID) async {
     if (currentCallData != null && requestID == currentCallData!.callID) {
       final extendedData =
           getCallExtendata(currentCallData?.callType == VIDEO_Call ? ZegoCallType.video : ZegoCallType.voice);
-      final result = await refuseUserRequest(requestID, extendedData.toJsonString());
+      await refuseUserRequest(requestID, extendedData.toJsonString());
       clearCallData();
-      return result;
-    } else {
-      throw Exception('rejectCallInvitation fail');
     }
   }
 
   @override
-  Future<ZIMCallRejectionSentResult> rejectCallInvitationCauseBusy(
-      String requestID, String extendedData, ZegoCallType type) async {
-    final result = await refuseUserRequest(requestID, extendedData);
-    return result;
+  Future<void> rejectCallInvitationCauseBusy(String requestID, String extendedData, ZegoCallType type) async {
+    await refuseUserRequest(requestID, extendedData);
   }
 
   @override
@@ -260,14 +254,25 @@ class OutgoingCallInvitationRejectedEvent {
   }
 }
 
-class OnCallUserQuitEvent {
+class CallUserQuitEvent {
   final String userID;
   final String extendedData;
-  OnCallUserQuitEvent({required this.userID, required this.extendedData});
+  CallUserQuitEvent({required this.userID, required this.extendedData});
 
   @override
   String toString() {
-    return 'OnCallUserQuitEvent{userID: $userID, extendedData: $extendedData}';
+    return 'CallUserQuitEvent{userID: $userID, extendedData: $extendedData}';
+  }
+}
+
+class OutgoingCallTimeoutEvent {
+  final String userID;
+  final String extendedData;
+  OutgoingCallTimeoutEvent({required this.userID, required this.extendedData});
+
+  @override
+  String toString() {
+    return 'OutgoingCallTimeoutEvent{userID: $userID, extendedData: $extendedData}';
   }
 }
 
@@ -289,6 +294,17 @@ class OnCallUserInfoUpdateEvent {
   @override
   String toString() {
     return 'OnCallUserInfoUpdateEvent{userList: $userList}';
+  }
+}
+
+class OnCallUserUpdateEvent {
+  final String userID;
+  final String extendedData;
+  OnCallUserUpdateEvent({required this.userID, required this.extendedData});
+
+  @override
+  String toString() {
+    return 'OnCallUserUpdateEvent{userID: $userID, extendedData: $extendedData}';
   }
 }
 

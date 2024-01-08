@@ -52,21 +52,12 @@ extension ZIMServiceInvitation on ZIMService {
     outgoingUserRequestRejectedStreamCtrl.add(OutgoingUserRequestRejectedEvent(requestID: invitationID, info: info));
   }
 
-  void onUserRequestAnsweredTimeout(ZIM zim, List<String> invitees, String invitationID) {
-    outgoingUserRequestTimeoutStreamCtrl
-        .add(OutgoingUserRequestTimeoutEvent(requestID: invitationID, invitees: invitees));
-  }
-
   void onCallUserStateChanged(ZIM zim, ZIMCallUserStateChangeInfo callUserStateChangeInfo, String callID) {
     userRequestStateChangeStreamCtrl.add(UserRequestStateChangeEvent(requestID: callID, info: callUserStateChangeInfo));
   }
 
   void onCallInvitationEnded(ZIM zim, ZIMCallInvitationEndedInfo callInvitationEndedInfo, String callID) {
     userRequestEndStreamCtrl.add(UserRequestEndEvent(requestID: callID, info: callInvitationEndedInfo));
-  }
-
-  void onCallInviteesAnsweredTimeout(ZIM zim, List<String> invitees, String callID) {
-    userRequestTimeOutStreamCtrl.add(UserRequestTimeOutEvent(requestID: callID, invitees: invitees));
   }
 
   void onUserRequestTimeout(ZIM zim, ZIMCallInvitationTimeoutInfo info, String invitationID) {

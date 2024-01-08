@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
+
 import 'internal/business/call/call_extended_data.dart';
 import 'internal/business/call/call_user_info.dart';
 import 'pages/call/call.dart';
@@ -54,7 +56,8 @@ extension ZegoCallManagerExtension on ZegoCallManager {
 
       for (final userInfo in event.info.callUserList) {
         final callUser = CallUserInfo(userID: userInfo.userID)
-          ..sdkUserNoti.value = ZEGOSDKManager().getUser(userInfo.userID)
+          ..sdkUserNoti.value =
+              userInfo.userID == localUser?.userID ? localUser : ZEGOSDKManager().getUser(userInfo.userID)
           ..updateCallUserState(userInfo.state)
           ..extendedData = userInfo.extendedData;
         callData.callUserList.add(callUser);
@@ -68,6 +71,7 @@ extension ZegoCallManagerExtension on ZegoCallManager {
 
   void onUserRequestStateChanged(UserRequestStateChangeEvent event) {
     if (currentCallData?.callID == event.requestID) {
+      debugPrint('onUserRequestStateChanged:$event');
       for (final userInfo in event.info.callUserList) {
         var findIfAlreadyAdded = false;
         var hasUserStateUpdate = false;
@@ -89,18 +93,26 @@ extension ZegoCallManagerExtension on ZegoCallManager {
             ..extendedData = userInfo.extendedData;
           currentCallData?.callUserList.add(callUser);
         }
+
+        if (hasUserStateUpdate) {
+          onCallUserUpdateStreamCtrl
+              .add(OnCallUserUpdateEvent(userID: userInfo.userID, extendedData: userInfo.extendedData));
+        }
       }
       final receivedUsers = <ZIMCallUserInfo>[];
       for (final userInfo in event.info.callUserList) {
         switch (userInfo.state) {
           case ZIMCallUserState.received:
+            debugPrint('onUserRequestStateChanged received:${userInfo.userID}');
             receivedUsers.add(userInfo);
             onReceiveCallUserReceived(receivedUsers);
             break;
           case ZIMCallUserState.accepted:
+            debugPrint('onUserRequestStateChanged accept:${userInfo.userID}');
             onReceiveCallUserAccepted(userInfo);
             break;
           case ZIMCallUserState.rejected:
+            debugPrint('onUserRequestStateChanged reject:${userInfo.userID}');
             outgoingCallInvitationRejectedStreamCtrl
                 .add(OutgoingCallInvitationRejectedEvent(userID: userInfo.userID, extendedData: userInfo.extendedData));
             if (localUser != null) {
@@ -111,6 +123,8 @@ extension ZegoCallManagerExtension on ZegoCallManager {
             onReceiveCallUserQuit(event.requestID, userInfo);
             break;
           case ZIMCallUserState.timeout:
+            outgoingCallInvitationTimeoutSreamCtrl
+                .add(OutgoingCallTimeoutEvent(userID: userInfo.userID, extendedData: userInfo.extendedData));
             if (localUser != null) {
               checkIfPKEnd(event.requestID, localUser!);
             }
@@ -127,7 +141,7 @@ extension ZegoCallManagerExtension on ZegoCallManager {
     }
   }
 
-  void onInComingUserRequestTimeout(UserRequestTimeOutEvent event) {
+  void onInComingUserRequestTimeout(IncomingUserRequestTimeoutEvent event) {
     if (currentCallData?.callID == event.requestID) {
       incomingCallInvitationTimeoutStreamCtrl.add(event);
       stopCall();
@@ -191,8 +205,7 @@ extension ZegoCallManagerExtension on ZegoCallManager {
           }
         }
         if (moreThanOneAcceptedExceptMe) {
-          onCallUserQuitStreamCtrl
-              .add(OnCallUserQuitEvent(userID: userInfo.userID, extendedData: userInfo.extendedData));
+          onCallUserQuitStreamCtrl.add(CallUserQuitEvent(userID: userInfo.userID, extendedData: userInfo.extendedData));
         }
         if (!hasWaitingUser) {
           quitCall();

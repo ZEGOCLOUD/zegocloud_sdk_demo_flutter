@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../components/call/zego_group_call_view.dart';
@@ -15,9 +17,26 @@ class CallContainer extends StatefulWidget {
 class CallContainerState extends State<CallContainer> {
   ListNotifier<CallUserInfo> enableShowUserNoti = ListNotifier([]);
 
+  List<StreamSubscription> subscriptions = [];
+
+  @override
+  void dispose() {
+    super.dispose();
+    for (final element in subscriptions) {
+      element.cancel();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    final callManager = ZegoCallManager();
+    subscriptions.addAll([
+      callManager.onCallUserQuitStreamCtrl.stream.listen(onCallUserQuit),
+      callManager.outgoingCallInvitationTimeoutSreamCtrl.stream.listen(onOutgoingCallTimeOut),
+      callManager.onCallUserUpdateStreamCtrl.stream.listen(onCallUserUpdate)
+    ]);
+
     if (ZegoCallManager().currentCallData != null) {
       for (final callUser in ZegoCallManager().currentCallData!.callUserList) {
         if (callUser.isWaiting.value || callUser.hasAccepted.value) {
@@ -82,7 +101,7 @@ class CallContainerState extends State<CallContainer> {
 
   List<Positioned> getGroupCallChildViews(List<CallUserInfo> userList, BoxConstraints constraints) {
     final containerViewWidth = constraints.maxWidth;
-    final containerViewHeight = constraints.maxHeight;
+    final containerViewHeight = constraints.maxWidth * (16 / 18);
     final views = <Positioned>[];
     if (userList.length == 3) {
       for (var i = 0; i < 3; i++) {
@@ -109,7 +128,7 @@ class CallContainerState extends State<CallContainer> {
         top = cellHeight * (i < column ? 0 : 1);
         final callUser = userList[i];
         final positionedView = Positioned(
-            top: left, left: top, width: cellWidth, height: cellHeight, child: GroupCallView(callUserInfo: callUser));
+            top: top, left: left, width: cellWidth, height: cellHeight, child: GroupCallView(callUserInfo: callUser));
         views.add(positionedView);
       }
     } else if (userList.length == 5) {
@@ -124,7 +143,7 @@ class CallContainerState extends State<CallContainer> {
         double top = i > 1 ? height : 0;
         final callUser = userList[i];
         final positionedView = Positioned(
-            top: left, left: top, width: width, height: height, child: GroupCallView(callUserInfo: callUser));
+            top: top, left: left, width: width, height: height, child: GroupCallView(callUserInfo: callUser));
         views.add(positionedView);
       }
     } else if (userList.length > 5) {
@@ -139,7 +158,7 @@ class CallContainerState extends State<CallContainer> {
         top = cellHeight * (i / column);
         final callUser = userList[i];
         final positionedView = Positioned(
-            top: left, left: top, width: cellWidth, height: cellHeight, child: GroupCallView(callUserInfo: callUser));
+            top: top, left: left, width: cellWidth, height: cellHeight, child: GroupCallView(callUserInfo: callUser));
         views.add(positionedView);
       }
     }
@@ -187,5 +206,35 @@ class CallContainerState extends State<CallContainer> {
             }
           });
         });
+  }
+
+  void onCallUserQuit(CallUserQuitEvent event) {
+    enableShowUserNoti.removeWhere((element) => element.userID == event.userID);
+  }
+
+  void onOutgoingCallTimeOut(OutgoingCallTimeoutEvent event) {
+    enableShowUserNoti.removeWhere((element) => element.userID == event.userID);
+  }
+
+  void onCallUserUpdate(OnCallUserUpdateEvent event) {
+    debugPrint('onCallUserUpdate:$event');
+    var isFindUser = false;
+    for (final user in enableShowUserNoti.value) {
+      if (user.userID == event.userID) {
+        isFindUser = true;
+        if (!user.isWaiting.value && !user.hasAccepted.value) {
+          enableShowUserNoti.remove(user);
+          break;
+        }
+      }
+    }
+    if (!isFindUser) {
+      for (final user in ZegoCallManager().currentCallData!.callUserList) {
+        if (user.userID == event.userID) {
+          enableShowUserNoti.add(user);
+          break;
+        }
+      }
+    }
   }
 }

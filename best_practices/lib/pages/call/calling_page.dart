@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -113,6 +114,7 @@ class _CallingPageState extends State<CallingPage> {
           toggleMicButton(),
           endCallButton(),
           speakerButton(),
+          inviteUserButton()
         ],
       );
     } else {
@@ -124,6 +126,7 @@ class _CallingPageState extends State<CallingPage> {
           endCallButton(),
           speakerButton(),
           switchCameraButton(),
+          inviteUserButton()
         ],
       );
     }
@@ -201,6 +204,55 @@ class _CallingPageState extends State<CallingPage> {
         ),
       );
     });
+  }
+
+  Widget inviteUserButton() {
+    return LayoutBuilder(builder: (context, constrains) {
+      return SizedBox(
+        width: 50,
+        height: 50,
+        child: TextButton(onPressed: sendCallInvite, child: const Text('inviteUser')),
+      );
+    });
+  }
+
+  void sendCallInvite() {
+    final editingController1 = TextEditingController();
+    final inviteUsers = <String>[];
+    showCupertinoDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return CupertinoAlertDialog(
+          title: const Text('Input a user id'),
+          content: CupertinoTextField(controller: editingController1),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: Navigator.of(context).pop,
+              child: const Text('Cancel'),
+            ),
+            CupertinoDialogAction(
+              onPressed: () {
+                addInviteUser(inviteUsers, [
+                  editingController1.text,
+                ]);
+                ZegoCallManager().inviteUserToJoinCall(inviteUsers);
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void addInviteUser(List<String> userList, List<String> userIDs) {
+    for (final userID in userIDs) {
+      if (userID.isNotEmpty) {
+        userList.add(userID);
+      }
+    }
   }
 
   void onStreamListUpdate(ZegoRoomStreamListUpdateEvent event) {

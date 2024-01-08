@@ -45,7 +45,6 @@ class ZIMService {
   final incomingUserRequestTimeoutStreamCtrl = StreamController<IncomingUserRequestTimeoutEvent>.broadcast();
   final outgoingUserRequestTimeoutStreamCtrl = StreamController<OutgoingUserRequestTimeoutEvent>.broadcast();
   final userRequestEndStreamCtrl = StreamController<UserRequestEndEvent>.broadcast();
-  final userRequestTimeOutStreamCtrl = StreamController<UserRequestTimeOutEvent>.broadcast();
   final userRequestStateChangeStreamCtrl = StreamController<UserRequestStateChangeEvent>.broadcast();
 
   final roomAttributeUpdateStreamCtrl = StreamController<ZIMServiceRoomAttributeUpdateEvent>.broadcast();
@@ -72,27 +71,24 @@ class ZIMService {
     ZIMEventHandler.onCallInvitationAccepted = onUserRequestAccepted;
     ZIMEventHandler.onCallInvitationRejected = onUserRequestRejected;
     ZIMEventHandler.onCallInvitationTimeout = onUserRequestTimeout;
-    ZIMEventHandler.onCallInviteesAnsweredTimeout = onUserRequestAnsweredTimeout;
-    ZIMEventHandler.onCallUserStateChanged = onCallUserStateChanged;
     ZIMEventHandler.onCallInvitationEnded = onCallInvitationEnded;
-    ZIMEventHandler.onCallInvitationTimeout = onUserRequestTimeout;
+    ZIMEventHandler.onCallUserStateChanged = onCallUserStateChanged;
     ZIMEventHandler.onRoomAttributesUpdated = onRoomAttributesUpdated;
     ZIMEventHandler.onRoomAttributesBatchUpdated = onRoomAttributesBatchUpdated;
   }
 
   void uninitEventHandle() {
-    ZIMEventHandler.onRoomStateChanged = null;
     ZIMEventHandler.onConnectionStateChanged = null;
+    ZIMEventHandler.onRoomStateChanged = null;
+    ZIMEventHandler.onRoomMemberLeft = null;
     ZIMEventHandler.onReceiveRoomMessage = null;
     ZIMEventHandler.onCallInvitationReceived = null;
     ZIMEventHandler.onCallInvitationCancelled = null;
     ZIMEventHandler.onCallInvitationAccepted = null;
     ZIMEventHandler.onCallInvitationRejected = null;
     ZIMEventHandler.onCallInvitationTimeout = null;
-    ZIMEventHandler.onCallInviteesAnsweredTimeout = null;
     ZIMEventHandler.onCallInvitationEnded = null;
     ZIMEventHandler.onCallUserStateChanged = null;
-    ZIMEventHandler.onCallInvitationTimeout = null;
     ZIMEventHandler.onRoomAttributesUpdated = null;
     ZIMEventHandler.onRoomAttributesBatchUpdated = null;
   }

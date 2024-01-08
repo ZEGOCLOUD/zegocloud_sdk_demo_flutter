@@ -63,7 +63,7 @@ class ZegoCallController {
     }
   }
 
-  void onIncomingCallInvitationTimeout(UserRequestTimeOutEvent event) {
+  void onIncomingCallInvitationTimeout(IncomingUserRequestTimeoutEvent event) {
     hideIncomingCallDialog();
     hidenWatingPage();
   }
