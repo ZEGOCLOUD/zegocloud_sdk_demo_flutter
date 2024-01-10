@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert' as convert;
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -117,6 +118,15 @@ class ExpressService {
     currentUser!.isMicOnNotifier.value = false;
     currentUser!.videoViewNotifier.value = null;
     currentUser!.viewID = -1;
+  }
+
+  Future<void> enableCustomVideoProcessing(bool enable) async {
+    var bufferType = ZegoVideoBufferType.CVPixelBuffer;
+    if (Platform.isAndroid) {
+      bufferType = ZegoVideoBufferType.GLTexture2D;
+    }
+    final config = ZegoCustomVideoProcessConfig(bufferType);
+    await ZegoExpressEngine.instance.enableCustomVideoProcessing(enable, config);
   }
 
   void useFrontCamera(bool isFrontFacing) {

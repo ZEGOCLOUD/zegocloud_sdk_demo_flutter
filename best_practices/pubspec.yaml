@@ -11,10 +11,12 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.2
+  zego_effects_plugin: ^1.0.13
+  shared_preferences: ^2.2.2
   zego_express_engine: ^3.11.0
   permission_handler: ^11.1.0
   encrypt: ^5.0.3
-  zego_zim: ^2.12.1
+  zego_zim: ^2.13.0
   cached_network_image: ^3.3.0
   faker: ^2.1.0
 
@@ -28,4 +30,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icons/
+    - assets/beautyIcons/
     - assets/images/

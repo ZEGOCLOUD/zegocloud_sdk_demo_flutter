@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
+import 'package:flutter/cupertino.dart';
 import 'package:zego_express_engine/zego_express_engine.dart';
 import 'package:zego_zim/zego_zim.dart';
-
 
 export 'package:zego_express_engine/zego_express_engine.dart';
 export 'package:zego_zim/zego_zim.dart';
@@ -167,7 +167,7 @@ class IncomingUserRequestReceivedEvent {
 
   @override
   String toString() {
-    return 'IncomingUserRequestReceivedEvent{requestID: $requestID, info: $info}';
+    return 'IncomingUserRequestReceivedEvent{invitationID: $requestID, info: $info}';
   }
 }
 
@@ -178,7 +178,7 @@ class IncomingUserRequestCancelledEvent {
 
   @override
   String toString() {
-    return 'IncomingUserRequestCancelledEvent{requestID: $requestID, info: $info}';
+    return 'IncomingUserRequestCancelledEvent{invitationID: $requestID, info: $info}';
   }
 }
 
@@ -189,7 +189,7 @@ class OutgoingUserRequestAcceptedEvent {
 
   @override
   String toString() {
-    return 'OutgoingUserRequestAcceptedEvent{requestID: $requestID, info: $info}';
+    return 'OutgoingUserRequestAcceptedEvent{invitationID: $requestID, info: $info}';
   }
 }
 
@@ -200,7 +200,7 @@ class OutgoingUserRequestRejectedEvent {
 
   @override
   String toString() {
-    return 'OutgoingUserRequestRejectedEvent{requestID: $requestID, info: $info}';
+    return 'OutgoingUserRequestRejectedEvent{invitationID: $requestID, info: $info}';
   }
 }
 
@@ -211,7 +211,7 @@ class IncomingUserRequestTimeoutEvent {
 
   @override
   String toString() {
-    return 'IncomingUserRequestTimeoutEvent{requestID: $requestID, info.mode: ${info.mode.name}}';
+    return 'IncomingUserRequestTimeoutEvent{invitationID: $requestID, info.mode: ${info.mode.name}}';
   }
 }
 
@@ -395,4 +395,20 @@ class OnRoomCommandReceivedEvent {
   String toString() {
     return 'OnRoomCommandReceivedEvent{senderID: $senderID command:$command}';
   }
+}
+
+class ButtonIcon {
+  Widget? icon;
+  Color? backgroundColor;
+  Color? borderColor;
+  double? borderWidth;
+  double? borderRadius;
+
+  ButtonIcon({
+    this.icon,
+    this.backgroundColor,
+    this.borderColor,
+    this.borderWidth,
+    this.borderRadius,
+  });
 }

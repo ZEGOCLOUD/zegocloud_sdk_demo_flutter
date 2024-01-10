@@ -9,7 +9,6 @@ import '../../components/call/zego_speaker_button.dart';
 import '../../components/call/zego_switch_camera_button.dart';
 import '../../components/call/zego_toggle_camera_button.dart';
 import '../../components/call/zego_toggle_microphone_button.dart';
-import '../../components/common/zego_audio_video_view.dart';
 import '../../internal/business/call/call_data.dart';
 import '../../utils/zegocloud_token.dart';
 import '../../zego_call_manager.dart';
@@ -125,8 +124,8 @@ class _CallingPageState extends State<CallingPage> {
           toggleCameraButton(),
           endCallButton(),
           speakerButton(),
-          switchCameraButton(),
-          inviteUserButton()
+          if (!kIsWeb) switchCameraButton(),
+          inviteUserButton(),
         ],
       );
     }
