@@ -7,6 +7,7 @@ import '../../components/call/zego_accept_button.dart';
 import '../../components/call/zego_cancel_button.dart';
 import '../../components/call/zego_reject_button.dart';
 import '../../internal/business/call/call_data.dart';
+import '../../internal/business/call/call_user_info.dart';
 import '../../zego_call_manager.dart';
 import '../../zego_sdk_manager.dart';
 import 'call_controller.dart';
@@ -48,13 +49,66 @@ class _CallWaitingPageState extends State<CallWaitingPage> {
           body: Stack(
             children: (widget.callData.callType == VIDEO_Call)
                 ? [
+                    backgroundImage(),
                     videoView(),
+                    headView(),
                     buttonView(),
                   ]
-                : [buttonView()],
+                : [backgroundImage(), headView(), buttonView()],
           ),
         ),
       ),
+    );
+  }
+
+  Widget headView() {
+    CallUserInfo? user;
+    if (widget.callData.inviter.userID == ZEGOSDKManager().currentUser?.userID) {
+      user = widget.callData.inviter;
+    } else {
+      user = widget.callData.callUserList
+          .where((element) => element.userID != widget.callData.inviter.userID)
+          .toList()
+          .first;
+    }
+    if (user.headUrl != null) {
+      return Center(
+        child: SizedBox(
+          width: 60,
+          height: 60,
+          child: Image.network(user.headUrl!),
+        ),
+      );
+    } else {
+      return Center(
+        child: Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            color: Colors.grey,
+            borderRadius: const BorderRadius.all(Radius.circular(30.0)),
+            border: Border.all(width: 0),
+          ),
+          child: Center(
+            child: SizedBox(
+                height: 20,
+                child: Text(
+                  (user.userName != null) ? user.userName![0] : user.userID[0],
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                )),
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget backgroundImage() {
+    return Image.asset(
+      'assets/icons/bg.png',
+      width: double.infinity,
+      height: double.infinity,
+      fit: BoxFit.fill,
     );
   }
 

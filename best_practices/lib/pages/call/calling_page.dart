@@ -109,12 +109,7 @@ class _CallingPageState extends State<CallingPage> {
     if (widget.callData.callType == VOICE_Call) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          toggleMicButton(),
-          endCallButton(),
-          speakerButton(),
-          inviteUserButton()
-        ],
+        children: [toggleMicButton(), endCallButton(), speakerButton(), inviteUserButton()],
       );
     } else {
       return Row(
@@ -129,6 +124,15 @@ class _CallingPageState extends State<CallingPage> {
         ],
       );
     }
+  }
+
+  Widget backgroundImage() {
+    return Image.asset(
+      'assets/icons/bg.png',
+      width: double.infinity,
+      height: double.infinity,
+      fit: BoxFit.fill,
+    );
   }
 
   Widget endCallButton() {

@@ -147,15 +147,15 @@ class CallContainerState extends State<CallContainer> {
         views.add(positionedView);
       }
     } else if (userList.length > 5) {
-      int row = (userList.length % 3 == 0 ? (userList.length / 3) : (userList.length / 3) + 1) as int;
+      int row = (userList.length % 3 == 0 ? (userList.length / 3) : (userList.length / 3) + 1).toInt();
       int column = 3;
       double cellWidth = containerViewWidth / column;
       double cellHeight = containerViewHeight / row;
       double left = 0;
       double top = 0;
       for (var i = 0; i < userList.length; i++) {
-        left = cellWidth * (i % column);
-        top = cellHeight * (i / column);
+        left = cellWidth * (i % column).toInt();
+        top = cellHeight * (i / column).toInt();
         final callUser = userList[i];
         final positionedView = Positioned(
             top: top, left: left, width: cellWidth, height: cellHeight, child: GroupCallView(callUserInfo: callUser));

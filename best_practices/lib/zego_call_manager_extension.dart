@@ -12,7 +12,10 @@ extension ZegoCallManagerExtension on ZegoCallManager {
         if (currentCallData != null) {
           for (final callUser in currentCallData!.callUserList) {
             if (callUser.userID == user.userID) {
-              callUser.sdkUserNoti.value = ZEGOSDKManager().getUser(user.userID);
+              final sdkUser = ZEGOSDKManager().getUser(user.userID)
+                ?..avatarUrlNotifier.value = callUser.headUrl
+                ..userName = ZEGOSDKManager().zimService.getUserName(callUser.userID) ?? '';
+              callUser.sdkUserNoti.value = sdkUser;
             }
           }
         }

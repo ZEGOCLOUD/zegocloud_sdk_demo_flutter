@@ -34,71 +34,99 @@ class ZegoCallInvitationDialogState extends State<ZegoCallInvitationDialog> {
           color: const Color(0xff333333).withOpacity(0.8),
           borderRadius: BorderRadius.circular(16.0),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 2,
-              child: Container(
-                alignment: Alignment.centerLeft,
-                child: Column(
-                  children: [
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    userNameText(),
-                    const SizedBox(height: 5),
-                    callTypeText(),
-                  ],
-                ),
-              ),
-            ),
-            const Expanded(
-              flex: 2,
-              child: SizedBox(
-                width: 100,
-              ),
-            ),
-            Expanded(
-              flex: 2,
-              child: SizedBox(
-                child: Row(
-                  children: [rejectButton(), const SizedBox(width: 20), acceptButton()],
-                ),
-              ),
-            ),
-          ],
-        ),
+        child: contentView(),
       );
     });
   }
 
-  Widget userNameText() {
+  Widget contentView() {
+    return Stack(
+      children: [
+        Positioned(
+          left: 5,
+          top: 20,
+          width: 60,
+          height: 60,
+          child: headContainer(),
+        ),
+        Positioned(
+          left: 70,
+          top: 20,
+          width: 100,
+          height: 20,
+          child: userNameText(),
+        ),
+        Positioned(
+          left: 70,
+          bottom: 20,
+          width: 100,
+          height: 20,
+          child: callTypeText(),
+        ),
+        Positioned(
+          right: 55,
+          top: 30,
+          width: 40,
+          height: 40,
+          child: rejectButton(),
+        ),
+        Positioned(
+          right: 5,
+          top: 30,
+          width: 40,
+          height: 40,
+          child: acceptButton(),
+        ),
+      ],
+    );
+  }
+
+  Widget headContainer() {
     return Container(
-      width: 40,
-      height: 40,
+      width: 60,
+      height: 60,
       decoration: const BoxDecoration(
         color: Colors.grey,
-        borderRadius: BorderRadius.all(Radius.circular(20)),
+        borderRadius: BorderRadius.all(Radius.circular(30)),
       ),
-      child: Center(
-        child: SizedBox(
-            height: 20,
-            child: Text(
-              widget.invitationData.inviter.userName == null
-                  ? widget.invitationData.inviter.userName![0]
-                  : widget.invitationData.inviter.userID[0],
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold, decoration: TextDecoration.none, color: Colors.black),
-            )),
-      ),
+      child: headView(),
     );
+  }
+
+  Widget headView() {
+    if (widget.invitationData.inviter.headUrl == null) {
+      return Center(
+        child: SizedBox(
+            child: Text(
+          widget.invitationData.inviter.userName != null
+              ? widget.invitationData.inviter.userName![0]
+              : widget.invitationData.inviter.userID[0],
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+              fontSize: 18, fontWeight: FontWeight.bold, decoration: TextDecoration.none, color: Colors.black),
+        )),
+      );
+    } else {
+      return Image.network(widget.invitationData.inviter.headUrl!);
+    }
+  }
+
+  Widget userNameText() {
+    return SizedBox(
+        width: 100,
+        height: 20,
+        child: Text(
+          widget.invitationData.inviter.userName != null
+              ? widget.invitationData.inviter.userName!
+              : widget.invitationData.inviter.userID,
+          style: const TextStyle(
+              fontSize: 16, fontWeight: FontWeight.normal, decoration: TextDecoration.none, color: Colors.grey),
+        ));
   }
 
   Widget callTypeText() {
     return Text(
-      widget.invitationData.callType == ZegoCallType.video ? 'video call' : 'voice call',
+      widget.invitationData.callType == VIDEO_Call ? 'video call' : 'voice call',
       textAlign: TextAlign.left,
       style: const TextStyle(
         fontSize: 16,
@@ -114,7 +142,7 @@ class ZegoCallInvitationDialogState extends State<ZegoCallInvitationDialog> {
       width: 40,
       height: 40,
       child: ZegoAcceptButton(
-        icon: (widget.invitationData.callType == ZegoCallType.video)
+        icon: (widget.invitationData.callType == VIDEO_Call)
             ? ButtonIcon(icon: const Image(image: AssetImage('assets/icons/invite_video.png')))
             : ButtonIcon(icon: const Image(image: AssetImage('assets/icons/invite_voice.png'))),
         iconSize: const Size(40, 40),
