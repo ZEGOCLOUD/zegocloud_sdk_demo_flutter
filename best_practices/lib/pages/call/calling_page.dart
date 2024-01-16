@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -8,18 +9,17 @@ import '../../components/call/zego_speaker_button.dart';
 import '../../components/call/zego_switch_camera_button.dart';
 import '../../components/call/zego_toggle_camera_button.dart';
 import '../../components/call/zego_toggle_microphone_button.dart';
-import '../../components/common/zego_audio_video_view.dart';
 import '../../internal/business/call/call_data.dart';
 import '../../utils/zegocloud_token.dart';
 import '../../zego_call_manager.dart';
 import '../../zego_sdk_key_center.dart';
 import '../../zego_sdk_manager.dart';
+import 'call_container.dart';
 
 class CallingPage extends StatefulWidget {
-  const CallingPage({required this.callData, required this.otherUserInfo, super.key});
+  const CallingPage({required this.callData, super.key});
 
   final ZegoCallData callData;
-  final ZegoSDKUser otherUserInfo;
 
   @override
   State<CallingPage> createState() => _CallingPageState();
@@ -34,14 +34,12 @@ class _CallingPageState extends State<CallingPage> {
   bool isFacingCamera = true;
   bool isSpeaker = true;
 
-  ValueNotifier<ZegoSDKUser?> otherUserInfoNoti = ValueNotifier(null);
-
   @override
   void initState() {
     super.initState();
 
     subscriptions
-        .addAll([ZEGOSDKManager().expressService.roomUserListUpdateStreamCtrl.stream.listen(onRoomUserListUpdate)]);
+        .addAll([ZEGOSDKManager().expressService.streamListUpdateStreamCtrl.stream.listen(onStreamListUpdate)]);
 
     String? token;
     if (kIsWeb) {
@@ -52,17 +50,14 @@ class _CallingPageState extends State<CallingPage> {
     }
     final roomID = widget.callData.callID;
     ZEGOSDKManager()
-        .loginRoom(
-            roomID,
-            widget.callData.callType == ZegoCallType.voice
-                ? ZegoScenario.StandardVoiceCall
-                : ZegoScenario.StandardVideoCall,
+        .loginRoom(roomID,
+            widget.callData.callType == VOICE_Call ? ZegoScenario.StandardVoiceCall : ZegoScenario.StandardVideoCall,
             token: token)
         .then((value) {
       if (value.errorCode == 0) {
         ZEGOSDKManager().expressService.turnMicrophoneOn(micIsOn);
         ZEGOSDKManager().expressService.setAudioRouteToSpeaker(isSpeaker);
-        if (widget.callData.callType == ZegoCallType.voice) {
+        if (widget.callData.callType == VOICE_Call) {
           cameraIsOn = false;
           ZEGOSDKManager().expressService.turnCameraOn(cameraIsOn);
         } else {
@@ -83,11 +78,8 @@ class _CallingPageState extends State<CallingPage> {
     for (final subscription in subscriptions) {
       subscription?.cancel();
     }
-    ZegoCallManager().clearCallData();
+    ZegoCallManager().quitCall();
     streamIDList.forEach(ZEGOSDKManager().expressService.stopPlayingStream);
-    ZEGOSDKManager().expressService.stopPreview();
-    ZEGOSDKManager().expressService.stopPublishingStream();
-    ZEGOSDKManager().expressService.logoutRoom(widget.callData.callID);
     super.dispose();
   }
 
@@ -97,42 +89,11 @@ class _CallingPageState extends State<CallingPage> {
         body: SafeArea(
       child: Stack(
         children: [
-          largetVideoView(),
-          smallVideoView(),
+          const CallContainer(),
           bottomBar(),
         ],
       ),
     ));
-  }
-
-  Widget largetVideoView() {
-    return ValueListenableBuilder<ZegoSDKUser?>(
-        valueListenable: otherUserInfoNoti,
-        builder: (context, userInfo, _) {
-          if (userInfo != null) {
-            return Container(
-              padding: EdgeInsets.zero,
-              color: Colors.black,
-              child: ZegoAudioVideoView(userInfo: userInfo),
-            );
-          } else {
-            return Container(
-              padding: EdgeInsets.zero,
-              color: Colors.black,
-            );
-          }
-        });
-  }
-
-  Widget smallVideoView() {
-    return LayoutBuilder(builder: (context, constraints) {
-      return Container(
-        margin: EdgeInsets.only(top: 100, left: constraints.maxWidth - 95.0 - 20),
-        width: 95.0,
-        height: 164.0,
-        child: ZegoAudioVideoView(userInfo: ZEGOSDKManager().currentUser!),
-      );
-    });
   }
 
   Widget bottomBar() {
@@ -145,14 +106,10 @@ class _CallingPageState extends State<CallingPage> {
   }
 
   Widget buttonView() {
-    if (widget.callData.callType == ZegoCallType.voice) {
+    if (widget.callData.callType == VOICE_Call) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          toggleMicButton(),
-          endCallButton(),
-          speakerButton(),
-        ],
+        children: [toggleMicButton(), endCallButton(), speakerButton(), inviteUserButton()],
       );
     } else {
       return Row(
@@ -163,9 +120,19 @@ class _CallingPageState extends State<CallingPage> {
           endCallButton(),
           speakerButton(),
           if (!kIsWeb) switchCameraButton(),
+          inviteUserButton(),
         ],
       );
     }
+  }
+
+  Widget backgroundImage() {
+    return Image.asset(
+      'assets/icons/bg.png',
+      width: double.infinity,
+      height: double.infinity,
+      fit: BoxFit.fill,
+    );
   }
 
   Widget endCallButton() {
@@ -175,7 +142,7 @@ class _CallingPageState extends State<CallingPage> {
         height: 50,
         child: ZegoCancelButton(
           onPressed: () {
-            Navigator.pop(context);
+            ZegoCallManager().quitCall();
           },
         ),
       );
@@ -242,29 +209,63 @@ class _CallingPageState extends State<CallingPage> {
     });
   }
 
-  // void onStreamListUpdate(ZegoRoomStreamListUpdateEvent event) {
-  //   for (var stream in event.streamList) {
-  //     if (event.updateType == ZegoUpdateType.Add) {
-  //       streamIDList.add(stream.streamID);
-  //       ZEGOSDKManager().expressService.startPlayingStream(stream.streamID);
-  //     } else {
-  //       streamIDList.remove(stream.streamID);
-  //       ZEGOSDKManager().expressService.stopPlayingStream(stream.streamID);
-  //     }
-  //   }
-  // }
+  Widget inviteUserButton() {
+    return LayoutBuilder(builder: (context, constrains) {
+      return SizedBox(
+        width: 50,
+        height: 50,
+        child: TextButton(onPressed: sendCallInvite, child: const Text('inviteUser')),
+      );
+    });
+  }
 
-  void onRoomUserListUpdate(ZegoRoomUserListUpdateEvent event) {
-    for (final user in event.userList) {
-      if (event.updateType == ZegoUpdateType.Delete) {
-        if (user.userID == widget.otherUserInfo.userID) {
-          otherUserInfoNoti.value = null;
-          Navigator.pop(context);
-        }
+  void sendCallInvite() {
+    final editingController1 = TextEditingController();
+    final inviteUsers = <String>[];
+    showCupertinoDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return CupertinoAlertDialog(
+          title: const Text('Input a user id'),
+          content: CupertinoTextField(controller: editingController1),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: Navigator.of(context).pop,
+              child: const Text('Cancel'),
+            ),
+            CupertinoDialogAction(
+              onPressed: () {
+                addInviteUser(inviteUsers, [
+                  editingController1.text,
+                ]);
+                ZegoCallManager().inviteUserToJoinCall(inviteUsers);
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void addInviteUser(List<String> userList, List<String> userIDs) {
+    for (final userID in userIDs) {
+      if (userID.isNotEmpty) {
+        userList.add(userID);
+      }
+    }
+  }
+
+  void onStreamListUpdate(ZegoRoomStreamListUpdateEvent event) {
+    for (final stream in event.streamList) {
+      if (event.updateType == ZegoUpdateType.Add) {
+        streamIDList.add(stream.streamID);
+        ZEGOSDKManager().expressService.startPlayingStream(stream.streamID);
       } else {
-        if (widget.otherUserInfo.userID == user.userID) {
-          otherUserInfoNoti.value = ZEGOSDKManager().getUser(user.userID);
-        }
+        streamIDList.remove(stream.streamID);
+        ZEGOSDKManager().expressService.stopPlayingStream(stream.streamID);
       }
     }
   }

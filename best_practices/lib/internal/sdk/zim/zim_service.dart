@@ -23,6 +23,7 @@ class ZIMService {
 
   Map<String, String> roomAttributesMap = {};
   Map<String, String> userAvatarUrlMap = {};
+  Map<String, String> userNameMap = {};
   MapNotifier<RoomRequest> roomRequestMapNoti = MapNotifier({});
 
   ZIMUserInfo? currentZimUserInfo;
@@ -44,7 +45,6 @@ class ZIMService {
   final incomingUserRequestTimeoutStreamCtrl = StreamController<IncomingUserRequestTimeoutEvent>.broadcast();
   final outgoingUserRequestTimeoutStreamCtrl = StreamController<OutgoingUserRequestTimeoutEvent>.broadcast();
   final userRequestEndStreamCtrl = StreamController<UserRequestEndEvent>.broadcast();
-  final userRequestTimeOutStreamCtrl = StreamController<UserRequestTimeOutEvent>.broadcast();
   final userRequestStateChangeStreamCtrl = StreamController<UserRequestStateChangeEvent>.broadcast();
 
   final roomAttributeUpdateStreamCtrl = StreamController<ZIMServiceRoomAttributeUpdateEvent>.broadcast();
@@ -71,27 +71,24 @@ class ZIMService {
     ZIMEventHandler.onCallInvitationAccepted = onUserRequestAccepted;
     ZIMEventHandler.onCallInvitationRejected = onUserRequestRejected;
     ZIMEventHandler.onCallInvitationTimeout = onUserRequestTimeout;
-    ZIMEventHandler.onCallInviteesAnsweredTimeout = onUserRequestAnsweredTimeout;
-    ZIMEventHandler.onCallUserStateChanged = onCallUserStateChanged;
     ZIMEventHandler.onCallInvitationEnded = onCallInvitationEnded;
-    ZIMEventHandler.onCallInvitationTimeout = onUserRequestTimeout;
+    ZIMEventHandler.onCallUserStateChanged = onCallUserStateChanged;
     ZIMEventHandler.onRoomAttributesUpdated = onRoomAttributesUpdated;
     ZIMEventHandler.onRoomAttributesBatchUpdated = onRoomAttributesBatchUpdated;
   }
 
   void uninitEventHandle() {
-    ZIMEventHandler.onRoomStateChanged = null;
     ZIMEventHandler.onConnectionStateChanged = null;
+    ZIMEventHandler.onRoomStateChanged = null;
+    ZIMEventHandler.onRoomMemberLeft = null;
     ZIMEventHandler.onReceiveRoomMessage = null;
     ZIMEventHandler.onCallInvitationReceived = null;
     ZIMEventHandler.onCallInvitationCancelled = null;
     ZIMEventHandler.onCallInvitationAccepted = null;
     ZIMEventHandler.onCallInvitationRejected = null;
     ZIMEventHandler.onCallInvitationTimeout = null;
-    ZIMEventHandler.onCallInviteesAnsweredTimeout = null;
     ZIMEventHandler.onCallInvitationEnded = null;
     ZIMEventHandler.onCallUserStateChanged = null;
-    ZIMEventHandler.onCallInvitationTimeout = null;
     ZIMEventHandler.onRoomAttributesUpdated = null;
     ZIMEventHandler.onRoomAttributesBatchUpdated = null;
   }
@@ -118,6 +115,7 @@ class ZIMService {
     currentZimUserInfo = ZIMUserInfo()
       ..userID = userID
       ..userName = userName;
+    userNameMap[userID] = userName;
     await ZIM.getInstance()!.login(
           userID,
           ZIMLoginConfig()
@@ -185,6 +183,4 @@ class ZIMService {
   void onRoomStateChanged(_, ZIMRoomState state, ZIMRoomEvent event, Map extendedData, String roomID) {
     roomStateChangedStreamCtrl.add(ZIMServiceRoomStateChangedEvent(roomID, state, event, extendedData));
   }
-
-  void cancelInvitation({required String invitationID, required List<String> invitees}) {}
 }

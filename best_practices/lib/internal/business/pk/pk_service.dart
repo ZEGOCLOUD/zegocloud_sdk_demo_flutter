@@ -63,7 +63,6 @@ class PKService implements PKServiceInterface {
       zimService.outgoingUserRequestTimeoutStreamCtrl.stream.listen(onReceivePKAnswerTimeout),
       zimService.userRequestEndStreamCtrl.stream.listen(onUserRequestEnded),
       zimService.userRequestStateChangeStreamCtrl.stream.listen(onUserRequestStateChanged),
-      zimService.userRequestTimeOutStreamCtrl.stream.listen((event) {}),
       zimService.roomAttributeUpdateStreamCtrl2.stream.listen(onRoomAttributesUpdated2),
       expressService.recvAudioFirstFrameCtrl.stream.listen(onReceiveAudioFirstFrame),
       expressService.recvVideoFirstFrameCtrl.stream.listen(onReceiveVideoFirstFrame),

@@ -5,11 +5,12 @@ import 'package:flutter/material.dart';
 
 import '../../components/call/zego_accept_button.dart';
 import '../../components/call/zego_cancel_button.dart';
-import '../../components/call/zego_defines.dart';
 import '../../components/call/zego_reject_button.dart';
 import '../../internal/business/call/call_data.dart';
+import '../../internal/business/call/call_user_info.dart';
 import '../../zego_call_manager.dart';
 import '../../zego_sdk_manager.dart';
+import 'call_controller.dart';
 import 'calling_page.dart';
 
 class CallWaitingPage extends StatefulWidget {
@@ -22,71 +23,21 @@ class CallWaitingPage extends StatefulWidget {
 }
 
 class _CallWaitingPageState extends State<CallWaitingPage> {
-  List<StreamSubscription<dynamic>?> subscriptions = [];
-
   final callManager = ZegoCallManager();
 
   @override
   void initState() {
     super.initState();
 
-    subscriptions.addAll([
-      ZEGOSDKManager().zimService.outgoingUserRequestRejectedStreamCtrl.stream.listen(onOutgoingCallInvitationRejected),
-      ZEGOSDKManager().zimService.outgoingUserRequestAcceptedStreamCtrl.stream.listen(
-            onOutgoingCallInvitationAccepted,
-          ),
-      ZEGOSDKManager().zimService.outgoingUserRequestTimeoutStreamCtrl.stream.listen(
-            onOutgoingCallInvitationTimeout,
-          ),
-      ZEGOSDKManager().zimService.incomingUserRequestCancelledStreamCtrl.stream.listen(
-            onIncomingCallInvitationCanceled,
-          ),
-      ZEGOSDKManager().zimService.incomingUserRequestTimeoutStreamCtrl.stream.listen(
-            onIncomingCallInvitationTimeout,
-          ),
-    ]);
-
-    if (widget.callData.callType == ZegoCallType.video) {
+    if (widget.callData.callType == VIDEO_Call) {
       ZEGOSDKManager().expressService.turnCameraOn(true);
       ZEGOSDKManager().expressService.startPreview();
     }
   }
 
-  void onOutgoingCallInvitationRejected(OutgoingUserRequestRejectedEvent event) {
-    final extendedData = jsonDecode(event.info.extendedData);
-    if (extendedData is Map && extendedData.containsKey('reason')) {
-      final reason = extendedData['reason'];
-      if (reason is String && reason == 'busy') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('invitee is busy')),
-        );
-      }
-    }
-    Navigator.pop(context);
-  }
-
-  void onOutgoingCallInvitationTimeout(OutgoingUserRequestTimeoutEvent event) {
-    Navigator.pop(context);
-  }
-
-  Future<void> onOutgoingCallInvitationAccepted(OutgoingUserRequestAcceptedEvent event) async {
-    pushToCallingPage();
-  }
-
-  void onIncomingCallInvitationCanceled(IncomingUserRequestCancelledEvent event) {
-    Navigator.pop(context);
-  }
-
-  void onIncomingCallInvitationTimeout(IncomingUserRequestTimeoutEvent event) {
-    Navigator.pop(context);
-  }
-
   @override
   void dispose() {
     super.dispose();
-    for (final subscription in subscriptions) {
-      subscription?.cancel();
-    }
   }
 
   @override
@@ -96,15 +47,68 @@ class _CallWaitingPageState extends State<CallWaitingPage> {
       child: SafeArea(
         child: Scaffold(
           body: Stack(
-            children: (widget.callData.callType == ZegoCallType.video)
+            children: (widget.callData.callType == VIDEO_Call)
                 ? [
+                    backgroundImage(),
                     videoView(),
+                    headView(),
                     buttonView(),
                   ]
-                : [buttonView()],
+                : [backgroundImage(), headView(), buttonView()],
           ),
         ),
       ),
+    );
+  }
+
+  Widget headView() {
+    CallUserInfo? user;
+    if (widget.callData.inviter.userID == ZEGOSDKManager().currentUser?.userID) {
+      user = widget.callData.inviter;
+    } else {
+      user = widget.callData.callUserList
+          .where((element) => element.userID != widget.callData.inviter.userID)
+          .toList()
+          .first;
+    }
+    if (user.headUrl != null) {
+      return Center(
+        child: SizedBox(
+          width: 60,
+          height: 60,
+          child: Image.network(user.headUrl!),
+        ),
+      );
+    } else {
+      return Center(
+        child: Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            color: Colors.grey,
+            borderRadius: const BorderRadius.all(Radius.circular(30.0)),
+            border: Border.all(width: 0),
+          ),
+          child: Center(
+            child: SizedBox(
+                height: 20,
+                child: Text(
+                  (user.userName != null) ? user.userName![0] : user.userID[0],
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                )),
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget backgroundImage() {
+    return Image.asset(
+      'assets/icons/bg.png',
+      width: double.infinity,
+      height: double.infinity,
+      fit: BoxFit.fill,
     );
   }
 
@@ -119,7 +123,7 @@ class _CallWaitingPageState extends State<CallWaitingPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                cancelCallButton(),
+                endCallButton(),
               ],
             ),
           ),
@@ -160,19 +164,19 @@ class _CallWaitingPageState extends State<CallWaitingPage> {
         });
   }
 
-  Widget cancelCallButton() {
+  Widget endCallButton() {
     return SizedBox(
       width: 50,
       height: 50,
       child: ZegoCancelButton(
-        onPressed: cancelCall,
+        onPressed: endCall,
       ),
     );
   }
 
-  Future<void> cancelCall() async {
-    ZegoCallManager().cancelCallRequest(widget.callData.callID, widget.callData.invitee.userID);
-    Navigator.pop(context);
+  Future<void> endCall() async {
+    ZegoCallManager().endCall(widget.callData.callID);
+    ZegoCallController().hidenWatingPage();
   }
 
   Widget acceptCallButton() {
@@ -181,7 +185,7 @@ class _CallWaitingPageState extends State<CallWaitingPage> {
       height: 50,
       child: ZegoAcceptButton(
         icon: ButtonIcon(
-          icon: (widget.callData.callType == ZegoCallType.video)
+          icon: (widget.callData.callType == VIDEO_Call)
               ? const Image(image: AssetImage('assets/icons/invite_video.png'))
               : const Image(image: AssetImage('assets/icons/invite_voice.png')),
         ),
@@ -191,8 +195,8 @@ class _CallWaitingPageState extends State<CallWaitingPage> {
   }
 
   Future<void> acceptCall() async {
-    ZegoCallManager().acceptCallRequest(widget.callData.callID).then((value) {
-      pushToCallingPage();
+    ZegoCallManager().acceptCallInvitation(widget.callData.callID).then((value) {
+      ZEGOSDKManager().expressService.stopPreview();
     }).catchError((error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('accept call invitation failed: $error')),
@@ -209,25 +213,7 @@ class _CallWaitingPageState extends State<CallWaitingPage> {
   }
 
   Future<void> declineCall() async {
-    ZegoCallManager().rejectCallRequest(widget.callData.callID);
-    Navigator.pop(context);
-  }
-
-  void pushToCallingPage() {
-    ZEGOSDKManager().expressService.stopPreview();
-    if (ZegoCallManager().callData != null) {
-      ZegoSDKUser otherUser;
-      if (callManager.callData?.inviter.userID != ZEGOSDKManager().currentUser!.userID) {
-        otherUser = callManager.callData!.inviter;
-      } else {
-        otherUser = callManager.callData!.invitee;
-      }
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CallingPage(callData: callManager.callData!, otherUserInfo: otherUser),
-        ),
-      );
-    }
+    ZegoCallManager().rejectCallInvitation(widget.callData.callID);
+    ZegoCallController().hidenWatingPage();
   }
 }

@@ -1,4 +1,5 @@
 import '../../../zego_sdk_manager.dart';
+import 'call_user_info.dart';
 
 enum ZegoCallUserState {
   inviting,
@@ -14,18 +15,13 @@ enum ZegoCallType {
   video,
 }
 
-class ZegoCallData {
-  ZegoCallData({
-    required this.inviter,
-    required this.invitee,
-    required this.callType,
-    required this.callID,
-    this.state = ZegoCallUserState.inviting,
-  });
+const VOICE_Call = 10001;
+const VIDEO_Call = 10000;
 
-  final ZegoSDKUser inviter;
-  final ZegoSDKUser invitee;
-  final ZegoCallType callType;
-  final String callID;
-  ZegoCallUserState state;
+class ZegoCallData {
+  late CallUserInfo inviter;
+  late int callType;
+  late String callID;
+  List<CallUserInfo> callUserList = [];
+  bool get isGroupCall => callUserList.length > 2;
 }

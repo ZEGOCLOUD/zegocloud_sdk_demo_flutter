@@ -23,15 +23,42 @@ class _ZegoAudioVideoViewState extends State<ZegoAudioVideoView> {
   }
 
   Widget createView(bool isCameraOn) {
-    if (isCameraOn) {
-      return videoView();
-    } else {
-      if (widget.userInfo.streamID != null) {
-        return coHostNomalView();
+    return LayoutBuilder(builder: (context, constraints) {
+      if (isCameraOn) {
+        return Stack(
+          children: [videoView(), userNameText(constraints)],
+        );
       } else {
-        return const SizedBox.shrink();
+        return Stack(
+          children: [noVideoView(constraints), userNameText(constraints)],
+        );
       }
+    });
+  }
+
+  Widget noVideoView(BoxConstraints constraints) {
+    if (widget.userInfo.streamID != null) {
+      if (widget.userInfo.streamID!.endsWith('_host')) {
+        return backGroundView();
+      } else {
+        return coHostNomalView();
+      }
+    } else {
+      return coHostNomalView();
     }
+  }
+
+  Widget userNameText(BoxConstraints constraints) {
+    return Positioned(
+        right: 10,
+        bottom: 10,
+        width: constraints.maxWidth - 15,
+        height: 20,
+        child: Text(
+          widget.userInfo.userName,
+          textAlign: TextAlign.right,
+          style: TextStyle(fontSize: 14, color: Colors.white),
+        ));
   }
 
   Widget backGroundView() {
@@ -43,27 +70,37 @@ class _ZegoAudioVideoViewState extends State<ZegoAudioVideoView> {
           height: double.infinity,
           fit: BoxFit.fill,
         ),
-        Center(
-          child: Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: Colors.grey,
-              borderRadius: const BorderRadius.all(Radius.circular(30.0)),
-              border: Border.all(width: 0),
-            ),
-            child: Center(
-              child: SizedBox(
-                  height: 20,
-                  child: Text(
-                    widget.userInfo.userName[0],
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  )),
-            ),
-          ),
-        ),
+        Center(child: headView()),
       ],
+    );
+  }
+
+  Widget headView() {
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        color: Colors.grey,
+        borderRadius: const BorderRadius.all(Radius.circular(30.0)),
+        border: Border.all(width: 0),
+      ),
+      child: ValueListenableBuilder(
+          valueListenable: widget.userInfo.avatarUrlNotifier,
+          builder: (context, String? url, _) {
+            if (url != null) {
+              return Image.network(url);
+            } else {
+              return Center(
+                child: SizedBox(
+                    height: 20,
+                    child: Text(
+                      widget.userInfo.userName[0],
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    )),
+              );
+            }
+          }),
     );
   }
 
@@ -74,24 +111,7 @@ class _ZegoAudioVideoViewState extends State<ZegoAudioVideoView> {
           color: Colors.black,
         ),
         Center(
-          child: Container(
-            width: 48,
-            height: 48,
-            decoration: const BoxDecoration(
-              color: Colors.grey,
-              borderRadius: BorderRadius.all(Radius.circular(24)),
-              // border: Border.all(width: 1, color: Colors.white),
-            ),
-            child: Center(
-              child: SizedBox(
-                  height: 20,
-                  child: Text(
-                    widget.userInfo.userName[0],
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  )),
-            ),
-          ),
+          child: headView(),
         ),
       ],
     );

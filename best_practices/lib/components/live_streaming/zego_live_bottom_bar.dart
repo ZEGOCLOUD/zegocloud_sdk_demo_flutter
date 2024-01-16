@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import '../../internal/sdk/zim/Define/zim_room_request.dart';
 import '../../zego_live_streaming_manager.dart';
 import '../../zego_sdk_manager.dart';
+import '../beauty_effects/zego_beauty_effect_button.dart';
+import '../beauty_effects/zego_beauty_effect_sheet.dart';
 import '../common/zego_switch_camera_button.dart';
 import '../common/zego_toggle_camera_button.dart';
 import '../common/zego_toggle_microphone_button.dart';
@@ -48,6 +50,7 @@ class _ZegoLiveBottomBarState extends State<ZegoLiveBottomBar> {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
+          beautyEffectButton(),
           toggleMicButton(),
           toggleCameraButton(),
           if (!kIsWeb) switchCameraButton(),
@@ -72,6 +75,7 @@ class _ZegoLiveBottomBarState extends State<ZegoLiveBottomBar> {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
+          beautyEffectButton(),
           toggleMicButton(),
           toggleCameraButton(),
           switchCameraButton(),
@@ -107,6 +111,20 @@ class _ZegoLiveBottomBarState extends State<ZegoLiveBottomBar> {
         width: 50,
         height: 50,
         child: ZegoSwitchCameraButton(),
+      );
+    });
+  }
+
+  Widget beautyEffectButton() {
+    return LayoutBuilder(builder: (context, constrains) {
+      return SizedBox(
+        width: 50,
+        height: 50,
+        child: ZegoBeautyEffectButton(
+          onPressed: () {
+            showBeautyEffectSheet(context);
+          },
+        ),
       );
     });
   }
