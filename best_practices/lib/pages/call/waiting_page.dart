@@ -123,7 +123,7 @@ class _CallWaitingPageState extends State<CallWaitingPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                cancelCallButton(),
+                endCallButton(),
               ],
             ),
           ),
@@ -164,17 +164,17 @@ class _CallWaitingPageState extends State<CallWaitingPage> {
         });
   }
 
-  Widget cancelCallButton() {
+  Widget endCallButton() {
     return SizedBox(
       width: 50,
       height: 50,
       child: ZegoCancelButton(
-        onPressed: cancelCall,
+        onPressed: endCall,
       ),
     );
   }
 
-  Future<void> cancelCall() async {
+  Future<void> endCall() async {
     ZegoCallManager().endCall(widget.callData.callID);
     ZegoCallController().hidenWatingPage();
   }

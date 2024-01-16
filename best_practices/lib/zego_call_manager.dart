@@ -97,7 +97,7 @@ class ZegoCallManager implements ZegoCallManagerInterface {
     final config = ZIMCallInviteConfig()
       ..mode = ZIMCallInvitationMode.advanced
       ..extendedData = extendedData
-      ..timeout = 10;
+      ..timeout = 60;
     final result = await ZEGOSDKManager().zimService.sendUserRequest(userList, config: config);
     final errorUser = result.info.errorUserList.map((e) => e.userID).toList();
     final sucessUsers = userList.where((element) => !errorUser.contains(element));
