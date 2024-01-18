@@ -115,11 +115,14 @@ class ExpressService {
     currentUser!.streamID = null;
     currentUser!.isCamerOnNotifier.value = false;
     currentUser!.isMicOnNotifier.value = false;
+    currentUser!.isUsingFrontCameraNotifier.value = true;
+    currentUser!.isUsingSpeaker.value = true;
     currentUser!.videoViewNotifier.value = null;
     currentUser!.viewID = -1;
   }
 
   void useFrontCamera(bool isFrontFacing) {
+    currentUser!.isUsingFrontCameraNotifier.value = isFrontFacing;
     ZegoExpressEngine.instance.useFrontCamera(isFrontFacing);
   }
 
@@ -136,6 +139,7 @@ class ExpressService {
   }
 
   void setAudioRouteToSpeaker(bool useSpeaker) {
+    currentUser!.isUsingSpeaker.value = useSpeaker;
     if (kIsWeb) {
       muteAllPlayStreamAudio(!useSpeaker);
     } else {

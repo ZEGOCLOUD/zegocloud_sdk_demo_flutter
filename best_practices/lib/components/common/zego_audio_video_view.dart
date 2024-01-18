@@ -57,7 +57,7 @@ class _ZegoAudioVideoViewState extends State<ZegoAudioVideoView> {
         child: Text(
           widget.userInfo.userName,
           textAlign: TextAlign.right,
-          style: TextStyle(fontSize: 14, color: Colors.white),
+          style: const TextStyle(fontSize: 14, color: Colors.white),
         ));
   }
 

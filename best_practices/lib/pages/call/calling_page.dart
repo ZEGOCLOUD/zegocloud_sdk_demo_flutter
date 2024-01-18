@@ -1,15 +1,14 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../components/call/add_user_button.dart';
 import '../../components/call/zego_cancel_button.dart';
-import '../../components/call/zego_speaker_button.dart';
-import '../../components/call/zego_switch_camera_button.dart';
-import '../../components/call/zego_toggle_camera_button.dart';
-import '../../components/call/zego_toggle_microphone_button.dart';
-import '../../components/common/zego_audio_video_view.dart';
+import '../../components/common/zego_speaker_button.dart';
+import '../../components/common/zego_switch_camera_button.dart';
+import '../../components/common/zego_toggle_camera_button.dart';
+import '../../components/common/zego_toggle_microphone_button.dart';
 import '../../internal/business/call/call_data.dart';
 import '../../utils/zegocloud_token.dart';
 import '../../zego_call_manager.dart';
@@ -29,11 +28,6 @@ class CallingPage extends StatefulWidget {
 class _CallingPageState extends State<CallingPage> {
   List<StreamSubscription<dynamic>?> subscriptions = [];
   List<String> streamIDList = [];
-
-  bool micIsOn = true;
-  bool cameraIsOn = true;
-  bool isFacingCamera = true;
-  bool isSpeaker = true;
 
   @override
   void initState() {
@@ -56,13 +50,12 @@ class _CallingPageState extends State<CallingPage> {
             token: token)
         .then((value) {
       if (value.errorCode == 0) {
-        ZEGOSDKManager().expressService.turnMicrophoneOn(micIsOn);
-        ZEGOSDKManager().expressService.setAudioRouteToSpeaker(isSpeaker);
+        ZEGOSDKManager().expressService.turnMicrophoneOn(true);
+        ZEGOSDKManager().expressService.setAudioRouteToSpeaker(true);
         if (widget.callData.callType == VOICE_Call) {
-          cameraIsOn = false;
-          ZEGOSDKManager().expressService.turnCameraOn(cameraIsOn);
+          ZEGOSDKManager().expressService.turnCameraOn(false);
         } else {
-          ZEGOSDKManager().expressService.turnCameraOn(cameraIsOn);
+          ZEGOSDKManager().expressService.turnCameraOn(true);
           ZEGOSDKManager().expressService.startPreview();
         }
         ZEGOSDKManager().expressService.startPublishingStream(ZegoCallManager().getMainStreamID());
@@ -87,14 +80,15 @@ class _CallingPageState extends State<CallingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: SafeArea(
-      child: Stack(
-        children: [
-          const CallContainer(),
-          bottomBar(),
-        ],
+      body: SafeArea(
+        child: Stack(
+          children: [
+            const CallContainer(),
+            bottomBar(),
+          ],
+        ),
       ),
-    ));
+    );
   }
 
   Widget bottomBar() {
@@ -137,126 +131,55 @@ class _CallingPageState extends State<CallingPage> {
   }
 
   Widget endCallButton() {
-    return LayoutBuilder(builder: (context, constrains) {
-      return SizedBox(
-        width: 50,
-        height: 50,
-        child: ZegoCancelButton(
-          onPressed: () {
-            ZegoCallManager().quitCall();
-          },
-        ),
-      );
-    });
-  }
-
-  Widget toggleMicButton() {
-    return LayoutBuilder(builder: (context, constrains) {
-      return SizedBox(
-        width: 50,
-        height: 50,
-        child: ZegoToggleMicrophoneButton(
-          onPressed: () {
-            micIsOn = !micIsOn;
-            ZEGOSDKManager().expressService.turnMicrophoneOn(micIsOn);
-          },
-        ),
-      );
-    });
-  }
-
-  Widget toggleCameraButton() {
-    return LayoutBuilder(builder: (context, constrains) {
-      return SizedBox(
-        width: 50,
-        height: 50,
-        child: ZegoToggleCameraButton(
-          onPressed: () {
-            cameraIsOn = !cameraIsOn;
-            ZEGOSDKManager().expressService.turnCameraOn(cameraIsOn);
-          },
-        ),
-      );
-    });
-  }
-
-  Widget switchCameraButton() {
-    return LayoutBuilder(builder: (context, constrains) {
-      return SizedBox(
-        width: 50,
-        height: 50,
-        child: ZegoSwitchCameraButton(
-          onPressed: () {
-            isFacingCamera = !isFacingCamera;
-            ZEGOSDKManager().expressService.useFrontCamera(isFacingCamera);
-          },
-        ),
-      );
-    });
-  }
-
-  Widget speakerButton() {
-    return LayoutBuilder(builder: (context, constrains) {
-      return SizedBox(
-        width: 50,
-        height: 50,
-        child: ZegoSpeakerButton(
-          onPressed: () {
-            isSpeaker = !isSpeaker;
-            ZEGOSDKManager().expressService.setAudioRouteToSpeaker(isSpeaker);
-          },
-        ),
-      );
-    });
-  }
-
-  Widget inviteUserButton() {
-    return LayoutBuilder(builder: (context, constrains) {
-      return SizedBox(
-        width: 50,
-        height: 50,
-        child: TextButton(onPressed: sendCallInvite, child: const Text('inviteUser')),
-      );
-    });
-  }
-
-  void sendCallInvite() {
-    final editingController1 = TextEditingController();
-    final inviteUsers = <String>[];
-    showCupertinoDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) {
-        return CupertinoAlertDialog(
-          title: const Text('Input a user id'),
-          content: CupertinoTextField(controller: editingController1),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: Navigator.of(context).pop,
-              child: const Text('Cancel'),
-            ),
-            CupertinoDialogAction(
-              onPressed: () {
-                addInviteUser(inviteUsers, [
-                  editingController1.text,
-                ]);
-                ZegoCallManager().inviteUserToJoinCall(inviteUsers);
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
+    return SizedBox(
+      width: 50,
+      height: 50,
+      child: ZegoCancelButton(
+        onPressed: () {
+          ZegoCallManager().quitCall();
+        },
+      ),
     );
   }
 
-  void addInviteUser(List<String> userList, List<String> userIDs) {
-    for (final userID in userIDs) {
-      if (userID.isNotEmpty) {
-        userList.add(userID);
-      }
-    }
+  Widget toggleMicButton() {
+    return const SizedBox(
+      width: 50,
+      height: 50,
+      child: ZegoToggleMicrophoneButton(),
+    );
+  }
+
+  Widget toggleCameraButton() {
+    return const SizedBox(
+      width: 50,
+      height: 50,
+      child: ZegoToggleCameraButton(),
+    );
+  }
+
+  Widget switchCameraButton() {
+    return const SizedBox(
+      width: 50,
+      height: 50,
+      child: ZegoSwitchCameraButton(),
+    );
+  }
+
+  Widget speakerButton() {
+    return const SizedBox(
+      width: 50,
+      height: 50,
+      child: ZegoSpeakerButton(),
+    );
+  }
+
+  Widget inviteUserButton() {
+    return const SizedBox(
+      width: 50,
+      height: 50,
+      child: ZegoCallAddUserButton(),
+    );
   }
 
   void onStreamListUpdate(ZegoRoomStreamListUpdateEvent event) {
