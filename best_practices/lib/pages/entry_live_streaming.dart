@@ -38,7 +38,7 @@ class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
           ),
         );
       },
-      child: role == ZegoLiveStreamingRole.host ? const Text('Host enter room') : const Text('Audience enter room'),
+      child: role == ZegoLiveStreamingRole.host ? const Text('Host enter') : const Text('Audience enter'),
     );
   }
 }

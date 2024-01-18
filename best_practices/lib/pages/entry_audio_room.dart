@@ -33,7 +33,7 @@ class _AudioRoomEntryState extends State<AudioRoomEntry> {
         context,
         MaterialPageRoute(builder: (context) => AudioRoomPage(roomID: roomIDController.text, role: role)),
       ),
-      child: role == ZegoLiveAudioRoomRole.host ? const Text('Host enter room') : const Text('Audience enter room'),
+      child: role == ZegoLiveAudioRoomRole.host ? const Text('Host enter') : const Text('Audience enter'),
     );
   }
 }
