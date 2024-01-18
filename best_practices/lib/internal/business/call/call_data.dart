@@ -1,4 +1,3 @@
-import '../../../zego_sdk_manager.dart';
 import 'call_user_info.dart';
 
 enum ZegoCallUserState {

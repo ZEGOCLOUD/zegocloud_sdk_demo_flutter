@@ -2,8 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
-import 'call_data.dart';
-
 class CallExtendedData {
   late int type;
 

@@ -10,8 +10,7 @@ abstract class ZegoCallManagerInterface {
   Future<void> quitCall();
   Future<ZIMCallEndSentResult> endCall(String requestID);
   Future<void> rejectCallInvitation(String requestID);
-  Future<void> rejectCallInvitationCauseBusy(
-      String requestID, String extendedData, ZegoCallType type);
+  Future<void> rejectCallInvitationCauseBusy(String requestID, String extendedData, ZegoCallType type);
   Future<ZIMCallAcceptanceSentResult> acceptCallInvitation(String requestID);
 
   Future<ZIMUserAvatarUrlUpdatedResult> updateUserAvatarUrl(String url);
