@@ -7,14 +7,12 @@ import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:zego_uikit_prebuilt_live_streaming/zego_uikit_prebuilt_live_streaming.dart';
 
-import 'constants.dart';
-import 'main.dart';
-import 'minigame/service/mini_game_api.dart';
-import 'minigame/ui/show_game_list_view.dart';
-import 'minigame/your_game_server.dart';
-import 'secret.dart';
+import '../main.dart';
+import '../minigame/service/mini_game_api.dart';
+import '../minigame/ui/show_game_list_view.dart';
+import '../minigame/your_game_server.dart';
+import '../zego_sdk_key_center.dart';
 
 class ZegoMiniGamePage extends StatefulWidget {
   const ZegoMiniGamePage({super.key, required this.userID, required this.userName, required this.roomID});
@@ -52,11 +50,11 @@ class ZegoMiniGamePageState extends State<ZegoMiniGamePage> {
                 onLoadStop: (controller, url) async {
                   try {
                     final token = await YourGameServer().getToken(
-                      appID: yourAppID,
+                      appID: SDKKeyCenter.appID,
                       userID: widget.userID,
                     );
                     await ZegoMiniGame().initGameSDK(
-                      appID: yourAppID,
+                      appID: SDKKeyCenter.appID,
                       token: token,
                       userID: widget.userID,
                       userName: widget.userName,
@@ -99,7 +97,7 @@ class ZegoMiniGamePageState extends State<ZegoMiniGamePage> {
 
                               debugPrint('[APP]enter game: $gameID');
                               final exchangeUserCurrencyResult = await YourGameServer().exchangeUserCurrency(
-                                appID: yourAppID,
+                                appID: SDKKeyCenter.appID,
                                 gameID: gameID,
                                 userID: widget.userID,
                                 exchangeValue: 10000,
@@ -108,7 +106,7 @@ class ZegoMiniGamePageState extends State<ZegoMiniGamePage> {
                               debugPrint('[APP]exchangeUserCurrencyResult: $exchangeUserCurrencyResult');
 
                               final getUserCurrencyResult = await YourGameServer().getUserCurrency(
-                                appID: yourAppID,
+                                appID: SDKKeyCenter.appID,
                                 userID: widget.userID,
                                 gameID: gameID,
                               );
