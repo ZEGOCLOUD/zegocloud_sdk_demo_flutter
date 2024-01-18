@@ -1,6 +1,3 @@
-import 'package:flutter/foundation.dart';
-
-import 'internal/sdk/effect/zego_effects_service.dart';
 import 'internal/sdk/express/express_service.dart';
 import 'internal/sdk/zim/zim_service.dart';
 
@@ -14,32 +11,10 @@ class ZEGOSDKManager {
 
   ExpressService expressService = ExpressService();
   ZIMService zimService = ZIMService();
-  EffectsService effectsService = EffectsService();
-
-  int appID = 0;
-  String appSign = '';
 
   Future<void> init(int appID, String? appSign, {ZegoScenario scenario = ZegoScenario.Default}) async {
     await expressService.init(appID: appID, appSign: appSign);
     await zimService.init(appID: appID, appSign: appSign);
-    await effectsService.init(appID, appSign ?? '');
-
-    this.appID = appID;
-    this.appSign = appSign ?? '';
-  }
-
-  Future<void> initEffects() async {
-    if (!kIsWeb) {
-      await effectsService.init(appID, appSign);
-      await expressService.enableCustomVideoProcessing(true);
-    }
-  }
-
-  Future<void> unInitEffects() async {
-    if (!kIsWeb) {
-      await effectsService.unInit();
-      await expressService.enableCustomVideoProcessing(false);
-    }
   }
 
   Future<void> connectUser(String userID, String userName, {String? token}) async {

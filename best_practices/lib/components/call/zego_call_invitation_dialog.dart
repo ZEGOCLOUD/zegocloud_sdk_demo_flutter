@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../internal/business/call/call_data.dart';
-import '../../internal/internal_defines.dart';
 import 'zego_accept_button.dart';
+import 'zego_defines.dart';
 import 'zego_reject_button.dart';
 
 class ZegoCallInvitationDialog extends StatefulWidget {

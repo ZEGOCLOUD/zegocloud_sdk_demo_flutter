@@ -261,7 +261,7 @@ class _AudioRoomPageState extends State<AudioRoomPage> {
   Widget seatListView() {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
-      height: kIsWeb ? 400 : 300,
+      height: 300,
       child: GridView.count(
         physics: const NeverScrollableScrollPhysics(),
         mainAxisSpacing: 10,

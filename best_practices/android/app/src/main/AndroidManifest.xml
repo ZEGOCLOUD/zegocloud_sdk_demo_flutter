@@ -1,6 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.zegocloud.demo.cohosting">
-    
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
     <!-- Permissions required by the SDK -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
