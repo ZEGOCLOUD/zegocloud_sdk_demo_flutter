@@ -11,7 +11,6 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.2
-  zego_effects_plugin: ^1.0.13
   shared_preferences: ^2.2.2
   zego_express_engine: ^3.11.0
   permission_handler: ^11.1.0
