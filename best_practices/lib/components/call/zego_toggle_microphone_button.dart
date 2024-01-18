@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../internal/internal_defines.dart';
-
+import 'zego_defines.dart';
 
 /// switch cameras
 class ZegoToggleMicrophoneButton extends StatefulWidget {

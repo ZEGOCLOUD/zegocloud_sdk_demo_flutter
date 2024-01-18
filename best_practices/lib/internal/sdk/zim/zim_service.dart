@@ -111,18 +111,12 @@ class ZIMService {
     return ZIM.getInstance()!.uploadLog();
   }
 
-  Future<void> connectUser(String userID, String userName, {String? token, bool isOfflineLogin = false}) async {
+  Future<void> connectUser(String userID, String userName, {String? token}) async {
     currentZimUserInfo = ZIMUserInfo()
       ..userID = userID
       ..userName = userName;
     userNameMap[userID] = userName;
-    await ZIM.getInstance()!.login(
-          userID,
-          ZIMLoginConfig()
-            ..token = token ?? ''
-            ..userName = userName
-            ..isOfflineLogin = isOfflineLogin,
-        );
+    await ZIM.getInstance()!.login(currentZimUserInfo!, token);
   }
 
   Future<void> disconnectUser() async {
@@ -183,4 +177,6 @@ class ZIMService {
   void onRoomStateChanged(_, ZIMRoomState state, ZIMRoomEvent event, Map extendedData, String roomID) {
     roomStateChangedStreamCtrl.add(ZIMServiceRoomStateChangedEvent(roomID, state, event, extendedData));
   }
+
+  void cancelInvitation({required String invitationID, required List<String> invitees}) {}
 }
