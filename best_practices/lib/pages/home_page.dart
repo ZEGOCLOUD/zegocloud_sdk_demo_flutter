@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../minigame/game_page.dart';
 import 'audio_room/audio_room.dart';
 import 'call/call.dart';
 import 'live_streaming/live_streaming.dart';
@@ -12,6 +13,7 @@ import 'live_streaming/live_streaming.dart';
 part 'entry_audio_room.dart';
 part 'entry_call.dart';
 part 'entry_live_streaming.dart';
+part 'entry_game_room.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -43,6 +45,7 @@ class HomePage extends StatelessWidget {
                   Divider(),
                   AudioRoomEntry(),
                   Divider(),
+                  MiniGameEntry(),
                 ],
               ),
             ),

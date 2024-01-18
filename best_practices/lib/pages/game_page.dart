@@ -49,10 +49,7 @@ class ZegoMiniGamePageState extends State<ZegoMiniGamePage> {
                 },
                 onLoadStop: (controller, url) async {
                   try {
-                    final token = await YourGameServer().getToken(
-                      appID: SDKKeyCenter.appID,
-                      userID: widget.userID,
-                    );
+                    final token = await YourGameServer().getToken();
                     await ZegoMiniGame().initGameSDK(
                       appID: SDKKeyCenter.appID,
                       token: token,
@@ -97,16 +94,13 @@ class ZegoMiniGamePageState extends State<ZegoMiniGamePage> {
 
                               debugPrint('[APP]enter game: $gameID');
                               final exchangeUserCurrencyResult = await YourGameServer().exchangeUserCurrency(
-                                appID: SDKKeyCenter.appID,
                                 gameID: gameID,
-                                userID: widget.userID,
                                 exchangeValue: 10000,
                                 outOrderId: DateTime.now().millisecondsSinceEpoch.toString(),
                               );
                               debugPrint('[APP]exchangeUserCurrencyResult: $exchangeUserCurrencyResult');
 
                               final getUserCurrencyResult = await YourGameServer().getUserCurrency(
-                                appID: SDKKeyCenter.appID,
                                 userID: widget.userID,
                                 gameID: gameID,
                               );

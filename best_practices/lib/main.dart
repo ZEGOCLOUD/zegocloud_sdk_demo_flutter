@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'pages/login_page.dart';
 
+import 'pages/login_page.dart';
 
 GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -33,4 +33,9 @@ class MyApp extends StatelessWidget {
       home: const LoginPage(title: 'Login Page'),
     );
   }
+}
+
+void showSnackBar(String text) {
+  debugPrint('show snack bar: $text');
+  ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(SnackBar(content: Text(text)));
 }
