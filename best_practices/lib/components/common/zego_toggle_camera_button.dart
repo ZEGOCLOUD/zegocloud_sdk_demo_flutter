@@ -3,38 +3,21 @@ import 'package:flutter/material.dart';
 import '../../zego_sdk_manager.dart';
 
 /// switch cameras
-class ZegoToggleCameraButton extends StatefulWidget {
-  const ZegoToggleCameraButton({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  State<ZegoToggleCameraButton> createState() => _ZegoToggleCameraButtonState();
-}
-
-class _ZegoToggleCameraButtonState extends State<ZegoToggleCameraButton> {
-  ValueNotifier<bool> isCameraOnNotifier = ValueNotifier<bool>(true);
-
-  @override
-  void initState() {
-    super.initState();
-  }
+class ZegoToggleCameraButton extends StatelessWidget {
+  const ZegoToggleCameraButton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-        valueListenable: isCameraOnNotifier,
+        valueListenable: ZEGOSDKManager().expressService.currentUser!.isCamerOnNotifier,
         builder: (context, isCameraOn, _) {
           return GestureDetector(
-            onTap: () {
-              ZEGOSDKManager().expressService.turnCameraOn(!isCameraOn);
-              isCameraOnNotifier.value = !isCameraOnNotifier.value;
-            },
+            onTap: () => ZEGOSDKManager().expressService.turnCameraOn(!isCameraOn),
             child: Container(
               width: 96,
               height: 96,
               decoration: BoxDecoration(
-                color: isCameraOn ? const Color.fromARGB(255, 51, 52, 56).withOpacity(0.6) : Colors.white,
+                color: isCameraOn ? const Color.fromARGB(255, 51, 52, 56).withOpacity(0.6) : Colors.grey,
                 shape: BoxShape.circle,
               ),
               child: SizedBox(

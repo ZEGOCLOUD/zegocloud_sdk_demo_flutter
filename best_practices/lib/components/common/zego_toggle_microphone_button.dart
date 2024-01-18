@@ -3,38 +3,21 @@ import 'package:flutter/material.dart';
 import '../../zego_sdk_manager.dart';
 
 /// switch cameras
-class ZegoToggleMicrophoneButton extends StatefulWidget {
-  const ZegoToggleMicrophoneButton({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  State<ZegoToggleMicrophoneButton> createState() => _ZegoToggleMicrophoneButtonState();
-}
-
-class _ZegoToggleMicrophoneButtonState extends State<ZegoToggleMicrophoneButton> {
-  ValueNotifier<bool> isMicOnNotifier = ValueNotifier<bool>(true);
-
-  @override
-  void initState() {
-    super.initState();
-  }
+class ZegoToggleMicrophoneButton extends StatelessWidget {
+  const ZegoToggleMicrophoneButton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-        valueListenable: isMicOnNotifier,
+        valueListenable: ZEGOSDKManager().expressService.currentUser!.isMicOnNotifier,
         builder: (context, isMicOn, _) {
           return GestureDetector(
-            onTap: () {
-              ZEGOSDKManager().expressService.turnMicrophoneOn(!isMicOn);
-              isMicOnNotifier.value = !isMicOn;
-            },
+            onTap: () => ZEGOSDKManager().expressService.turnMicrophoneOn(!isMicOn),
             child: Container(
               width: 96,
               height: 96,
               decoration: BoxDecoration(
-                color: isMicOn ? const Color.fromARGB(255, 51, 52, 56).withOpacity(0.6) : Colors.white,
+                color: isMicOn ? const Color.fromARGB(255, 51, 52, 56).withOpacity(0.6) : Colors.grey,
                 shape: BoxShape.circle,
               ),
               child: SizedBox(
