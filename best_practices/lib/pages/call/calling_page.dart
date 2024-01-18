@@ -79,13 +79,19 @@ class _CallingPageState extends State<CallingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            const CallContainer(),
-            bottomBar(),
-          ],
+    return WillPopScope(
+      onWillPop: () async {
+        ZegoCallManager().quitCall();
+        return false;
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: Stack(
+            children: [
+              const CallContainer(),
+              bottomBar(),
+            ],
+          ),
         ),
       ),
     );
