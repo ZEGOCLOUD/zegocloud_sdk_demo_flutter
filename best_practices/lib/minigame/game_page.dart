@@ -33,32 +33,39 @@ class MiniGamePageState extends State<MiniGamePage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      demoGameController.init(); // you need uninit demoGameController in the onWillPop block
+      demoGameController.init(); // you need uninit demoGameController in the PopScope block
+      ZegoMiniGame().loadedStateNotifier.addListener(onloadedStateUpdated);
     });
+  }
+
+  void onloadedStateUpdated() {
+    if (!ZegoMiniGame().loadedStateNotifier.value && mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        await demoGameController.uninit();
-        return true;
+    return PopScope(
+      onPopInvoked: (bool didPop) async {
+        if (didPop) {
+          ZegoMiniGame().loadedStateNotifier.removeListener(onloadedStateUpdated);
+          await demoGameController.uninit();
+        }
       },
       child: SafeArea(
         child: Scaffold(
           appBar: AppBar(title: const Text('ZegoMiniGame')),
-          body: Expanded(
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                demoGameController.gameView(),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: demoGameController.gameButton(),
-                ),
-              ],
-            ),
+          body: Stack(
+            fit: StackFit.expand,
+            children: [
+              demoGameController.gameView(),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: demoGameController.gameButton(),
+              ),
+            ],
           ),
         ),
       ),

@@ -24,9 +24,7 @@ class DemoGameController {
   }
 
   void onloadedStateUpdated() {
-    if (!ZegoMiniGame().loadedStateNotifier.value) {
-      Navigator.of(navigatorKey.currentContext!).pop();
-    }
+    debugPrint('onloadedStateUpdated: ${ZegoMiniGame().loadedStateNotifier.value}');
   }
 
   String? currentGameID;
@@ -50,7 +48,7 @@ class DemoGameController {
             token: token,
             userID: userID,
             userName: userName,
-            avatarUrl: Uri.encodeComponent('https://robohash.org/$userID.png?set=set4'),
+            avatarUrl: 'https://robohash.org/$userID.png?set=set4',
             language: GameLanguage.english,
           );
         },
@@ -173,7 +171,7 @@ class DemoGameController {
 
   Future<void> startGame(List<String> playWithUserID) async {
     final gameInfo = ZegoMiniGame().getAllGameList().value.firstWhere((e) => e.miniGameId == currentGameID!);
-    final gameMaxPlayer = gameInfo.detail!.player.reduce(max);
+    final gameMaxPlayer = gameInfo.detail!.player?.reduce(max) ?? 1;
     await ZegoMiniGame().startGame(
       playerList: [
         ...playWithUserID.asMap().entries.map((e) => ZegoPlayer(seatIndex: e.key, userID: e.value)),

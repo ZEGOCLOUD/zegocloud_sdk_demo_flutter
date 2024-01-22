@@ -2,7 +2,7 @@ part of 'game_defines.dart';
 
 class ZegoGameDetail {
   List<int>? spin;
-  List<int> player = [];
+  List<int>? player;
   String? thumbnail;
   int? cloudType;
   String? miniGameId;
@@ -16,7 +16,7 @@ class ZegoGameDetail {
 
   ZegoGameDetail.fromJson(Map<String, dynamic> json) {
     spin = json['spin'] == null ? null : List<int>.from(json['spin']);
-    player = List<int>.from(json['player']);
+    player = json['player'] == null ? null : List<int>.from(json['player']);
     thumbnail = json['thumbnail'];
     cloudType = json['CloudType'];
     miniGameId = json['miniGameId'];
