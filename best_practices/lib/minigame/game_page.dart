@@ -29,6 +29,9 @@ class MiniGamePageState extends State<MiniGamePage> {
     roomID: widget.roomID,
   );
 
+  List<StreamSubscription<dynamic>?> subscriptions = [];
+  List<String> streamIDList = [];
+
   @override
   void initState() {
     super.initState();
@@ -36,6 +39,19 @@ class MiniGamePageState extends State<MiniGamePage> {
       demoGameController.init(); // you need uninit demoGameController in the PopScope block
       ZegoMiniGame().loadedStateNotifier.addListener(onloadedStateUpdated);
     });
+
+    subscriptions.add(ZEGOSDKManager().expressService.streamListUpdateStreamCtrl.stream.listen(onStreamListUpdate));
+
+    loginRoom();
+  }
+
+  @override
+  void dispose() {
+    for (final subscription in subscriptions) {
+      subscription?.cancel();
+    }
+    ZEGOSDKManager().logoutRoom();
+    super.dispose();
   }
 
   void onloadedStateUpdated() {
@@ -70,5 +86,34 @@ class MiniGamePageState extends State<MiniGamePage> {
         ),
       ),
     );
+  }
+
+  void loginRoom() {
+    ZEGOSDKManager().loginRoom(widget.roomID, ZegoScenario.HighQualityChatroom).then((value) {
+      if (value.errorCode == 0) {
+        ZEGOSDKManager().expressService.turnMicrophoneOn(true);
+        ZEGOSDKManager().expressService.setAudioRouteToSpeaker(true);
+        ZEGOSDKManager().expressService.turnCameraOn(false);
+        final streamID = '${widget.roomID}_${ZEGOSDKManager().currentUser!.userID}_main';
+        ZEGOSDKManager().expressService.startPublishingStream(streamID);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('join room fail: ${value.errorCode},${value.extendedData}')),
+        );
+        if (mounted) Navigator.of(context).pop();
+      }
+    });
+  }
+
+  void onStreamListUpdate(ZegoRoomStreamListUpdateEvent event) {
+    for (final stream in event.streamList) {
+      if (event.updateType == ZegoUpdateType.Add) {
+        streamIDList.add(stream.streamID);
+        ZEGOSDKManager().expressService.startPlayingStream(stream.streamID);
+      } else {
+        streamIDList.remove(stream.streamID);
+        ZEGOSDKManager().expressService.stopPlayingStream(stream.streamID);
+      }
+    }
   }
 }
