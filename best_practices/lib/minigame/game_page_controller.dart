@@ -137,25 +137,25 @@ class DemoGameController {
     } catch (e) {
       showSnackBar('loadGame:$e');
     }
-    try {
-      final exchangeUserCurrencyResult = await YourGameServer().exchangeUserCurrency(
-        gameID: gameID,
-        exchangeValue: 100,
-        outOrderId: DateTime.now().millisecondsSinceEpoch.toString(),
-      );
-      debugPrint('[APP]exchangeUserCurrencyResult: $exchangeUserCurrencyResult');
-    } catch (e) {
-      showSnackBar('exchangeUserCurrency:$e');
-    }
-    try {
-      final getUserCurrencyResult = await YourGameServer().getUserCurrency(
-        userID: userID,
-        gameID: gameID,
-      );
-      debugPrint('[APP]getUserCurrencyResult: $getUserCurrencyResult');
-    } catch (e) {
-      showSnackBar('getUserCurrency:$e');
-    }
+    // try {
+    //   final exchangeUserCurrencyResult = await YourGameServer().exchangeUserCurrency(
+    //     gameID: gameID,
+    //     exchangeValue: 100,
+    //     outOrderId: DateTime.now().millisecondsSinceEpoch.toString(),
+    //   );
+    //   debugPrint('[APP]exchangeUserCurrencyResult: $exchangeUserCurrencyResult');
+    // } catch (e) {
+    //   showSnackBar('exchangeUserCurrency:$e');
+    // }
+    // try {
+    //   final getUserCurrencyResult = await YourGameServer().getUserCurrency(
+    //     userID: userID,
+    //     gameID: gameID,
+    //   );
+    //   debugPrint('[APP]getUserCurrencyResult: $getUserCurrencyResult');
+    // } catch (e) {
+    //   showSnackBar('getUserCurrency:$e');
+    // }
   }
 
   Widget quitGameButton(BuildContext context) {
