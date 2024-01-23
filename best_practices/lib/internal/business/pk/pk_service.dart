@@ -416,7 +416,7 @@ class PKService implements PKServiceInterface {
       double left, top, right, bottom;
       for (var i = 0; i < streamList.length; i++) {
         left = cellWidth * (i % column);
-        top = cellHeight * (i < column ? 0 : 1);
+        top = cellHeight * (i ~/ column);
         right = left + cellWidth;
         bottom = top + cellHeight;
         final rect = Rect.fromLTRB(left, top, right, bottom);
