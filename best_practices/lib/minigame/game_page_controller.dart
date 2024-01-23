@@ -5,12 +5,7 @@ String get attributeKeyRoomGame => 'game_id';
 class DemoGameController {
   final String userID;
   final String userName;
-  final String roomID;
-  DemoGameController({
-    required this.userID,
-    required this.userName,
-    required this.roomID,
-  });
+  DemoGameController({required this.userID, required this.userName});
 
   void init() {
     ZegoMiniGame().loadedStateNotifier.addListener(onloadedStateUpdated);
@@ -59,21 +54,6 @@ class DemoGameController {
     );
   }
 
-  Widget gameButton() {
-    return ValueListenableBuilder(
-      valueListenable: ZegoMiniGame().loadedStateNotifier,
-      builder: (context, bool loaded, _) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            if (loaded) ...[startGameButton(), const SizedBox(width: 10)],
-            if (!loaded) loadGameButton(context) else quitGameButton(context),
-          ],
-        );
-      },
-    );
-  }
-
   Widget startGameButton() {
     return ValueListenableBuilder(
       valueListenable: ZegoMiniGame().gameStateNotifier,
@@ -92,36 +72,7 @@ class DemoGameController {
     );
   }
 
-  Widget loadGameButton(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () async {
-        showGameListView(context).then((ZegoGameInfo? gameInfo) async {
-          if (gameInfo != null) {
-            final gameID = gameInfo.miniGameId!;
-            debugPrint('loadGame: $gameID');
-            final gameList = ZegoMiniGame().getAllGameList();
-            // If the gameList has not been loaded successfully at this time,
-            // wait here for the game list to be loaded and then proceed to load the game.
-            if (gameList.value.where((e) => e.miniGameId == gameID).isEmpty) {
-              void onGameListUpdate() {
-                if (gameList.value.where((e) => e.miniGameId == gameID).isNotEmpty) {
-                  gameList.removeListener(onGameListUpdate);
-                  loadGame(gameID);
-                }
-              }
-
-              gameList.addListener(onGameListUpdate);
-            } else {
-              loadGame(gameID);
-            }
-          }
-        });
-      },
-      child: const Text('Game List'),
-    );
-  }
-
-  Future<void> loadGame(String gameID) async {
+  Future<void> loadGame({required String gameID, required String roomID}) async {
     try {
       await ZegoMiniGame().loadGame(
         gameID: gameID,
@@ -137,32 +88,6 @@ class DemoGameController {
     } catch (e) {
       showSnackBar('loadGame:$e');
     }
-    // try {
-    //   final exchangeUserCurrencyResult = await YourGameServer().exchangeUserCurrency(
-    //     gameID: gameID,
-    //     exchangeValue: 100,
-    //     outOrderId: DateTime.now().millisecondsSinceEpoch.toString(),
-    //   );
-    //   debugPrint('[APP]exchangeUserCurrencyResult: $exchangeUserCurrencyResult');
-    // } catch (e) {
-    //   showSnackBar('exchangeUserCurrency:$e');
-    // }
-    // try {
-    //   final getUserCurrencyResult = await YourGameServer().getUserCurrency(
-    //     userID: userID,
-    //     gameID: gameID,
-    //   );
-    //   debugPrint('[APP]getUserCurrencyResult: $getUserCurrencyResult');
-    // } catch (e) {
-    //   showSnackBar('getUserCurrency:$e');
-    // }
-  }
-
-  Widget quitGameButton(BuildContext context) {
-    return ElevatedButton(
-      onPressed: unloadGame,
-      child: const Text('Quit'),
-    );
   }
 
   Future<void> unloadGame() async {
