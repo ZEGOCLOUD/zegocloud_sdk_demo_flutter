@@ -159,6 +159,10 @@ class ExpressService {
     ZegoExpressEngine.instance.mutePublishStreamAudio(!isOn);
   }
 
+  void setAudioDeviceMode(ZegoAudioDeviceMode mode) {
+    ZegoExpressEngine.instance.setAudioDeviceMode(mode);
+  }
+
   Future<void> startPlayingStream(String streamID,
       {ZegoViewMode viewMode = ZegoViewMode.AspectFill, ZegoPlayerConfig? config}) async {
     final userID = streamMap[streamID];

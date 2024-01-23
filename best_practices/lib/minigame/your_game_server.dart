@@ -8,7 +8,6 @@ import 'service/impl/zegocloud_token.dart';
 
 class YourGameServer {
   final miniGameHostUrl = 'https://mini-game-test-server.zego.im';
-  // final miniGameHostUrl = 'http://192.168.38.62:3020';
   final apiToken = 'api/token';
   final apiGetUserCurrency = 'api/getUserCurrency';
   final apiExchangeUserCurrency = 'api/exchangeUserCurrency';

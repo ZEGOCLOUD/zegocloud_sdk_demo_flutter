@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 
 import '../../zego_sdk_key_center.dart';
 import '../../zego_sdk_manager.dart';
+import '../components/common/zego_speaker_button.dart';
+import '../components/common/zego_toggle_microphone_button.dart';
 import '../main.dart';
 import 'service/mini_game_api.dart';
 import 'ui/show_game_list_view.dart';
@@ -76,11 +78,9 @@ class MiniGamePageState extends State<MiniGamePage> {
             fit: StackFit.expand,
             children: [
               demoGameController.gameView(),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: demoGameController.gameButton(),
-              ),
+              Positioned(bottom: 0, right: 0, child: demoGameController.gameButton()),
+              Positioned(bottom: 50, right: 10, child: microphoneButton()),
+              Positioned(bottom: 50, right: 70, child: speakerButton()),
             ],
           ),
         ),
@@ -88,14 +88,18 @@ class MiniGamePageState extends State<MiniGamePage> {
     );
   }
 
+  SizedBox microphoneButton() => const SizedBox(width: 50, height: 50, child: ZegoToggleMicrophoneButton());
+  SizedBox speakerButton() => const SizedBox(width: 50, height: 50, child: ZegoSpeakerButton());
+
   void loginRoom() {
     ZEGOSDKManager().loginRoom(widget.roomID, ZegoScenario.HighQualityChatroom).then((value) {
       if (value.errorCode == 0) {
-        ZEGOSDKManager().expressService.turnMicrophoneOn(true);
-        ZEGOSDKManager().expressService.setAudioRouteToSpeaker(true);
-        ZEGOSDKManager().expressService.turnCameraOn(false);
-        final streamID = '${widget.roomID}_${ZEGOSDKManager().currentUser!.userID}_main';
-        ZEGOSDKManager().expressService.startPublishingStream(streamID);
+        ZEGOSDKManager().expressService
+          ..setAudioDeviceMode(ZegoAudioDeviceMode.Communication3)
+          ..turnCameraOn(false)
+          ..turnMicrophoneOn(true)
+          ..setAudioRouteToSpeaker(true)
+          ..startPublishingStream('${widget.roomID}_${ZEGOSDKManager().currentUser!.userID}_main');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('join room fail: ${value.errorCode},${value.extendedData}')),
