@@ -38,7 +38,8 @@ class MiniGamePageState extends State<MiniGamePage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      demoGameController.init(); // you need uninit demoGameController in the PopScope block
+      // Due to the limitations of inappWebView, you must init demoGameController in this PostFrameCallback
+      demoGameController.init();
       ZegoMiniGame().loadedStateNotifier.addListener(onloadedStateUpdated);
     });
 
@@ -64,10 +65,12 @@ class MiniGamePageState extends State<MiniGamePage> {
 
   @override
   Widget build(BuildContext context) {
+    // If there is a compilation error about PopScope here, please try upgrading the Flutter version."
     return PopScope(
       onPopInvoked: (bool didPop) async {
         if (didPop) {
           ZegoMiniGame().loadedStateNotifier.removeListener(onloadedStateUpdated);
+          // Due to the limitations of inappWebView, you must uninit demoGameController in this onPopInvoked callback.
           await demoGameController.uninit();
         }
       },
