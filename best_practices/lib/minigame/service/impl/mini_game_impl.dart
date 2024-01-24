@@ -27,6 +27,8 @@ extension ZegoMiniGameInner on ZegoMiniGame {
     required String token,
     GameLanguage language = GameLanguage.english,
   }) async {
+    loadedStateNotifier.value = false;
+    gameStateNotifier.value = ZegoGameState.idel;
     final jsonParams = jsonEncode({
       'appID': appID,
       'token': token,

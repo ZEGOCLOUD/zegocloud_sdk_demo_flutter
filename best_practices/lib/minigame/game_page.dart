@@ -37,16 +37,12 @@ class MiniGamePageState extends State<MiniGamePage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      // Due to the limitations of inappWebView, you must init demoGameController in this PostFrameCallback
-      demoGameController.init();
-      ZegoMiniGame().loadedStateNotifier.addListener(onloadedStateUpdated);
-    });
     final expressService = ZEGOSDKManager().expressService;
     subscriptions.addAll([
       expressService.streamListUpdateStreamCtrl.stream.listen(onStreamListUpdate),
       expressService.roomStateChangedStreamCtrl.stream.listen(onExpressRoomStateChanged),
     ]);
+    ZegoMiniGame().loadedStateNotifier.addListener(onloadedStateUpdated);
   }
 
   @override
@@ -55,49 +51,39 @@ class MiniGamePageState extends State<MiniGamePage> {
       subscription?.cancel();
     }
     logoutRTCRoom();
+    ZegoMiniGame().loadedStateNotifier.removeListener(onloadedStateUpdated);
+    ZegoMiniGame().unloadGame();
+    ZegoMiniGame().uninitGameSDK();
+    ZegoMiniGame().uninitWebViewController();
     super.dispose();
-  }
-
-  void onloadedStateUpdated() {
-    if (!ZegoMiniGame().loadedStateNotifier.value && mounted) {
-      Navigator.of(context).pop();
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     // If there is a compilation error about PopScope here, please try upgrading the Flutter version."
-    return PopScope(
-      onPopInvoked: (bool didPop) async {
-        if (didPop) {
-          ZegoMiniGame().loadedStateNotifier.removeListener(onloadedStateUpdated);
-          // Due to the limitations of inappWebView, you must uninit demoGameController in this onPopInvoked callback.
-          await demoGameController.uninit();
-        }
-      },
-      child: SafeArea(
-        child: Scaffold(
-          appBar: AppBar(title: const Text('ZegoMiniGame')),
-          body: ValueListenableBuilder(
-              valueListenable: ZegoMiniGame().loadedStateNotifier,
-              builder: (context, gameLoaded, _) {
-                return ValueListenableBuilder(
-                    valueListenable: rtcRoomConnected,
-                    builder: (context, rtcRoomConnected, _) {
-                      return Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          demoGameController.gameView(),
-                          if (gameLoaded)
-                            Positioned(bottom: 0, right: 0, child: quitGameButton())
-                          else
-                            Positioned(bottom: 200, right: 0, left: 0, child: Center(child: startMatchButton())),
-                          if (rtcRoomConnected) Positioned(bottom: 50, right: 10, child: microphoneButton()),
-                          if (rtcRoomConnected) Positioned(bottom: 50, right: 70, child: speakerButton()),
-                        ],
-                      );
-                    });
-              }),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(title: const Text('ZegoMiniGame')),
+        body: ValueListenableBuilder(
+          valueListenable: ZegoMiniGame().loadedStateNotifier,
+          builder: (context, gameLoaded, _) {
+            return ValueListenableBuilder(
+                valueListenable: rtcRoomConnected,
+                builder: (context, rtcRoomConnected, _) {
+                  return Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      demoGameController.gameView(),
+                      if (gameLoaded)
+                        Positioned(bottom: 0, right: 0, child: quitGameButton())
+                      else
+                        Positioned(bottom: 200, right: 0, left: 0, child: Center(child: startMatchButton())),
+                      if (rtcRoomConnected) Positioned(bottom: 50, right: 10, child: microphoneButton()),
+                      if (rtcRoomConnected) Positioned(bottom: 50, right: 70, child: speakerButton()),
+                    ],
+                  );
+                });
+          },
         ),
       ),
     );
@@ -176,6 +162,12 @@ class MiniGamePageState extends State<MiniGamePage> {
 
   void logoutRTCRoom() {
     ZEGOSDKManager().logoutRoom();
+  }
+
+  void onloadedStateUpdated() {
+    if (!ZegoMiniGame().loadedStateNotifier.value && mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   void onStreamListUpdate(ZegoRoomStreamListUpdateEvent event) {

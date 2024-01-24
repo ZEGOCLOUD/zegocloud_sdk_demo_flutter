@@ -8,18 +8,13 @@ class DemoGameController {
   DemoGameController({required this.userID, required this.userName});
 
   void init() {
-    ZegoMiniGame().loadedStateNotifier.addListener(onloadedStateUpdated);
+    //
   }
 
   Future<void> uninit() async {
-    ZegoMiniGame().loadedStateNotifier.removeListener(onloadedStateUpdated);
     await ZegoMiniGame().unloadGame();
     await ZegoMiniGame().uninitGameSDK();
     await ZegoMiniGame().uninitWebViewController();
-  }
-
-  void onloadedStateUpdated() {
-    debugPrint('onloadedStateUpdated: ${ZegoMiniGame().loadedStateNotifier.value}');
   }
 
   String? currentGameID;
