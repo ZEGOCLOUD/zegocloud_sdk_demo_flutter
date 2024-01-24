@@ -60,7 +60,6 @@ class MiniGamePageState extends State<MiniGamePage> {
 
   @override
   Widget build(BuildContext context) {
-    // If there is a compilation error about PopScope here, please try upgrading the Flutter version."
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(title: const Text('ZegoMiniGame')),
