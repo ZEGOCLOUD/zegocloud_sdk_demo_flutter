@@ -7,16 +7,6 @@ class DemoGameController {
   final String userName;
   DemoGameController({required this.userID, required this.userName});
 
-  void init() {
-    //
-  }
-
-  Future<void> uninit() async {
-    await ZegoMiniGame().unloadGame();
-    await ZegoMiniGame().uninitGameSDK();
-    await ZegoMiniGame().uninitWebViewController();
-  }
-
   String? currentGameID;
 
   Widget gameView() {
@@ -46,24 +36,6 @@ class DemoGameController {
           debugPrint('[InAppWebView][${msg.messageLevel}]${msg.message}');
         },
       ),
-    );
-  }
-
-  Widget startGameButton() {
-    return ValueListenableBuilder(
-      valueListenable: ZegoMiniGame().gameStateNotifier,
-      builder: (context, ZegoGameState gameState, _) {
-        if (gameState != ZegoGameState.playing) {
-          return ElevatedButton(
-            onPressed: () async {
-              startGame([userID]);
-            },
-            child: const Text('Start'),
-          );
-        } else {
-          return const SizedBox.shrink();
-        }
-      },
     );
   }
 
