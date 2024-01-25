@@ -52,13 +52,13 @@
       return new Promise((resolve, reject) => {
         ZegoMiniGameEngine.init(data.appID, data.token, data.userInfo).then((instance) => {
           gameInstance = instance;
-          instance.on("tokenWillExpire", tokenWillExpire); // token过期回调
-          instance.on("unloaded", unloaded); // 游戏被销毁通知
+          instance.on("tokenWillExpire", tokenWillExpire); // Token expiration callback
+          instance.on("unloaded", unloaded); // Game destruction notification
           instance.on("languageChanged", languageChanged);
-          instance.on("chargeRequire", chargeRequire); // 金币不足提示通知
-          instance.on("playerStateUpdate", playerStateUpdate); // 参与游戏的玩家状态更新
-          instance.on("gameStateUpdate", gameStateUpdate); // 游戏状态更新
-          instance.on("loadStateUpdate", loadStateUpdate); // 游戏加载状态更新通知
+          instance.on("chargeRequire", chargeRequire); // Insufficient gold coins prompt notification
+          instance.on("playerStateUpdate", playerStateUpdate); // Player status update for participating in the game
+          instance.on("gameStateUpdate", gameStateUpdate); // Game status update
+          instance.on("loadStateUpdate", loadStateUpdate); // Game loading status update notification'
           instance.on("actionEventUpdate", actionEventUpdate);
           instance.on("gameOverDetailUpdate", gameOverDetailUpdate);
           instance.on("gameError", gameError);
@@ -284,19 +284,6 @@
         ins.updateToken(token);
         console.warn('[js-updateToken:token]');
       }
-    }
-
-
-    function judgeNumber(num) {
-      var promise1 = new Promise(function (resolve, reject) {
-        num = 5;
-        if (num < 5) {
-          resolve("num小于5，值为：" + num);
-        } else {
-          reject("num不小于5，值为：" + num);
-        }
-      });
-      return promise1;
     }
   </script>
 </body>
