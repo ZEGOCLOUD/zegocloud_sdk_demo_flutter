@@ -52,9 +52,6 @@ class MiniGamePageState extends State<MiniGamePage> {
     }
     logoutRTCRoom();
     ZegoMiniGame().loadedStateNotifier.removeListener(onloadedStateUpdated);
-    ZegoMiniGame().unloadGame();
-    ZegoMiniGame().uninitGameSDK();
-    ZegoMiniGame().uninitWebViewController();
     super.dispose();
   }
 

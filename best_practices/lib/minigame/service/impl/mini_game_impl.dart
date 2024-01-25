@@ -125,24 +125,29 @@ extension ZegoMiniGameInner on ZegoMiniGame {
   }
 
   Future<CallAsyncJavaScriptResult> _miniGameChannel(String jsCode) async {
-    if (jsCode.contains('await')) {
-      debugPrint('$logTag[channel] callAsyncJS.jsCode: $jsCode');
-      return (await webViewController).callAsyncJavaScript(functionBody: jsCode).then((result) {
-        debugPrint('$logTag[channel] callAsyncJS.then: $result');
-        return result ?? CallAsyncJavaScriptResult(error: 'result is null', value: null);
-      }).catchError((error) {
-        debugPrint('$logTag[channel] callAsyncJS.catchError: $error');
-        return CallAsyncJavaScriptResult(error: error.toString(), value: null);
-      });
-    } else {
-      debugPrint('$logTag[channel] evaluateJS.jsCode: $jsCode');
-      return (await webViewController).evaluateJavascript(source: jsCode).then((result) {
-        debugPrint('$logTag[channel] evaluateJS.then: $result');
-        return CallAsyncJavaScriptResult(error: null, value: result);
-      }).catchError((error) {
-        debugPrint('$logTag[channel] evaluateJS.catchError: $error');
-        return CallAsyncJavaScriptResult(error: error.toString(), value: null);
-      });
+    try {
+      if (jsCode.contains('await')) {
+        debugPrint('$logTag[channel] callAsyncJS.jsCode: $jsCode');
+        return (await webViewController).callAsyncJavaScript(functionBody: jsCode).then((result) {
+          debugPrint('$logTag[channel] callAsyncJS.then: $result');
+          return result ?? CallAsyncJavaScriptResult(error: 'result is null', value: null);
+        }).catchError((error) {
+          debugPrint('$logTag[channel] callAsyncJS.catchError: $error');
+          return CallAsyncJavaScriptResult(error: error.toString(), value: null);
+        });
+      } else {
+        debugPrint('$logTag[channel] evaluateJS.jsCode: $jsCode');
+        return (await webViewController).evaluateJavascript(source: jsCode).then((result) {
+          debugPrint('$logTag[channel] evaluateJS.then: $result');
+          return CallAsyncJavaScriptResult(error: null, value: result);
+        }).catchError((error) {
+          debugPrint('$logTag[channel] evaluateJS.catchError: $error');
+          return CallAsyncJavaScriptResult(error: error.toString(), value: null);
+        });
+      }
+    } catch (e) {
+      debugPrint('$logTag[channel] catchError: $e, ');
+      return CallAsyncJavaScriptResult(error: '$e', value: e);
     }
   }
 
