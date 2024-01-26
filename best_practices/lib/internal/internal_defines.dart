@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:zego_express_engine/zego_express_engine.dart';
 import 'package:zego_zim/zego_zim.dart';
 
-
 export 'package:zego_express_engine/zego_express_engine.dart';
 export 'package:zego_zim/zego_zim.dart';
 
@@ -120,6 +119,17 @@ class ZegoMixerSoundLevelUpdateEvent {
   @override
   String toString() {
     return 'ZegoMixerSoundLevelUpdateEvent{soundLevels: $soundLevels}';
+  }
+}
+
+class ZegoPlayerStateChangeEvent {
+  final ZegoMediaPlayerState state;
+  final int errorCode;
+
+  ZegoPlayerStateChangeEvent({required this.state, required this.errorCode});
+   @override
+  String toString() {
+    return 'ZegoPlayerStateChangeEvent{state: $state, errorCode:$errorCode}';
   }
 }
 
