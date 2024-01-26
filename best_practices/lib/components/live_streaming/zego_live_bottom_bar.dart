@@ -8,6 +8,7 @@ import '../../zego_sdk_manager.dart';
 import '../common/zego_switch_camera_button.dart';
 import '../common/zego_toggle_camera_button.dart';
 import '../common/zego_toggle_microphone_button.dart';
+import '../gift/gift_list_sheet.dart';
 
 class ZegoLiveBottomBar extends StatefulWidget {
   const ZegoLiveBottomBar({
@@ -61,7 +62,7 @@ class _ZegoLiveBottomBarState extends State<ZegoLiveBottomBar> {
             children: [
               const SizedBox(width: 50, height: 50),
               const SizedBox(width: 50, height: 50),
-              const SizedBox(width: 50, height: 50),
+              giftButton(),
               if (state) cancelApplyCohostButton() else applyCoHostButton(),
             ],
           );
@@ -74,10 +75,24 @@ class _ZegoLiveBottomBarState extends State<ZegoLiveBottomBar> {
           toggleMicButton(),
           toggleCameraButton(),
           switchCameraButton(),
+          giftButton(),
           endCohostButton(),
         ],
       );
     }
+  }
+
+  Widget giftButton() {
+    return SizedBox(
+      width: 50,
+      height: 50,
+      child: IconButton(
+          color: Colors.white,
+          onPressed: () {
+            showGiftListSheet(context);
+          },
+          icon: const Icon(Icons.blender)),
+    );
   }
 
   Widget toggleMicButton() {
