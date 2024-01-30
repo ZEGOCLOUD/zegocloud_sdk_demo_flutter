@@ -8,9 +8,14 @@ import '../../components/common/common_button.dart';
 import '../../components/common/zego_apply_cohost_list_page.dart';
 import '../../components/common/zego_audio_video_view.dart';
 import '../../components/common/zego_member_button.dart';
+import '../../components/gift/mp4_player_widget.dart';
+import '../../components/gift/svga_player_widget.dart';
 import '../../components/live_streaming/zego_live_bottom_bar.dart';
 import '../../components/pk/pk_button.dart';
 import '../../components/pk/pk_container.dart';
+import '../../internal/business/gift/defines.dart';
+import '../../internal/business/gift/gift_data.dart';
+import '../../internal/business/gift/gift_manager.dart';
 import '../../internal/sdk/zim/Define/zim_room_request.dart';
 import '../../utils/zegocloud_token.dart';
 import '../../zego_live_streaming_manager.dart';
@@ -92,11 +97,24 @@ class ZegoLivePageState extends State<ZegoLivePage> {
       ZEGOSDKManager().expressService.turnMicrophoneOn(true);
       ZEGOSDKManager().expressService.startPreview();
     }
+
+    ZegoGiftManager().cache.cacheAllFiles(giftItemList);
+    ZegoGiftManager().service.recvNotifier.addListener(onGiftReceived);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      ZegoGiftManager().service.init(
+            appID: SDKKeyCenter.appID,
+            liveID: widget.roomID,
+            localUserID: ZEGOSDKManager().currentUser!.userID,
+            localUserName: 'user_${ZEGOSDKManager().currentUser!.userID}',
+          );
+    });
   }
 
   @override
   void dispose() {
     super.dispose();
+    ZegoGiftManager().service.recvNotifier.removeListener(onGiftReceived);
+    ZegoGiftManager().service.uninit();
     liveStreamingManager
       ..leaveRoom()
       ..uninit();
@@ -126,6 +144,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
                   Positioned(bottom: 120, left: 30, child: cohostRequestListButton(isLiveing, pkState)),
                   Positioned(bottom: 80, left: 30, child: pkButton(isLiveing, pkState)),
                   Positioned(left: 0, right: 0, bottom: 20, child: bottomBar(isLiveing, pkState)),
+                  giftForeground()
                 ],
               ),
             );
@@ -292,6 +311,133 @@ class ZegoLivePageState extends State<ZegoLivePage> {
     }
   }
 
+  Widget giftForeground() {
+    return ValueListenableBuilder<PlayData?>(
+      valueListenable: ZegoGiftManager().playList.playingDataNotifier,
+      builder: (context, playData, _) {
+        if (null == playData) {
+          return const SizedBox.shrink();
+        }
+
+        if (playData.giftItem.type == ZegoGiftType.svga) {
+          return svgaWidget(playData);
+        } else {
+          return mp4Widget(playData);
+        }
+      },
+    );
+  }
+
+  Widget svgaWidget(PlayData playData) {
+    if (playData.giftItem.type != ZegoGiftType.svga) {
+      return const SizedBox.shrink();
+    }
+
+    /// you can define the area and size for displaying your own
+    /// animations here
+    int level = 1;
+    if (playData.giftItem.weight < 10) {
+      level = 1;
+    } else if (playData.giftItem.weight < 100) {
+      level = 2;
+    } else {
+      level = 3;
+    }
+    switch (level) {
+      case 2:
+        return Positioned(
+          top: 100,
+          bottom: 100,
+          left: 10,
+          right: 10,
+          child: ZegoSvgaPlayerWidget(
+            key: UniqueKey(),
+            playData: playData,
+            onPlayEnd: () {
+              ZegoGiftManager().playList.next();
+            },
+          ),
+        );
+      case 3:
+        return ZegoSvgaPlayerWidget(
+          key: UniqueKey(),
+          playData: playData,
+          onPlayEnd: () {
+            ZegoGiftManager().playList.next();
+          },
+        );
+    }
+    // level 1
+    return Positioned(
+      bottom: 200,
+      left: 10,
+      child: ZegoSvgaPlayerWidget(
+        key: UniqueKey(),
+        size: const Size(100, 100),
+        playData: playData,
+        onPlayEnd: () {
+          /// if there is another gift animation, then play
+          ZegoGiftManager().playList.next();
+        },
+      ),
+    );
+  }
+
+  Widget mp4Widget(PlayData playData) {
+    if (playData.giftItem.type != ZegoGiftType.mp4) {
+      return const SizedBox.shrink();
+    }
+
+    /// you can define the area and size for displaying your own
+    /// animations here
+    int level = 1;
+    if (playData.giftItem.weight < 10) {
+      level = 1;
+    } else if (playData.giftItem.weight < 100) {
+      level = 2;
+    } else {
+      level = 3;
+    }
+    switch (level) {
+      case 2:
+        return Positioned(
+          top: 100,
+          bottom: 100,
+          left: 10,
+          right: 10,
+          child: ZegoMp4PlayerWidget(
+            key: UniqueKey(),
+            playData: playData,
+            onPlayEnd: () {
+              ZegoGiftManager().playList.next();
+            },
+          ),
+        );
+      case 3:
+        return ZegoMp4PlayerWidget(
+          key: UniqueKey(),
+          playData: playData,
+          onPlayEnd: () {
+            ZegoGiftManager().playList.next();
+          },
+        );
+    }
+    // level 1
+    return Positioned(
+      bottom: 200,
+      left: 10,
+      child: ZegoMp4PlayerWidget(
+        key: UniqueKey(),
+        size: const Size(100, 100),
+        playData: playData,
+        onPlayEnd: () {
+          /// if there is another gift animation, then play
+          ZegoGiftManager().playList.next();
+        },
+      ),
+    );
+  }
+
   void onExpressRoomStateChanged(ZegoRoomStateEvent event) {
     debugPrint('LivePage:onExpressRoomStateChanged: $event');
     if (event.errorCode != 0) {
@@ -397,5 +543,19 @@ class ZegoLivePageState extends State<ZegoLivePage> {
         );
       },
     ).whenComplete(() => showingPKDialog = false);
+  }
+
+  void onGiftReceived() {
+    final receivedGift = ZegoGiftManager().service.recvNotifier.value ?? ZegoGiftProtocolItem.empty();
+    final giftData = queryGiftInItemList(receivedGift.name);
+    if (null == giftData) {
+      debugPrint('not ${receivedGift.name} exist');
+      return;
+    }
+
+    ZegoGiftManager().playList.add(PlayData(
+          giftItem: giftData,
+          count: receivedGift.count,
+        ));
   }
 }

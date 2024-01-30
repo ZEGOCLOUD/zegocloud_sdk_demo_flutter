@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:convert' as convert;
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../internal_defines.dart';
 import 'express_service.dart';
+import 'express_service_media.dart';
 
 export 'package:pkbattles/internal/business/business_define.dart';
 export 'package:zego_express_engine/zego_express_engine.dart';
@@ -54,6 +56,9 @@ class ExpressService {
     initEventHandle();
     ZegoExpressEngine.setEngineConfig(ZegoEngineConfig(advancedConfig: {'vcap_external_mem_class': '1'}));
     final profile = ZegoEngineProfile(appID, scenario, appSign: appSign);
+    if (Platform.isIOS) {
+      profile.enablePlatformView = true;
+    }
     currentScenario = scenario;
     await ZegoExpressEngine.createEngineWithProfile(profile);
     ZegoExpressEngine.setEngineConfig(ZegoEngineConfig(advancedConfig: {
@@ -205,6 +210,7 @@ class ExpressService {
   final recvVideoFirstFrameCtrl = StreamController<ZegoRecvVideoFirstFrameEvent>.broadcast();
   final recvSEICtrl = StreamController<ZegoRecvSEIEvent>.broadcast();
   final mixerSoundLevelUpdateCtrl = StreamController<ZegoMixerSoundLevelUpdateEvent>.broadcast();
+  final onMediaPlayerStateUpdateCtrl = StreamController<ZegoPlayerStateChangeEvent>.broadcast();
 
   void uninitEventHandle() {
     ZegoExpressEngine.onRoomStreamUpdate = null;
@@ -219,6 +225,8 @@ class ExpressService {
     ZegoExpressEngine.onPlayerRecvVideoFirstFrame = null;
     ZegoExpressEngine.onPlayerRecvSEI = null;
     ZegoExpressEngine.onPublisherStateUpdate = null;
+    ZegoExpressEngine.onMediaPlayerFirstFrameEvent = null;
+    ZegoExpressEngine.onMediaPlayerStateUpdate = null;
   }
 
   void initEventHandle() {
@@ -234,6 +242,7 @@ class ExpressService {
     ZegoExpressEngine.onPlayerRecvSEI = ExpressService().onPlayerRecvSEI;
     ZegoExpressEngine.onRoomExtraInfoUpdate = ExpressService().onRoomExtraInfoUpdate;
     ZegoExpressEngine.onPublisherStateUpdate = ExpressService().onPublisherStateUpdate;
+    ZegoExpressEngine.onMediaPlayerStateUpdate = ExpressService().onMediaPlayerStateUpdate;
   }
 
   void onRoomUserUpdate(
