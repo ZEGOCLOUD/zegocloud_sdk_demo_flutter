@@ -103,8 +103,8 @@ class _ZegoPKContainerViewState extends State<ZegoPKContainerView> {
   }
 
   Rect conversionRect(Rect originalRect, BoxConstraints constraints) {
-    final wRatio = constraints.maxWidth / 972.0;
-    final hRatio = constraints.maxHeight / 864.0;
+    final wRatio = constraints.maxWidth / 810.0;
+    final hRatio = constraints.maxHeight / 720.0;
     return Rect.fromLTRB(originalRect.left * wRatio, originalRect.top * hRatio, originalRect.right * wRatio,
         originalRect.bottom * hRatio);
   }
