@@ -290,7 +290,7 @@ extension PKServiceZIMExtension on PKService {
         seiTimeMap[pkuser.userID] = DateTime.now().millisecondsSinceEpoch;
       }
       if (pkInfo == null) {
-        if (ZegoLiveStreamingManager().hostNoti.value != null) {
+        if (ZegoLiveStreamingManager().hostNotifier.value != null) {
           pkInfo = PKInfo()
             ..requestID = requestId ?? ''
             ..pkUserList.value = pkUserList;

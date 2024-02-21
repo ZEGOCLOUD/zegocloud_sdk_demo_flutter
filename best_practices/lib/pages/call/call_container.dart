@@ -33,7 +33,7 @@ class CallContainerState extends State<CallContainer> {
     final callManager = ZegoCallManager();
     subscriptions.addAll([
       callManager.onCallUserQuitStreamCtrl.stream.listen(onCallUserQuit),
-      callManager.outgoingCallInvitationTimeoutSreamCtrl.stream.listen(onOutgoingCallTimeOut),
+      callManager.outgoingCallInvitationTimeoutStreamCtrl.stream.listen(onOutgoingCallTimeOut),
       callManager.onCallUserUpdateStreamCtrl.stream.listen(onCallUserUpdate)
     ]);
 

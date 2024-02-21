@@ -43,7 +43,7 @@ class _ZegoPKContainerViewState extends State<ZegoPKContainerView> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<ZegoLiveStreamingRole>(
-        valueListenable: liveManager.currentUserRoleNoti,
+        valueListenable: liveManager.currentUserRoleNotifier,
         builder: (context, role, _) {
           if (role == ZegoLiveStreamingRole.host) {
             //is host

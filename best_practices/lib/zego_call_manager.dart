@@ -24,7 +24,7 @@ class ZegoCallManager implements ZegoCallManagerInterface {
 
   final incomingCallInvitationReceivedStreamCtrl = StreamController<IncomingCallInvitationReceivedEvent>.broadcast();
   final incomingCallInvitationTimeoutStreamCtrl = StreamController<IncomingUserRequestTimeoutEvent>.broadcast();
-  final outgoingCallInvitationTimeoutSreamCtrl = StreamController<OutgoingCallTimeoutEvent>.broadcast();
+  final outgoingCallInvitationTimeoutStreamCtrl = StreamController<OutgoingCallTimeoutEvent>.broadcast();
   final outgoingCallInvitationRejectedStreamCtrl = StreamController<OutgoingCallInvitationRejectedEvent>.broadcast();
   final onOutgoingCallInvitationAccepted = StreamController<OnOutgoingCallAcceptedEvent>.broadcast();
   final onCallUserQuitStreamCtrl = StreamController<CallUserQuitEvent>.broadcast();

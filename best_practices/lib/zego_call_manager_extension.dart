@@ -125,7 +125,7 @@ extension ZegoCallManagerExtension on ZegoCallManager {
             onReceiveCallUserQuit(event.requestID, userInfo);
             break;
           case ZIMCallUserState.timeout:
-            outgoingCallInvitationTimeoutSreamCtrl
+            outgoingCallInvitationTimeoutStreamCtrl
                 .add(OutgoingCallTimeoutEvent(userID: userInfo.userID, extendedData: userInfo.extendedData));
             if (localUser != null) {
               checkIfPKEnd(event.requestID, localUser!);

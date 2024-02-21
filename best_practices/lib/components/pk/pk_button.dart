@@ -20,7 +20,7 @@ class _PKButtonState extends State<PKButton> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<RoomPKState>(
-        valueListenable: ZegoLiveStreamingManager().pkStateNoti,
+        valueListenable: ZegoLiveStreamingManager().pkStateNotifier,
         builder: (context, pkState, _) {
           return CommonButton(
             onTap: () {

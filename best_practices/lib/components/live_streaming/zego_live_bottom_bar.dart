@@ -31,7 +31,7 @@ class _ZegoLiveBottomBarState extends State<ZegoLiveBottomBar> {
       return const SizedBox.shrink();
     } else {
       return ValueListenableBuilder<ZegoLiveStreamingRole>(
-        valueListenable: ZegoLiveStreamingManager().currentUserRoleNoti,
+        valueListenable: ZegoLiveStreamingManager().currentUserRoleNotifier,
         builder: (context, role, _) {
           return getBottomBar(role);
         },
@@ -134,7 +134,7 @@ class _ZegoLiveBottomBarState extends State<ZegoLiveBottomBar> {
           });
           ZEGOSDKManager()
               .zimService
-              .sendRoomRequest(ZegoLiveStreamingManager().hostNoti.value?.userID ?? '', signaling)
+              .sendRoomRequest(ZegoLiveStreamingManager().hostNotifier.value?.userID ?? '', signaling)
               .then((value) {
             widget.applying?.value = true;
             myRoomRequest = ZEGOSDKManager().zimService.roomRequestMapNoti.value[value.requestID];

@@ -20,21 +20,21 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
 
   List<ZegoMixerInput> Function(List<String> streamIDList, ZegoMixerVideoConfig videoConfig)? setMixerLayout;
 
-  ValueNotifier<ZegoLiveStreamingRole> currentUserRoleNoti = ValueNotifier(ZegoLiveStreamingRole.audience);
+  ValueNotifier<ZegoLiveStreamingRole> currentUserRoleNotifier = ValueNotifier(ZegoLiveStreamingRole.audience);
   ValueNotifier<bool> isLivingNotifier = ValueNotifier(false);
   List<StreamSubscription> subscriptions = [];
 
   PKInfo? get pkInfo => pkService?.pkInfo;
 
-  ValueNotifier<ZegoSDKUser?> get hostNoti => cohostService?.hostNoti ?? ValueNotifier(null);
+  ValueNotifier<ZegoSDKUser?> get hostNotifier => cohostService?.hostNoti ?? ValueNotifier(null);
 
-  ListNotifier<ZegoSDKUser> get coHostUserListNoti => cohostService?.coHostUserListNoti ?? ListNotifier([]);
+  ListNotifier<ZegoSDKUser> get coHostUserListNotifier => cohostService?.coHostUserListNoti ?? ListNotifier([]);
 
-  ValueNotifier<RoomPKState> get pkStateNoti => pkService?.pkStateNoti ?? ValueNotifier(RoomPKState.isNoPK);
+  ValueNotifier<RoomPKState> get pkStateNotifier => pkService?.pkStateNoti ?? ValueNotifier(RoomPKState.isNoPK);
 
-  ValueNotifier<bool> get isMuteAnotherAudioNoti => pkService?.isMuteAnotherAudioNoti ?? ValueNotifier(false);
+  ValueNotifier<bool> get isMuteAnotherAudioNotifier => pkService?.isMuteAnotherAudioNoti ?? ValueNotifier(false);
 
-  ValueNotifier<bool> get onPKViewAvaliableNoti => pkService?.onPKViewAvaliableNoti ?? ValueNotifier(false);
+  ValueNotifier<bool> get onPKViewAvailableNotifier => pkService?.onPKViewAvaliableNoti ?? ValueNotifier(false);
 
   ZegoSDKUser? get pkUser => pkService?.pkUser;
 
@@ -126,7 +126,7 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
     ZEGOSDKManager().expressService.turnMicrophoneOn(true);
     ZEGOSDKManager().expressService.startPreview();
     ZEGOSDKManager().expressService.startPublishingStream(coHostStreamID());
-    currentUserRoleNoti.value = ZegoLiveStreamingRole.coHost;
+    currentUserRoleNotifier.value = ZegoLiveStreamingRole.coHost;
     cohostService?.startCoHost();
   }
 
@@ -134,7 +134,7 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
   Future<void> endCoHost() async {
     ZEGOSDKManager().expressService.stopPreview();
     ZEGOSDKManager().expressService.stopPublishingStream();
-    currentUserRoleNoti.value = ZegoLiveStreamingRole.audience;
+    currentUserRoleNotifier.value = ZegoLiveStreamingRole.audience;
     cohostService?.endCoHost();
   }
 

@@ -224,7 +224,7 @@ class PKService implements PKServiceInterface {
   }
 
   void muteHostAudioVideo(bool mute) {
-    if (ZegoLiveStreamingManager().hostNoti.value != null) {
+    if (ZegoLiveStreamingManager().hostNotifier.value != null) {
       final hostMainStreamID = ZegoLiveStreamingManager().hostStreamID();
       ZEGOSDKManager().expressService.mutePlayStreamAudio(hostMainStreamID, mute);
       ZEGOSDKManager().expressService.mutePlayStreamVideo(hostMainStreamID, mute);
@@ -236,7 +236,7 @@ class PKService implements PKServiceInterface {
       return;
     }
     for (final pkuser in pkInfo!.pkUserList.value) {
-      if (pkuser.userID != ZegoLiveStreamingManager().hostNoti.value?.userID) {
+      if (pkuser.userID != ZegoLiveStreamingManager().hostNotifier.value?.userID) {
         ZEGOSDKManager().expressService.stopPlayingStream(pkuser.pkUserStream);
       }
     }
@@ -258,8 +258,8 @@ class PKService implements PKServiceInterface {
       return;
     }
     final pkMap = <String, String>{};
-    if (ZegoLiveStreamingManager().hostNoti.value != null) {
-      pkMap['host_user_id'] = ZegoLiveStreamingManager().hostNoti.value?.userID ?? '';
+    if (ZegoLiveStreamingManager().hostNotifier.value != null) {
+      pkMap['host_user_id'] = ZegoLiveStreamingManager().hostNotifier.value?.userID ?? '';
     }
     pkMap['request_id'] = pkInfo!.requestID ?? '';
 

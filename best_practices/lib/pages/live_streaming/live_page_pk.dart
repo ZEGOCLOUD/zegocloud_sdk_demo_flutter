@@ -5,6 +5,19 @@ import '../../zego_sdk_manager.dart';
 import 'live_page.dart';
 
 extension ZegoLiveStreamingPKBattleManagerEventConv on ZegoLivePageState {
+  void listenPKEvents() {
+    subscriptions.addAll([
+      liveStreamingManager.onPKBattleReceived.stream.listen(onPKRequestReceived),
+      liveStreamingManager.onPKBattleCancelStreamCtrl.stream.listen(onPKRequestCancelled),
+      liveStreamingManager.onPKBattleRejectedStreamCtrl.stream.listen(onPKRequestRejected),
+      liveStreamingManager.incomingPKRequestTimeoutStreamCtrl.stream.listen(onIncomingPKRequestTimeout),
+      liveStreamingManager.outgoingPKRequestAnsweredTimeoutStreamCtrl.stream.listen(onOutgoingPKRequestTimeout),
+      liveStreamingManager.onPKStartStreamCtrl.stream.listen(onPKStart),
+      liveStreamingManager.onPKEndStreamCtrl.stream.listen(onPKEnd),
+      liveStreamingManager.onPKUserConnectingCtrl.stream.listen(onPKUserConnecting),
+    ]);
+  }
+
   void onPKRequestReceived(PKBattleReceivedEvent event) {
     showPKDialog(event.requestID);
   }

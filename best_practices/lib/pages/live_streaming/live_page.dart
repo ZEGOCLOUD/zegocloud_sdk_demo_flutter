@@ -55,14 +55,6 @@ class ZegoLivePageState extends State<ZegoLivePage> {
     final expressService = ZEGOSDKManager().expressService;
     subscriptions.addAll([
       expressService.roomStateChangedStreamCtrl.stream.listen(onExpressRoomStateChanged),
-      liveStreamingManager.onPKBattleReceived.stream.listen(onPKRequestReceived),
-      liveStreamingManager.onPKBattleCancelStreamCtrl.stream.listen(onPKRequestCancelled),
-      liveStreamingManager.onPKBattleRejectedStreamCtrl.stream.listen(onPKRequestRejected),
-      liveStreamingManager.incomingPKRequestTimeoutStreamCtrl.stream.listen(onIncomingPKRequestTimeout),
-      liveStreamingManager.outgoingPKRequestAnsweredTimeoutStreamCtrl.stream.listen(onOutgoingPKRequestTimeout),
-      liveStreamingManager.onPKStartStreamCtrl.stream.listen(onPKStart),
-      liveStreamingManager.onPKEndStreamCtrl.stream.listen(onPKEnd),
-      liveStreamingManager.onPKUserConnectingCtrl.stream.listen(onPKUserConnecting),
       zimService.roomStateChangedStreamCtrl.stream.listen(onZIMRoomStateChanged),
       zimService.connectionStateStreamCtrl.stream.listen(onZIMConnectionStateChanged),
       zimService.onInComingRoomRequestStreamCtrl.stream.listen(onInComingRoomRequest),
@@ -70,10 +62,11 @@ class ZegoLivePageState extends State<ZegoLivePage> {
       zimService.onOutgoingRoomRequestAcceptedStreamCtrl.stream.listen(onOutgoingRoomRequestAccepted),
       zimService.onOutgoingRoomRequestRejectedStreamCtrl.stream.listen(onOutgoingRoomRequestRejected),
     ]);
+    listenPKEvents();
 
     if (widget.role == ZegoLiveStreamingRole.audience) {
       //Join room
-      liveStreamingManager.currentUserRoleNoti.value = ZegoLiveStreamingRole.audience;
+      liveStreamingManager.currentUserRoleNotifier.value = ZegoLiveStreamingRole.audience;
 
       String? token;
       if (kIsWeb) {
@@ -91,8 +84,8 @@ class ZegoLivePageState extends State<ZegoLivePage> {
         },
       );
     } else if (widget.role == ZegoLiveStreamingRole.host) {
-      liveStreamingManager.hostNoti.value = ZEGOSDKManager().currentUser;
-      ZegoLiveStreamingManager().currentUserRoleNoti.value = ZegoLiveStreamingRole.host;
+      liveStreamingManager.hostNotifier.value = ZEGOSDKManager().currentUser;
+      ZegoLiveStreamingManager().currentUserRoleNotifier.value = ZegoLiveStreamingRole.host;
       ZEGOSDKManager().expressService.turnCameraOn(true);
       ZEGOSDKManager().expressService.turnMicrophoneOn(true);
       ZEGOSDKManager().expressService.startPreview();
@@ -130,7 +123,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
       valueListenable: liveStreamingManager.isLivingNotifier,
       builder: (context, isLiveing, _) {
         return ValueListenableBuilder<RoomPKState>(
-          valueListenable: ZegoLiveStreamingManager().pkStateNoti,
+          valueListenable: ZegoLiveStreamingManager().pkStateNotifier,
           builder: (context, RoomPKState pkState, child) {
             return Scaffold(
               body: Stack(
@@ -170,7 +163,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
 
   Widget hostVideoView(bool isLiveing, RoomPKState pkState) {
     return ValueListenableBuilder(
-        valueListenable: liveStreamingManager.onPKViewAvaliableNoti,
+        valueListenable: liveStreamingManager.onPKViewAvailableNotifier,
         builder: (context, bool showPKView, _) {
           if (pkState == RoomPKState.isStartPK) {
             if (showPKView || liveStreamingManager.iamHost()) {
@@ -188,16 +181,16 @@ class ZegoLivePageState extends State<ZegoLivePage> {
                 );
               });
             } else {
-              if (liveStreamingManager.hostNoti.value == null) {
+              if (liveStreamingManager.hostNotifier.value == null) {
                 return const SizedBox.shrink();
               }
-              return ZegoAudioVideoView(userInfo: liveStreamingManager.hostNoti.value!);
+              return ZegoAudioVideoView(userInfo: liveStreamingManager.hostNotifier.value!);
             }
           } else {
-            if (liveStreamingManager.hostNoti.value == null) {
+            if (liveStreamingManager.hostNotifier.value == null) {
               return const SizedBox.shrink();
             }
-            return ZegoAudioVideoView(userInfo: liveStreamingManager.hostNoti.value!);
+            return ZegoAudioVideoView(userInfo: liveStreamingManager.hostNotifier.value!);
           }
         });
   }
@@ -224,9 +217,9 @@ class ZegoLivePageState extends State<ZegoLivePage> {
         final width = height * (9 / 16);
 
         return ValueListenableBuilder<List<ZegoSDKUser>>(
-          valueListenable: liveStreamingManager.coHostUserListNoti,
+          valueListenable: liveStreamingManager.coHostUserListNotifier,
           builder: (context, cohostList, _) {
-            final videoList = liveStreamingManager.coHostUserListNoti.value.map((user) {
+            final videoList = liveStreamingManager.coHostUserListNotifier.value.map((user) {
               return ZegoAudioVideoView(userInfo: user);
             }).toList();
 
@@ -292,7 +285,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
 
   Widget hostText() {
     return ValueListenableBuilder<ZegoSDKUser?>(
-      valueListenable: liveStreamingManager.hostNoti,
+      valueListenable: liveStreamingManager.hostNotifier,
       builder: (context, userInfo, _) {
         return Text(
           'RoomID: ${widget.roomID}\n'
