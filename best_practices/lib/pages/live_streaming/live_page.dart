@@ -38,14 +38,12 @@ class ZegoLivePageState extends State<ZegoLivePage> {
 
   bool showingDialog = false;
   bool showingPKDialog = false;
-
-  final liveStreamingManager = ZegoLiveStreamingManager();
-
+  
   @override
   void initState() {
     super.initState();
 
-    liveStreamingManager.init();
+    ZegoLiveStreamingManager().init();
 
     final zimService = ZEGOSDKManager().zimService;
     final expressService = ZEGOSDKManager().expressService;
@@ -61,7 +59,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
     listenPKEvents();
 
     /// cache role
-    liveStreamingManager.currentUserRoleNotifier.value = widget.role;
+    ZegoLiveStreamingManager().currentUserRoleNotifier.value = widget.role;
 
     if (widget.role == ZegoLiveStreamingRole.audience) {
       /// Join room now
@@ -90,7 +88,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
       /// will join room on startLive
 
       /// cache host
-      liveStreamingManager.hostNotifier.value = ZEGOSDKManager().currentUser;
+      ZegoLiveStreamingManager().hostNotifier.value = ZEGOSDKManager().currentUser;
 
       /// start preview
       ZEGOSDKManager().expressService.turnCameraOn(true);
@@ -107,7 +105,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
 
     uninitGift();
 
-    liveStreamingManager
+    ZegoLiveStreamingManager()
       ..leaveRoom()
       ..uninit();
 
@@ -121,7 +119,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
   @override
   Widget build(Object context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: liveStreamingManager.isLivingNotifier,
+      valueListenable: ZegoLiveStreamingManager().isLivingNotifier,
       builder: (context, isLiving, _) {
         return ValueListenableBuilder<RoomPKState>(
           valueListenable: ZegoLiveStreamingManager().pkStateNotifier,
@@ -164,10 +162,10 @@ class ZegoLivePageState extends State<ZegoLivePage> {
 
   Widget hostVideoView(bool isLiving, RoomPKState pkState) {
     return ValueListenableBuilder(
-        valueListenable: liveStreamingManager.onPKViewAvailableNotifier,
+        valueListenable: ZegoLiveStreamingManager().onPKViewAvailableNotifier,
         builder: (context, bool showPKView, _) {
           if (pkState == RoomPKState.isStartPK) {
-            if (showPKView || liveStreamingManager.iamHost()) {
+            if (showPKView || ZegoLiveStreamingManager().iamHost()) {
               return LayoutBuilder(builder: (context, constraints) {
                 return Stack(
                   children: [
@@ -182,16 +180,16 @@ class ZegoLivePageState extends State<ZegoLivePage> {
                 );
               });
             } else {
-              if (liveStreamingManager.hostNotifier.value == null) {
+              if (ZegoLiveStreamingManager().hostNotifier.value == null) {
                 return const SizedBox.shrink();
               }
-              return ZegoAudioVideoView(userInfo: liveStreamingManager.hostNotifier.value!);
+              return ZegoAudioVideoView(userInfo: ZegoLiveStreamingManager().hostNotifier.value!);
             }
           } else {
-            if (liveStreamingManager.hostNotifier.value == null) {
+            if (ZegoLiveStreamingManager().hostNotifier.value == null) {
               return const SizedBox.shrink();
             }
-            return ZegoAudioVideoView(userInfo: liveStreamingManager.hostNotifier.value!);
+            return ZegoAudioVideoView(userInfo: ZegoLiveStreamingManager().hostNotifier.value!);
           }
         });
   }
@@ -218,9 +216,9 @@ class ZegoLivePageState extends State<ZegoLivePage> {
         final width = height * (9 / 16);
 
         return ValueListenableBuilder<List<ZegoSDKUser>>(
-          valueListenable: liveStreamingManager.coHostUserListNotifier,
+          valueListenable: ZegoLiveStreamingManager().coHostUserListNotifier,
           builder: (context, cohostList, _) {
-            final videoList = liveStreamingManager.coHostUserListNotifier.value.map((user) {
+            final videoList = ZegoLiveStreamingManager().coHostUserListNotifier.value.map((user) {
               return ZegoAudioVideoView(userInfo: user);
             }).toList();
 
@@ -255,11 +253,11 @@ class ZegoLivePageState extends State<ZegoLivePage> {
   }
 
   void startLive() {
-    liveStreamingManager.startLive(widget.roomID).then((value) {
+    ZegoLiveStreamingManager().startLive(widget.roomID).then((value) {
       if (value.errorCode != 0) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('login room failed: ${value.errorCode}')));
       } else {
-        ZEGOSDKManager().expressService.startPublishingStream(liveStreamingManager.hostStreamID());
+        ZEGOSDKManager().expressService.startPublishingStream(ZegoLiveStreamingManager().hostStreamID());
       }
     }).catchError((error) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('login room failed: $error}')));
@@ -286,7 +284,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
 
   Widget hostText() {
     return ValueListenableBuilder<ZegoSDKUser?>(
-      valueListenable: liveStreamingManager.hostNotifier,
+      valueListenable: ZegoLiveStreamingManager().hostNotifier,
       builder: (context, userInfo, _) {
         return Text(
           'RoomID: ${widget.roomID}\n'
@@ -360,7 +358,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
 
   void onOutgoingRoomRequestAccepted(OnOutgoingRoomRequestAcceptedEvent event) {
     applying.value = false;
-    liveStreamingManager.startCoHost();
+    ZegoLiveStreamingManager().startCoHost();
   }
 
   void onOutgoingRoomRequestRejected(OnOutgoingRoomRequestRejectedEvent event) {

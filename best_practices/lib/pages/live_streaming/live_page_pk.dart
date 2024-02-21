@@ -8,14 +8,14 @@ import 'live_page.dart';
 extension ZegoLiveStreamingPKBattleManagerEventConv on ZegoLivePageState {
   void listenPKEvents() {
     subscriptions.addAll([
-      liveStreamingManager.onPKBattleReceived.stream.listen(onPKRequestReceived),
-      liveStreamingManager.onPKBattleCancelStreamCtrl.stream.listen(onPKRequestCancelled),
-      liveStreamingManager.onPKBattleRejectedStreamCtrl.stream.listen(onPKRequestRejected),
-      liveStreamingManager.incomingPKRequestTimeoutStreamCtrl.stream.listen(onIncomingPKRequestTimeout),
-      liveStreamingManager.outgoingPKRequestAnsweredTimeoutStreamCtrl.stream.listen(onOutgoingPKRequestTimeout),
-      liveStreamingManager.onPKStartStreamCtrl.stream.listen(onPKStart),
-      liveStreamingManager.onPKEndStreamCtrl.stream.listen(onPKEnd),
-      liveStreamingManager.onPKUserConnectingCtrl.stream.listen(onPKUserConnecting),
+      ZegoLiveStreamingManager().onPKBattleReceived.stream.listen(onPKRequestReceived),
+      ZegoLiveStreamingManager().onPKBattleCancelStreamCtrl.stream.listen(onPKRequestCancelled),
+      ZegoLiveStreamingManager().onPKBattleRejectedStreamCtrl.stream.listen(onPKRequestRejected),
+      ZegoLiveStreamingManager().incomingPKRequestTimeoutStreamCtrl.stream.listen(onIncomingPKRequestTimeout),
+      ZegoLiveStreamingManager().outgoingPKRequestAnsweredTimeoutStreamCtrl.stream.listen(onOutgoingPKRequestTimeout),
+      ZegoLiveStreamingManager().onPKStartStreamCtrl.stream.listen(onPKStart),
+      ZegoLiveStreamingManager().onPKEndStreamCtrl.stream.listen(onPKEnd),
+      ZegoLiveStreamingManager().onPKUserConnectingCtrl.stream.listen(onPKUserConnecting),
     ]);
   }
 
@@ -44,9 +44,9 @@ extension ZegoLiveStreamingPKBattleManagerEventConv on ZegoLivePageState {
   void onPKUserConnecting(PKBattleUserConnectingEvent event) {
     if (event.duration > 60000) {
       if (event.userID != ZEGOSDKManager().currentUser!.userID) {
-        liveStreamingManager.removeUserFromPKBattle(event.userID);
+        ZegoLiveStreamingManager().removeUserFromPKBattle(event.userID);
       } else {
-        liveStreamingManager.quitPKBattle();
+        ZegoLiveStreamingManager().quitPKBattle();
       }
     }
   }
@@ -54,7 +54,7 @@ extension ZegoLiveStreamingPKBattleManagerEventConv on ZegoLivePageState {
   void onPKStart(dynamic event) {
     //stop cohost
     if (!ZegoLiveStreamingManager().iamHost()) {
-      liveStreamingManager.endCoHost();
+      ZegoLiveStreamingManager().endCoHost();
     }
     if (ZegoLiveStreamingManager().iamHost()) {
       ZEGOSDKManager().zimService.roomRequestMapNoti.value.values.toList().forEach((element) {
@@ -84,14 +84,14 @@ extension ZegoLiveStreamingPKBattleManagerEventConv on ZegoLivePageState {
             CupertinoDialogAction(
               child: const Text('Disagree'),
               onPressed: () {
-                liveStreamingManager.rejectPKStartRequest(requestID);
+                ZegoLiveStreamingManager().rejectPKStartRequest(requestID);
                 Navigator.pop(context);
               },
             ),
             CupertinoDialogAction(
               child: const Text('Agree'),
               onPressed: () {
-                liveStreamingManager.acceptPKStartRequest(requestID);
+                ZegoLiveStreamingManager().acceptPKStartRequest(requestID);
                 Navigator.pop(context);
               },
             ),
