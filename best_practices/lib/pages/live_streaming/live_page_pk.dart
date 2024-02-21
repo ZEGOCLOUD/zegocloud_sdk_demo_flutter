@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../zego_live_streaming_manager.dart';
@@ -66,5 +67,37 @@ extension ZegoLiveStreamingPKBattleManagerEventConv on ZegoLivePageState {
     if (showingPKDialog) {
       Navigator.pop(context);
     }
+  }
+
+  void showPKDialog(String requestID) {
+    if (showingPKDialog) {
+      return;
+    }
+    showingPKDialog = true;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return CupertinoAlertDialog(
+          title: const Text('receive pk invitation'),
+          actions: [
+            CupertinoDialogAction(
+              child: const Text('Disagree'),
+              onPressed: () {
+                liveStreamingManager.rejectPKStartRequest(requestID);
+                Navigator.pop(context);
+              },
+            ),
+            CupertinoDialogAction(
+              child: const Text('Agree'),
+              onPressed: () {
+                liveStreamingManager.acceptPKStartRequest(requestID);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    ).whenComplete(() => showingPKDialog = false);
   }
 }
