@@ -12,12 +12,16 @@ import 'Define/zim_define.dart';
 import 'Define/zim_room_request.dart';
 
 part 'zim_service_avatar.dart';
+
 part 'zim_service_room_attributes.dart';
+
 part 'zim_service_room_request.dart';
+
 part 'zim_service_user_request.dart';
 
 class ZIMService {
   ZIMService._internal();
+
   factory ZIMService() => instance;
   static final ZIMService instance = ZIMService._internal();
 
@@ -28,9 +32,11 @@ class ZIMService {
 
   ZIMUserInfo? currentZimUserInfo;
   String? currentRoomID;
+  ZIMRoomState currentRoomState = ZIMRoomState.disconnected;
 
   void clearRoomData() {
     currentRoomID = null;
+    currentRoomState = ZIMRoomState.disconnected;
     roomAttributesMap.clear();
     roomRequestMapNoti.clear();
   }
@@ -181,6 +187,8 @@ class ZIMService {
   }
 
   void onRoomStateChanged(_, ZIMRoomState state, ZIMRoomEvent event, Map extendedData, String roomID) {
+    currentRoomState = state;
+
     roomStateChangedStreamCtrl.add(ZIMServiceRoomStateChangedEvent(roomID, state, event, extendedData));
   }
 

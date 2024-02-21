@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'audio_room/audio_room.dart';
 import 'call/call.dart';
 import 'live_streaming/live_streaming.dart';
+import 'live_streaming/swiping/live_page.dart';
 
 part 'entry_audio_room.dart';
 part 'entry_call.dart';
