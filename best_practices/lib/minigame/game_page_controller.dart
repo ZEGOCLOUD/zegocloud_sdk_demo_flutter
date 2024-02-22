@@ -43,7 +43,7 @@ class DemoGameController {
     try {
       await ZegoMiniGame().loadGame(
         gameID: gameID,
-        gameMode: ZegoGameMode.inroom,
+        gameMode: ZegoGameMode.hostsGame,
         loadGameConfig: ZegoLoadGameConfig(
           minGameCoin: 0,
           roomID: roomID,

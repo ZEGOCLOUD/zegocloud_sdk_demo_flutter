@@ -1,14 +1,14 @@
 part of 'game_defines.dart';
 
 enum ZegoGameMode {
-  // The game room needs to be created by a user in the live streaming room (voice chat room), usually the host. Only users in the same game room can participate in this mode of the game.
-  inroom(1),
+  // The anchor(host) plays the specified matching mode. A game room needs to be created by a user in the live broadcast room (language chat room), usually the anchor (host). Games in this mode only allow users in the same game room to participate.
+  hostsGame(1),
 
-  // randomly matches the half-screen mode. The game screen only occupies half of the user interface or is not full screen. All users can participate in this mode of the game.
-  halfScreen(2),
+  // The game field randomly matches the half-screen mode. The game screen occupies only half of the user interface or is not full screen. Games in this mode allow all users to participate.
+  showGame(2),
 
-  // The game room randomly matches the full-screen mode. The game screen occupies the entire user interface. All users can participate in this mode of the game. ' ' '
-  fullScreen(3),
+  // The game field randomly matches full screen mode. The game screen fills the user interface. Games in this mode allow all users to participate.
+  mallGame(3),
 
   // Cloud Game.
   cloudGame(4),
@@ -30,11 +30,11 @@ class ZegoLoadGameConfig {
   bool useRobot;
 
   // Game room ID, corresponds to the business room ID created by the host,
-  // When the game is in 'ZegoGameMode.inroom' mode, it must be passed.
+  // When the game is in 'ZegoGameMode.hostsGame' mode, it must be passed.
   String? roomID;
 
   // The minimum number of coins required to play the game.
-  // When the game is in ZegoGameMode.inroom mode, it can be omitted.
+  // When the game is in ZegoGameMode.hostsGame mode, it can be omitted.
   int minGameCoin;
 
   // Whether to customize the sound of playing games. If set to true, you need to play the sound based on the callback
