@@ -8,7 +8,13 @@ enum ZegoGameMode {
   halfScreen(2),
 
   // The game room randomly matches the full-screen mode. The game screen occupies the entire user interface. All users can participate in this mode of the game. ' ' '
-  fullScreen(3);
+  fullScreen(3),
+
+  // Cloud Game.
+  cloudGame(4),
+
+  // Matchmaking in the game.
+  matchInGame(5);
 
   const ZegoGameMode(this.value);
 
