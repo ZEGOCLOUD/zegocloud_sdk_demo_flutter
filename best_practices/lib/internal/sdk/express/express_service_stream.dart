@@ -39,7 +39,7 @@ extension ExpressServiceStream on ExpressService {
     if (kIsWeb && (publisherState.value != ZegoPublisherState.Publishing)) return;
     final extraInfo = jsonEncode({
       'mic': currentUser!.isMicOnNotifier.value ? 'on' : 'off',
-      'cam': currentUser!.isCamerOnNotifier.value ? 'on' : 'off',
+      'cam': currentUser!.isCameraOnNotifier.value ? 'on' : 'off',
     });
     await ZegoExpressEngine.instance.setStreamExtraInfo(extraInfo);
   }
@@ -54,7 +54,7 @@ extension ExpressServiceStream on ExpressService {
 
   Future<void> stopPublishingStream({ZegoPublishChannel? channel}) async {
     currentUser!.streamID = null;
-    currentUser!.isCamerOnNotifier.value = false;
+    currentUser!.isCameraOnNotifier.value = false;
     currentUser!.isMicOnNotifier.value = false;
     await ZegoExpressEngine.instance.stopPublishingStream();
   }
@@ -68,7 +68,11 @@ extension ExpressServiceStream on ExpressService {
   }
 
   Future<void> onRoomStreamUpdate(
-      String roomID, ZegoUpdateType updateType, List<ZegoStream> streamList, Map<String, dynamic> extendedData) async {
+    String roomID,
+    ZegoUpdateType updateType,
+    List<ZegoStream> streamList,
+    Map<String, dynamic> extendedData,
+  ) async {
     for (final stream in streamList) {
       if (updateType == ZegoUpdateType.Add) {
         debugPrint('onRoomStreamUpdate: ${stream.streamID}');
@@ -84,7 +88,7 @@ extension ExpressServiceStream on ExpressService {
           final Map<String, dynamic> extraInfoMap = convert.jsonDecode(stream.extraInfo);
           final isMicOn = extraInfoMap['mic'] == 'on';
           final isCameraOn = extraInfoMap['cam'] == 'on';
-          userInfo.isCamerOnNotifier.value = isCameraOn;
+          userInfo.isCameraOnNotifier.value = isCameraOn;
           userInfo.isMicOnNotifier.value = isMicOn;
         } catch (e) {
           debugPrint('stream.extraInfo: ${stream.extraInfo}.');
@@ -95,7 +99,7 @@ extension ExpressServiceStream on ExpressService {
         streamMap[stream.streamID] = '';
         final userInfo = getUser(stream.user.userID);
         userInfo?.streamID = '';
-        userInfo?.isCamerOnNotifier.value = false;
+        userInfo?.isCameraOnNotifier.value = false;
         userInfo?.isMicOnNotifier.value = false;
         stopPlayingStream(stream.streamID);
       }
@@ -103,7 +107,10 @@ extension ExpressServiceStream on ExpressService {
     streamListUpdateStreamCtrl.add(ZegoRoomStreamListUpdateEvent(roomID, updateType, streamList, extendedData));
   }
 
-  Future<void> startPlayingAnotherHostStream(String streamID, ZegoSDKUser anotherHost) async {
+  Future<void> startPlayingAnotherHostStream(
+    String streamID,
+    ZegoSDKUser anotherHost,
+  ) async {
     await ZegoExpressEngine.instance.createCanvasView((viewID) async {
       anotherHost.viewID = viewID;
       final canvas = ZegoCanvas(
@@ -170,7 +177,7 @@ extension ExpressServiceStream on ExpressService {
             final Map<String, dynamic> extraInfoMap = convert.jsonDecode(stream.extraInfo);
             final isMicOn = extraInfoMap['mic'] == 'on';
             final isCameraOn = extraInfoMap['cam'] == 'on';
-            user.isCamerOnNotifier.value = isCameraOn;
+            user.isCameraOnNotifier.value = isCameraOn;
             user.isMicOnNotifier.value = isMicOn;
           } catch (e) {
             debugPrint('stream.extraInfo: ${stream.extraInfo}.');
@@ -188,5 +195,4 @@ extension ExpressServiceStream on ExpressService {
       updateStreamExtraInfo();
     }
   }
-
 }

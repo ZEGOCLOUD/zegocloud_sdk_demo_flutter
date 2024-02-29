@@ -21,7 +21,7 @@ abstract class ZegoLiveStreamingManagerInterface {
 
   Future<ZegoMixerStartResult> mutePKUser(List<String> muteUserList, bool mute);
 
-  void leaveRoom();
+  Future<void> leaveRoom();
   void clearData();
   void stopPKBattle();
 
@@ -32,6 +32,8 @@ abstract class ZegoLiveStreamingManagerInterface {
 
   String hostStreamID();
   String coHostStreamID();
+  String hostStreamIDFormat(String roomID, String userID);
+  String coHostStreamIDFormat(String roomID, String userID);
 
   bool isPKUser(String userID);
   bool isPKUserMuted(String userID);

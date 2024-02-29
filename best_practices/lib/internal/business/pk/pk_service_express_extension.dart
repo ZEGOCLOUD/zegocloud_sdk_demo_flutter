@@ -70,12 +70,12 @@ extension PKServiceExpressExtension on PKService {
       final pkuser = getPKUser(pkInfo!, senderID);
       if (pkInfo != null && pkuser != null) {
         final micChanged = pkuser.sdkUser.isMicOnNotifier.value != isMicOpen;
-        final camChanged = pkuser.sdkUser.isCamerOnNotifier.value != isCameraOpen;
+        final camChanged = pkuser.sdkUser.isCameraOnNotifier.value != isCameraOpen;
         if (micChanged) {
           pkuser.sdkUser.isMicOnNotifier.value = isMicOpen;
         }
         if (camChanged) {
-          pkuser.sdkUser.isCamerOnNotifier.value = isCameraOpen;
+          pkuser.sdkUser.isCameraOnNotifier.value = isCameraOpen;
         }
       }
     } catch (e) {

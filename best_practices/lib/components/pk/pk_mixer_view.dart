@@ -83,7 +83,7 @@ class _PKMixerViewState extends State<PKMixerView> {
 
   Widget backGroundView(PKUser user) {
     return ValueListenableBuilder(
-        valueListenable: user.sdkUser.isCamerOnNotifier,
+        valueListenable: user.sdkUser.isCameraOnNotifier,
         builder: (context, bool isCameraOn, _) {
           if (isCameraOn) {
             return IgnorePointer(

@@ -128,7 +128,7 @@ class ExpressService {
 
   void clearLocalUserData() {
     currentUser!.streamID = null;
-    currentUser!.isCamerOnNotifier.value = false;
+    currentUser!.isCameraOnNotifier.value = false;
     currentUser!.isMicOnNotifier.value = false;
     currentUser!.isUsingFrontCameraNotifier.value = true;
     currentUser!.isUsingSpeaker.value = true;
@@ -163,7 +163,7 @@ class ExpressService {
   }
 
   void turnCameraOn(bool isOn) {
-    currentUser!.isCamerOnNotifier.value = isOn;
+    currentUser!.isCameraOnNotifier.value = isOn;
     updateStreamExtraInfo();
     ZegoExpressEngine.instance.enableCamera(isOn);
   }

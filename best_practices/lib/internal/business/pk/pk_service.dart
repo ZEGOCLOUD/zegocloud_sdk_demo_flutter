@@ -586,7 +586,7 @@ class PKService implements PKServiceInterface {
         'type': SEIType.deviceState,
         'sender_id': currentUser!.userID,
         'mic': currentUser.isMicOnNotifier.value,
-        'cam': currentUser.isCamerOnNotifier.value
+        'cam': currentUser.isCameraOnNotifier.value
       };
       final jsonStr = jsonEncode(seiData);
       ZEGOSDKManager().expressService.sendSEI(jsonStr);

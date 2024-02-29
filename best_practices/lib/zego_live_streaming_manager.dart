@@ -15,6 +15,7 @@ import 'zego_sdk_manager.dart';
 
 class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
   ZegoLiveStreamingManager._internal();
+
   factory ZegoLiveStreamingManager() => instance;
   static final ZegoLiveStreamingManager instance = ZegoLiveStreamingManager._internal();
 
@@ -28,7 +29,7 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
 
   ValueNotifier<ZegoSDKUser?> get hostNotifier => cohostService?.hostNoti ?? ValueNotifier(null);
 
-  ListNotifier<ZegoSDKUser> get coHostUserListNotifier => cohostService?.coHostUserListNoti ?? ListNotifier([]);
+  ListNotifier<ZegoSDKUser> get coHostUserListNotifier => cohostService?.coHostUserListNotifier ?? ListNotifier([]);
 
   ValueNotifier<RoomPKState> get pkStateNotifier => pkService?.pkStateNoti ?? ValueNotifier(RoomPKState.isNoPK);
 
@@ -73,11 +74,19 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
       pkService?.outgoingPKRequestAnsweredTimeoutStreamCtrl ??
       StreamController<OutgoingPKRequestTimeoutEvent>.broadcast();
 
+  bool hadInit = false;
   PKService? pkService;
   CoHostService? cohostService;
 
   @override
   void init() {
+    if (hadInit) {
+      debugPrint('live streaming manager, init, but had init');
+      return;
+    }
+    debugPrint('live streaming manager, init');
+    hadInit = true;
+
     pkService = PKService()
       ..addListener()
       ..setMixerLayout = (streamIDList, videoConfig) {
@@ -100,6 +109,13 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
 
   @override
   void uninit() {
+    if (!hadInit) {
+      debugPrint('live streaming manager, uninit, but not init');
+      return;
+    }
+    debugPrint('live streaming manager, uninit');
+    hadInit = false;
+
     pkService?.uninit();
     for (final subscription in subscriptions) {
       subscription.cancel();
@@ -159,12 +175,12 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
   }
 
   @override
-  void leaveRoom() {
+  Future<void> leaveRoom() async {
     if (iamHost()) {
       quitPKBattle();
     }
     isLivingNotifier.value = false;
-    ZEGOSDKManager().logoutRoom();
+    await ZEGOSDKManager().logoutRoom();
     clearData();
   }
 
@@ -176,57 +192,77 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
 
   @override
   String hostStreamID() {
-    return '${ZEGOSDKManager().expressService.currentRoomID}_${ZEGOSDKManager().currentUser!.userID}_main_host';
+    return hostStreamIDFormat(
+      ZEGOSDKManager().expressService.currentRoomID,
+      ZEGOSDKManager().currentUser!.userID,
+    );
   }
 
   @override
   String coHostStreamID() {
-    return '${ZEGOSDKManager().expressService.currentRoomID}_${ZEGOSDKManager().currentUser!.userID}_main_cohost';
+    return coHostStreamIDFormat(
+      ZEGOSDKManager().expressService.currentRoomID,
+      ZEGOSDKManager().currentUser!.userID,
+    );
+  }
+
+  @override
+  String hostStreamIDFormat(String roomID, String userID) {
+    return '${roomID}_${userID}_main_host';
+  }
+
+  @override
+  String coHostStreamIDFormat(String roomID, String userID) {
+    return '${roomID}_${userID}_main_cohost';
   }
 
   @override
   bool isPKUser(String userID) {
-    return pkService!.isPKUser(userID);
+    return pkService?.isPKUser(userID) ?? false;
   }
 
   @override
   bool isPKUserMuted(String userID) {
-    return pkService!.isPKUserMuted(userID);
+    return pkService?.isPKUserMuted(userID) ?? false;
   }
 
   @override
   Future<PKInviteSentResult> startPKBattle(String anotherHostID) async {
-    return pkService!.invitePKbattle([anotherHostID], true);
+    return await pkService?.invitePKbattle([anotherHostID], true) ??
+        PKInviteSentResult(requestID: '-1', errorUserList: []);
   }
 
   @override
   Future<PKInviteSentResult> startPKBattleWith(List<String> anotherHostIDList) async {
-    return pkService!.invitePKbattle(anotherHostIDList, true);
+    return await pkService?.invitePKbattle(anotherHostIDList, true) ??
+        PKInviteSentResult(requestID: '-1', errorUserList: []);
   }
 
   @override
   Future<PKInviteSentResult> invitePKBattle(String targetUserID) async {
-    return pkService!.invitePKbattle([targetUserID], false);
+    return await pkService?.invitePKbattle([targetUserID], false) ??
+        PKInviteSentResult(requestID: '-1', errorUserList: []);
   }
 
   @override
   Future<PKInviteSentResult> invitePKBattleWith(List<String> targetUserIDList) async {
-    return pkService!.invitePKbattle(targetUserIDList, false);
+    return await pkService?.invitePKbattle(targetUserIDList, false) ??
+        PKInviteSentResult(requestID: '-1', errorUserList: []);
   }
 
   @override
   Future<void> acceptPKStartRequest(String requestID) async {
-    pkService!.acceptPKBattle(requestID);
+    pkService?.acceptPKBattle(requestID);
   }
 
   @override
   Future<void> rejectPKStartRequest(String requestID) async {
-    pkService!.rejectPKBattle(requestID);
+    pkService?.rejectPKBattle(requestID);
   }
 
   @override
   Future<void> cancelPKBattleRequest(String requestID, String targetUserID) async {
-    pkService!.cancelPKBattle(requestID, targetUserID);
+    pkService?.cancelPKBattle(requestID, targetUserID);
   }
 
   @override
@@ -242,7 +278,7 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
           index++;
         }
       }
-      return pkService!.mutePKUser(muteIndex, mute);
+      return await pkService?.mutePKUser(muteIndex, mute) ?? ZegoMixerStartResult(-9999, {});
     }
     return ZegoMixerStartResult(-9999, {});
   }
@@ -250,27 +286,27 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
   @override
   Future<void> quitPKBattle() async {
     if (pkService?.pkInfo != null) {
-      pkService!.stopPlayAnotherHostStream();
-      pkService!.quitPKBattle(pkService?.pkInfo!.requestID ?? '');
-      pkService!.stopPKBattle();
+      pkService?.stopPlayAnotherHostStream();
+      pkService?.quitPKBattle(pkService?.pkInfo!.requestID ?? '');
+      pkService?.stopPKBattle();
     }
   }
 
   @override
   Future<void> endPKBattle() async {
     if (pkService?.pkInfo != null) {
-      pkService!.endPKBattle(pkService?.pkInfo!.requestID ?? '');
+      pkService?.endPKBattle(pkService?.pkInfo!.requestID ?? '');
       pkService?.stopPKBattle();
     }
   }
 
   @override
   void removeUserFromPKBattle(String userID) {
-    pkService!.removeUserFromPKBattle(userID);
+    pkService?.removeUserFromPKBattle(userID);
   }
 
   @override
   void stopPKBattle() {
-    pkService!.stopPKBattle();
+    pkService?.stopPKBattle();
   }
 }

@@ -15,7 +15,7 @@ class _ZegoAudioVideoViewState extends State<ZegoAudioVideoView> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: widget.userInfo.isCamerOnNotifier,
+      valueListenable: widget.userInfo.isCameraOnNotifier,
       builder: (context, isCameraOn, _) {
         return createView(isCameraOn);
       },
@@ -41,10 +41,10 @@ class _ZegoAudioVideoViewState extends State<ZegoAudioVideoView> {
       if (widget.userInfo.streamID!.endsWith('_host')) {
         return backGroundView();
       } else {
-        return coHostNomalView();
+        return normalView();
       }
     } else {
-      return coHostNomalView();
+      return normalView();
     }
   }
 
@@ -104,7 +104,7 @@ class _ZegoAudioVideoViewState extends State<ZegoAudioVideoView> {
     );
   }
 
-  Widget coHostNomalView() {
+  Widget normalView() {
     return Stack(
       children: [
         Container(

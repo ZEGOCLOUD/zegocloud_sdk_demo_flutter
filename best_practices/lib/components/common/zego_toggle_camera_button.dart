@@ -9,7 +9,7 @@ class ZegoToggleCameraButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-        valueListenable: ZEGOSDKManager().expressService.currentUser!.isCamerOnNotifier,
+        valueListenable: ZEGOSDKManager().expressService.currentUser!.isCameraOnNotifier,
         builder: (context, isCameraOn, _) {
           return GestureDetector(
             onTap: () => ZEGOSDKManager().expressService.turnCameraOn(!isCameraOn),

@@ -43,7 +43,7 @@ extension PKServiceZIMExtension on PKService {
           pkuser
             ..userName = localUser?.userName ?? ''
             ..roomID = ZEGOSDKManager().expressService.currentRoomID
-            ..camera.value = localUser?.isCamerOnNotifier.value ?? false
+            ..camera.value = localUser?.isCameraOnNotifier.value ?? false
             ..microphone.value = localUser?.isMicOnNotifier.value ?? false;
           newPKInfo.pkUserList.insert(0, pkuser);
         } else {
@@ -91,7 +91,7 @@ extension PKServiceZIMExtension on PKService {
               pkuser
                 ..roomID = ZEGOSDKManager().expressService.currentRoomID
                 ..userName = localUser?.userName ?? ''
-                ..camera.value = localUser?.isCamerOnNotifier.value ?? false
+                ..camera.value = localUser?.isCameraOnNotifier.value ?? false
                 ..microphone.value = localUser?.isMicOnNotifier.value ?? false;
             }
             findIfAlreadyAdded = true;
@@ -110,7 +110,7 @@ extension PKServiceZIMExtension on PKService {
             newPKUser
               ..roomID = ZEGOSDKManager().expressService.currentRoomID
               ..userName = localUser?.userName ?? ''
-              ..camera.value = localUser?.isCamerOnNotifier.value ?? false
+              ..camera.value = localUser?.isCameraOnNotifier.value ?? false
               ..microphone.value = localUser?.isMicOnNotifier.value ?? false;
             pkInfo!.pkUserList.insert(0, newPKUser);
           } else {

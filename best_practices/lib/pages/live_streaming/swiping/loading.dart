@@ -1,7 +1,7 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 
-import 'logout_notifier.dart';
+import '../../../internal/sdk/utils/logout_notifier.dart';
 
 class ZegoLiveSwipingLoading extends StatefulWidget {
   const ZegoLiveSwipingLoading({
@@ -20,7 +20,7 @@ class ZegoLiveSwipingLoading extends StatefulWidget {
 /// @nodoc
 class _ZegoUIKitPrebuiltLiveStreamingScrollerElementState extends State<ZegoLiveSwipingLoading> {
   final roomBuildNotifier = ValueNotifier<bool>(false);
-  final roomLogoutNotifier = ZegoLiveSwipingRoomLogoutNotifier();
+  final roomLogoutNotifier = ZegoRoomLogoutNotifier();
 
   @override
   void initState() {

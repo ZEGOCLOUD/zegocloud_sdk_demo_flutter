@@ -173,7 +173,10 @@ class ZIMService {
 
   Future<ZIMRoomLeftResult> logoutRoom() async {
     if (currentRoomID != null) {
-      final ret = await ZIM.getInstance()!.leaveRoom(currentRoomID!);
+      final ret = await ZIM.getInstance()!.leaveRoom(currentRoomID!).then((value) {
+        debugPrint('zim leave result:value');
+        return value;
+      });
       clearRoomData();
       return ret;
     } else {

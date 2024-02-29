@@ -7,8 +7,17 @@ import 'package:flutter/cupertino.dart';
 // Package imports:
 import '../../../zego_sdk_manager.dart';
 
-class ZegoLiveSwipingRoomLogoutNotifier {
-  ZegoLiveSwipingRoomLogoutNotifier() {
+/// check room logout
+///
+/// notifier's value will be true when room logout
+class ZegoRoomLogoutNotifier {
+  ZegoRoomLogoutNotifier({
+    bool withExpress = true,
+    bool withZIM = true,
+  }) {
+    _withExpress = withExpress;
+    _withZIM = withZIM;
+
     _checkExpressRoom();
     _checkZIMRoom();
   }
@@ -19,6 +28,8 @@ class ZegoLiveSwipingRoomLogoutNotifier {
 
   bool get value => notifier.value;
 
+  bool _withExpress = true;
+  bool _withZIM = true;
   String? _checkingRoomID;
 
   final List<bool> _result = [false, false];
@@ -47,10 +58,19 @@ class ZegoLiveSwipingRoomLogoutNotifier {
   void _syncResult() {
     notifier.value = _result[_expressResultIndex] && _result[_zimResultIndex];
 
-    debugPrint('logout notifier, sync result, result:$_result, value:${notifier.value}');
+    debugPrint(
+        'logout notifier, sync result, result:$_result, value:${notifier.value}');
   }
 
   void _checkExpressRoom() {
+    if (!_withExpress) {
+      debugPrint('logout notifier, not need to check express room');
+
+      _result[_expressResultIndex] = true;
+
+      return;
+    }
+
     debugPrint('logout notifier, check express room, '
         'room id:${expressService.currentRoomID}, '
         'state:${expressService.currentRoomState}, ');
@@ -65,19 +85,23 @@ class ZegoLiveSwipingRoomLogoutNotifier {
       _checkingRoomID = expressService.currentRoomID;
 
       _expressSubscription?.cancel();
-      _expressSubscription = expressService.roomStateChangedStreamCtrl.stream.listen(_onExpressRoomStateChanged);
+      _expressSubscription = expressService.roomStateChangedStreamCtrl.stream
+          .listen(_onExpressRoomStateChanged);
     }
   }
 
   void _onExpressRoomStateChanged(ZegoRoomStateEvent event) {
-    debugPrint('logout notifier, express room state changed, target room id:$_checkingRoomID, '
+    debugPrint(
+        'logout notifier, express room state changed, target room id:$_checkingRoomID, '
         'room id:${event.roomID}, '
         'room state:${event.reason}');
 
-    _result[_expressResultIndex] = ZegoRoomStateChangedReason.Logout == event.reason;
+    _result[_expressResultIndex] =
+        ZegoRoomStateChangedReason.Logout == event.reason;
 
     if (_result[_expressResultIndex]) {
-      debugPrint('logout notifier, express room state changed, room already logout, remove listener');
+      debugPrint(
+          'logout notifier, express room state changed, room already logout, remove listener');
 
       _expressSubscription?.cancel();
     }
@@ -86,32 +110,46 @@ class ZegoLiveSwipingRoomLogoutNotifier {
   }
 
   void _checkZIMRoom() {
-    debugPrint('logout notifier, check zim room, target room id:$_checkingRoomID, '
+    if (!_withZIM) {
+      debugPrint('logout notifier, not need to check ZIM room');
+
+      _result[_zimResultIndex] = true;
+
+      return;
+    }
+
+    debugPrint(
+        'logout notifier, check ZIM room, target room id:$_checkingRoomID, '
         'room id:${zimService.currentRoomID}, '
         'room state:${zimService.currentRoomState}');
 
-    _result[_zimResultIndex] = ZIMRoomState.disconnected == zimService.currentRoomState;
+    _result[_zimResultIndex] =
+        ZIMRoomState.disconnected == zimService.currentRoomState;
     _syncResult();
 
     if (ZIMRoomState.disconnected != zimService.currentRoomState) {
-      debugPrint('logout notifier, check zim room, room is not disconnected, listen...');
+      debugPrint(
+          'logout notifier, check ZIM room, room is not disconnected, listen...');
 
       _zimSubscription?.cancel();
-      _zimSubscription = zimService.roomStateChangedStreamCtrl.stream.listen(onZIMRoomStateChanged);
+      _zimSubscription = zimService.roomStateChangedStreamCtrl.stream
+          .listen(onZIMRoomStateChanged);
     }
   }
 
   void onZIMRoomStateChanged(
     ZIMServiceRoomStateChangedEvent event,
   ) {
-    debugPrint('logout notifier, zim room state changed, target room id:$_checkingRoomID, '
+    debugPrint(
+        'logout notifier, ZIM room state changed, target room id:$_checkingRoomID, '
         'room id:${event.roomID}, '
         'room state:${event.state}');
 
     _result[_zimResultIndex] = ZIMRoomState.disconnected == event.state;
 
     if (_result[_zimResultIndex]) {
-      debugPrint('logout notifier, zim room state changed, room already disconnected, remove listener');
+      debugPrint(
+          'logout notifier, ZIM room state changed, room already disconnected, remove listener');
 
       _zimSubscription?.cancel();
     }

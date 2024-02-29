@@ -73,7 +73,7 @@ class _PKViewState extends State<PKView> {
             return hostReconnecting();
           } else {
             return ValueListenableBuilder(
-                valueListenable: widget.pkUser.sdkUser.isCamerOnNotifier,
+                valueListenable: widget.pkUser.sdkUser.isCameraOnNotifier,
                 builder: (context, bool isCameraOn, _) {
                   if (isCameraOn) {
                     return SizedBox(

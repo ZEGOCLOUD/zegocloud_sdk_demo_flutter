@@ -44,10 +44,13 @@ class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
   }
 
   Widget audienceJoinLivePageButton() {
-    final normalLivePage = ZegoLivePage(roomID: roomIDController.text, role: ZegoLiveStreamingRole.audience);
-    final swipingLivePage = ZegoSwipingLivePage(
-      initialRoomID: roomIDController.text,
-      roomIDList: const <String>[],
+    final normalAudiencePage = ZegoLivePage(
+      roomID: roomIDController.text,
+      role: ZegoLiveStreamingRole.audience,
+    );
+
+    final swipingAudiencePage = ZegoSwipingLivePage(
+      roomList: <ZegoSwipingLiveInfo>[ZegoSwipingLiveInfo(roomID: roomIDController.text, hostID: '')],
     );
 
     return ElevatedButton(
@@ -55,7 +58,7 @@ class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => swipingLivePage,
+            builder: (context) => swipingAudiencePage,
           ),
         );
       },

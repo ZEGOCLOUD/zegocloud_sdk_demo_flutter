@@ -1,46 +1,46 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'dart:async';
 
-import '../live_page.dart';
-import 'loading.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+import '../../../internal/sdk/utils/logout_notifier.dart';
+import '../../../zego_live_streaming_manager.dart';
 import '../../../zego_sdk_manager.dart';
-import 'login_notifier.dart';
+import '../live_command.dart';
+import '../live_page.dart';
+
+import 'page_builder.dart';
+import 'room_controller.dart';
+import 'stream_controller.dart';
+
+class ZegoSwipingLiveInfo {
+  String roomID;
+  String hostID;
+
+  ZegoSwipingLiveInfo({required this.roomID, required this.hostID});
+}
 
 class ZegoSwipingLivePage extends StatefulWidget {
   const ZegoSwipingLivePage({
     super.key,
-    required this.initialRoomID,
-    required this.roomIDList,
+    required this.roomList,
   });
 
-  final String initialRoomID;
-  final List<String> roomIDList;
+  final List<ZegoSwipingLiveInfo> roomList;
 
   @override
   State<ZegoSwipingLivePage> createState() => ZegoSwipingLivePageState();
 }
 
 class ZegoSwipingLivePageState extends State<ZegoSwipingLivePage> {
-  ZegoLiveSwipingRoomLoginNotifier? roomLoginNotifier;
+  final _roomController = ZegoSwipingRoomController();
+  final _streamController = ZegoSwipingStreamController();
 
-  int roomIDIndex = -1;
-  List<String> roomIDList = [];
-
-  String _targetRoomID = '';
-  bool _targetRoomDone = false;
+  var swipingRoomListNotifier = ValueNotifier<List<ZegoSwipingLiveInfo>>([]);
+  var roomCommandsNotifier = ValueNotifier<Map<String, ZegoLivePageCommand>>({});
+  ZegoRoomLogoutNotifier? singleLiveLogoutNotifier;
 
   List<StreamSubscription<dynamic>?> subscriptions = [];
-
-  late final PageController _pageController;
-
-  int get currentPageIndex => _pageController.page?.round() ?? 0;
-
-  int get pageCount => 2;
-
-  Duration get pageDuration => const Duration(milliseconds: 500);
-
-  Curve get pageCurve => Curves.easeInOut;
 
   ZIMService get zimService => ZEGOSDKManager().zimService;
 
@@ -50,95 +50,68 @@ class ZegoSwipingLivePageState extends State<ZegoSwipingLivePage> {
   void initState() {
     super.initState();
 
-    roomIDList = List<String>.from(widget.roomIDList);
+    swipingRoomListNotifier.value = List<ZegoSwipingLiveInfo>.from(widget.roomList);
 
-    roomLoginNotifier = ZegoLiveSwipingRoomLoginNotifier();
-    roomLoginNotifier?.notifier.addListener(onRoomStateChanged);
-
-    _pageController = PageController(initialPage: 0);
-
-    _targetRoomID = widget.initialRoomID;
-    _targetRoomDone = false;
-    roomLoginNotifier?.resetCheckingData(_targetRoomID);
+    _roomController.init(roomCommandsNotifier: roomCommandsNotifier);
+    if (widget.roomList.length > 1) {
+      _roomController.joinRoom(widget.roomList.first.roomID);
+    }
   }
 
   @override
   void dispose() {
     super.dispose();
 
+    _roomController.uninit();
+
     for (final subscription in subscriptions) {
       subscription?.cancel();
     }
 
-    _pageController.dispose();
-    roomLoginNotifier?.notifier.removeListener(onRoomStateChanged);
+    ZegoLiveStreamingManager()
+      ..leaveRoom()
+      ..uninit();
   }
 
-  String previousRoomID() {
-    if (roomIDList.isEmpty) {
-      return '';
+  int roomIDIndexOfPage(int pageIndex) {
+    if (pageIndex > swipingRoomListNotifier.value.length - 1) {
+      return pageIndex % swipingRoomListNotifier.value.length;
     }
 
-    roomIDIndex--;
-    if (roomIDIndex < 0) {
-      /// back to the last live
-      roomIDIndex = roomIDList.length - 1;
-    }
-    return roomIDList[roomIDIndex];
+    return pageIndex;
   }
 
-  String nextRoomID() {
-    if (roomIDList.isEmpty) {
-      return '';
+  ZegoLivePageCommand commandOfPage(int pageIndex) {
+    final targetRoom = swipingRoomListNotifier.value[roomIDIndexOfPage(pageIndex)];
+    if (!roomCommandsNotifier.value.containsKey(targetRoom.roomID)) {
+      roomCommandsNotifier.value[targetRoom.roomID] = ZegoLivePageCommand(roomID: targetRoom.roomID);
     }
 
-    roomIDIndex++;
-    if (roomIDIndex > (roomIDList.length - 1)) {
-      /// back to the first live
-      roomIDIndex = 0;
-    }
-    return roomIDList[roomIDIndex];
+    return roomCommandsNotifier.value[targetRoom.roomID]!;
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onVerticalDragEnd: (details) {
-        if (!_targetRoomDone) {
-          return;
+    return ValueListenableBuilder<List<ZegoSwipingLiveInfo>>(
+      valueListenable: swipingRoomListNotifier,
+      builder: (context, roomList, _) {
+        if (roomList.isEmpty) {
+          return const Center(
+            child: Text(
+              'Not Lives',
+              style: TextStyle(
+                decoration: TextDecoration.none,
+                color: Colors.blue,
+              ),
+            ),
+          );
         }
 
-        var targetRoomID = '';
-        if (details.velocity.pixelsPerSecond.dy > 0) {
-          targetRoomID = previousRoomID();
-        } else if (details.velocity.pixelsPerSecond.dy < 0) {
-          targetRoomID = nextRoomID();
-        }
-        swipingTo(targetRoomID);
-      },
-      child: PageView.builder(
-        scrollDirection: Axis.vertical,
-        physics: const NeverScrollableScrollPhysics(),
-        controller: _pageController,
-        onPageChanged: (pageIndex) {
-          debugPrint('swiping page, PageView.onPageChanged $pageIndex');
-        },
-        itemCount: pageCount,
-        itemBuilder: (context, pageIndex) {
-          debugPrint('swiping page, PageView.itemBuilder $pageIndex, room id:$_targetRoomID');
-
-          return ZegoLiveSwipingLoading(
-            loadingRoomID: _targetRoomID,
-            roomBuilder: () {
-              debugPrint('swiping page, PageView.itemBuilder.builder, page index:$pageIndex live id:$_targetRoomID');
-
-              ///wait express room and zim room login result
-              roomLoginNotifier?.resetCheckingData(_targetRoomID);
-
-              return Stack(
+        return roomList.length == 1
+            ? Stack(
                 children: [
                   ZegoLivePage(
-                    roomID: _targetRoomID,
+                    roomID: roomList.first.roomID,
                     role: ZegoLiveStreamingRole.audience,
                   ),
                   Positioned(
@@ -146,46 +119,98 @@ class ZegoSwipingLivePageState extends State<ZegoSwipingLivePage> {
                     left: 20,
                     child: ElevatedButton(
                       onPressed: updateRoomLists,
-                      child: Text('UpdateRoomLists'),
+                      child: const Text('UpdateRoomLists'),
                     ),
                   )
                 ],
-              );
-            },
-          );
-        },
-      ),
+              )
+            : livePages();
+      },
     );
   }
 
+  void _onSingleLiveLogoutChanged() {
+    debugPrint(
+        'swiping page, room ${singleLiveLogoutNotifier?.checkingRoomID} state changed, logout:${singleLiveLogoutNotifier?.value}');
+
+    if (singleLiveLogoutNotifier?.value ?? false) {
+      debugPrint('swiping page, room ${singleLiveLogoutNotifier?.checkingRoomID} had logout..');
+
+      singleLiveLogoutNotifier?.notifier.removeListener(_onSingleLiveLogoutChanged);
+
+      /// previous single live logout, render PageView
+      swipingRoomListNotifier.value = List.from(swipingRoomListNotifier.value);
+    }
+  }
+
+  Widget livePages() {
+    singleLiveLogoutNotifier?.notifier.removeListener(_onSingleLiveLogoutChanged);
+
+    singleLiveLogoutNotifier ??= ZegoRoomLogoutNotifier();
+    if (!(singleLiveLogoutNotifier?.notifier.value ?? false)) {
+      /// previous single live room still login, wait logout
+      singleLiveLogoutNotifier?.notifier.addListener(_onSingleLiveLogoutChanged);
+
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return ZegoSwipingPageBuilder(
+      onPageChanged: onPageChanged,
+      itemBuilder: (context, pageIndex) {
+        /// todo: 跨房间拉流，绑定跨房间用户
+        /// 展示所属房间的流（controller去拉流，view负责展示，有什么展示什么）
+        final targetRoom = swipingRoomListNotifier.value[roomIDIndexOfPage(pageIndex)];
+        debugPrint('swiping page, PageView.itemBuilder $pageIndex, room:$targetRoom');
+
+        final streamID = ZegoLiveStreamingManager().hostStreamIDFormat(targetRoom.roomID, targetRoom.hostID);
+        _streamController.playRoomStream(targetRoom.roomID, streamID);
+
+        return ZegoLivePage(
+          roomID: targetRoom.roomID,
+          previewHostID: targetRoom.hostID,
+          role: ZegoLiveStreamingRole.audience,
+          externalControlCommand: commandOfPage(pageIndex),
+        );
+      },
+    );
+  }
+
+  Future<void> onPageChanged(int pageIndex) async {
+    debugPrint('swiping page, PageView.onPageChanged $pageIndex');
+
+    /// current page, switch room(leave previous and login current room)
+    final targetRoom = swipingRoomListNotifier.value[roomIDIndexOfPage(pageIndex)];
+    await _roomController.switchRoom(targetRoom.roomID);
+  }
+
   void updateRoomLists() {
-    final editingController1 = TextEditingController();
-    final editingController2 = TextEditingController();
-    final editingController3 = TextEditingController();
-    final editingController4 = TextEditingController();
-    final editingController5 = TextEditingController();
-    final editingController6 = TextEditingController();
+    const roomCount = 6;
+    final roomIDEditors =
+        List<TextEditingController>.generate(roomCount, (index) => TextEditingController(text: index.toString()));
+    final hostIDEditors =
+        List<TextEditingController>.generate(roomCount, (index) => TextEditingController(text: index.toString()));
 
     showCupertinoDialog(
       context: context,
       barrierDismissible: true,
       builder: (context) {
         return CupertinoAlertDialog(
-          title: const Text('Input room id'),
+          title: const Text('Input room id & host id'),
           content: Column(
-            children: [
-              CupertinoTextField(controller: editingController1),
-              const SizedBox(height: 5),
-              CupertinoTextField(controller: editingController2),
-              const SizedBox(height: 5),
-              CupertinoTextField(controller: editingController3),
-              const SizedBox(height: 5),
-              CupertinoTextField(controller: editingController4),
-              const SizedBox(height: 5),
-              CupertinoTextField(controller: editingController5),
-              const SizedBox(height: 5),
-              CupertinoTextField(controller: editingController6),
-            ],
+            children: List.generate(roomCount, (index) {
+              return [
+                Row(
+                  children: [
+                    const SizedBox(width: 30, child: Text('room:', style: TextStyle(fontSize: 10))),
+                    SizedBox(width: 80, child: CupertinoTextField(controller: roomIDEditors[index])),
+                    const SizedBox(width: 2),
+                    const SizedBox(width: 30, child: Text('host:', style: TextStyle(fontSize: 10))),
+                    SizedBox(width: 80, child: CupertinoTextField(controller: hostIDEditors[index])),
+                  ],
+                ),
+                const SizedBox(height: 5),
+              ];
+            }).expand((widgets) => widgets).toList(),
           ),
           actions: [
             CupertinoDialogAction(
@@ -194,22 +219,19 @@ class ZegoSwipingLivePageState extends State<ZegoSwipingLivePage> {
             ),
             CupertinoDialogAction(
               onPressed: () {
-                var tempRoomIDList = <String>[];
-                void addRoomID(String roomID) {
-                  if (roomID.isNotEmpty) {
-                    tempRoomIDList.add(roomID);
+                var tempRoomList = <ZegoSwipingLiveInfo>[];
+                void addRoomID(String roomID, String hostID) {
+                  if (roomID.isNotEmpty && hostID.isNotEmpty) {
+                    tempRoomList.add(ZegoSwipingLiveInfo(roomID: roomID, hostID: hostID));
                   }
                 }
 
-                addRoomID(editingController1.text);
-                addRoomID(editingController2.text);
-                addRoomID(editingController3.text);
-                addRoomID(editingController4.text);
-                addRoomID(editingController5.text);
-                addRoomID(editingController6.text);
+                for (var index = 0; index < roomCount; index++) {
+                  addRoomID(roomIDEditors[index].text, hostIDEditors[index].text);
+                }
 
-                debugPrint('swiping page, update room id list:$tempRoomIDList');
-                roomIDList = tempRoomIDList;
+                debugPrint('swiping page, update room list:$tempRoomList');
+                swipingRoomListNotifier.value = List<ZegoSwipingLiveInfo>.from(tempRoomList);
 
                 Navigator.of(context).pop();
               },
@@ -219,45 +241,5 @@ class ZegoSwipingLivePageState extends State<ZegoSwipingLivePage> {
         );
       },
     );
-  }
-
-  void swipingTo(String targetRoomID) {
-    if (targetRoomID == _targetRoomID) {
-      debugPrint('swiping page, swipingTo, target room id($targetRoomID) is same as before ($_targetRoomID)');
-      return;
-    }
-
-    if (targetRoomID.isEmpty) {
-      debugPrint('swiping page, swipingTo, target room id is empty');
-
-      return;
-    }
-
-    debugPrint('swiping page, swipingTo, $targetRoomID');
-
-    _targetRoomID = targetRoomID;
-    _targetRoomDone = false;
-
-    _pageController.jumpToPage(0 == currentPageIndex ? 1 : 0);
-  }
-
-  void onRoomStateChanged() {
-    final expressDone = expressService.currentRoomID == _targetRoomID &&
-        ZegoRoomStateChangedReason.Logined == expressService.currentRoomState;
-
-    debugPrint('swiping page, on room state changed, '
-        'target room id:$_targetRoomID, '
-        'express room id:${expressService.currentRoomID}, '
-        'express room state:${expressService.currentRoomState}, ');
-
-    final zimDone = zimService.currentRoomID == _targetRoomID && ZIMRoomState.connected == zimService.currentRoomState;
-    debugPrint('swiping page, on room state changed, '
-        'ZIM room id:${zimService.currentRoomID}, '
-        'ZIM room state:${zimService.currentRoomState},');
-
-    debugPrint('swiping page, on room state changed, express done:$expressDone, ZIM done:$zimDone');
-    if (expressDone && zimDone) {
-      _targetRoomDone = true;
-    }
   }
 }

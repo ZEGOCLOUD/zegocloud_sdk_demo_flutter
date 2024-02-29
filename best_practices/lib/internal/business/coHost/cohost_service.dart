@@ -9,14 +9,14 @@ bool isHostStreamID(String streamID) {
 
 class CoHostService {
   ValueNotifier<ZegoSDKUser?> hostNoti = ValueNotifier(null);
-  ListNotifier<ZegoSDKUser> coHostUserListNoti = ListNotifier([]);
+  ListNotifier<ZegoSDKUser> coHostUserListNotifier = ListNotifier([]);
 
   bool isHost(String userID) {
     return hostNoti.value?.userID == userID;
   }
 
   bool isCoHost(String userID) {
-    for (final user in coHostUserListNoti.value) {
+    for (final user in coHostUserListNotifier.value) {
       if (user.userID == userID) {
         return true;
       }
@@ -36,16 +36,16 @@ class CoHostService {
   }
 
   void clearData() {
-    coHostUserListNoti.clear();
+    coHostUserListNotifier.clear();
     hostNoti.value = null;
   }
 
   void startCoHost() {
-    coHostUserListNoti.add(ZEGOSDKManager().currentUser!);
+    coHostUserListNotifier.add(ZEGOSDKManager().currentUser!);
   }
 
   void endCoHost() {
-    coHostUserListNoti.removeWhere((element) {
+    coHostUserListNotifier.removeWhere((element) {
       return element.userID == ZEGOSDKManager().currentUser!.userID;
     });
   }
@@ -58,7 +58,7 @@ class CoHostService {
         } else if (element.streamID.endsWith('_cohost')) {
           final cohostUser = ZEGOSDKManager().getUser(element.user.userID);
           if (cohostUser != null) {
-            coHostUserListNoti.add(cohostUser);
+            coHostUserListNotifier.add(cohostUser);
           }
         }
       }
@@ -67,7 +67,7 @@ class CoHostService {
         if (isHostStreamID(element.streamID)) {
           hostNoti.value = null;
         } else if (element.streamID.endsWith('_cohost')) {
-          coHostUserListNoti.removeWhere((coHostUser) {
+          coHostUserListNotifier.removeWhere((coHostUser) {
             return coHostUser.userID == element.user.userID;
           });
         }
@@ -78,7 +78,7 @@ class CoHostService {
   void onRoomUserListUpdate(ZegoRoomUserListUpdateEvent event) {
     for (final user in event.userList) {
       if (event.updateType == ZegoUpdateType.Delete) {
-        coHostUserListNoti.removeWhere((element) => element.userID == ZEGOSDKManager().currentUser!.userID);
+        coHostUserListNotifier.removeWhere((element) => element.userID == ZEGOSDKManager().currentUser!.userID);
         if (hostNoti.value?.userID == user.userID) {
           hostNoti.value = null;
         }
