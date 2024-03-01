@@ -33,6 +33,7 @@ class ExpressService {
   ZegoRoomStateChangedReason currentRoomState = ZegoRoomStateChangedReason.Logout;
   ZegoSDKUser? currentUser;
   List<ZegoSDKUser> userInfoList = [];
+  var remoteStreamUserInfoListNotifier = ValueNotifier<List<ZegoSDKUser>>([]);
   Map<String, String> streamMap = {};
   ZegoMixerTask? currentMixerTask;
   ValueNotifier<Widget?> mixerStreamNotifier = ValueNotifier(null);
@@ -44,6 +45,7 @@ class ExpressService {
     currentRoomID = '';
     currentRoomState = ZegoRoomStateChangedReason.Logout;
     userInfoList.clear();
+    remoteStreamUserInfoListNotifier.value = <ZegoSDKUser>[];
     clearLocalUserData();
     streamMap.clear();
     currentMixerTask = null;
@@ -93,6 +95,17 @@ class ExpressService {
         return user;
       }
     }
+
+    return null;
+  }
+
+  ZegoSDKUser? getRemoteUser(String userID) {
+    for (final user in remoteStreamUserInfoListNotifier.value) {
+      if (user.userID == userID) {
+        return user;
+      }
+    }
+
     return null;
   }
 

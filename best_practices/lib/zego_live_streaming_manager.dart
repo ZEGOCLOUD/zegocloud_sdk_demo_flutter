@@ -14,7 +14,9 @@ import 'zego_sdk_key_center.dart';
 import 'zego_sdk_manager.dart';
 
 class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
-  ZegoLiveStreamingManager._internal();
+  ZegoLiveStreamingManager._internal() {
+    init();
+  }
 
   factory ZegoLiveStreamingManager() => instance;
   static final ZegoLiveStreamingManager instance = ZegoLiveStreamingManager._internal();
@@ -27,7 +29,7 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
 
   PKInfo? get pkInfo => pkService?.pkInfo;
 
-  ValueNotifier<ZegoSDKUser?> get hostNotifier => cohostService?.hostNoti ?? ValueNotifier(null);
+  ValueNotifier<ZegoSDKUser?> get hostNotifier => cohostService?.hostNotifier ?? ValueNotifier(null);
 
   ListNotifier<ZegoSDKUser> get coHostUserListNotifier => cohostService?.coHostUserListNotifier ?? ListNotifier([]);
 

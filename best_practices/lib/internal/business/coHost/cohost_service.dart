@@ -8,11 +8,11 @@ bool isHostStreamID(String streamID) {
 }
 
 class CoHostService {
-  ValueNotifier<ZegoSDKUser?> hostNoti = ValueNotifier(null);
+  ValueNotifier<ZegoSDKUser?> hostNotifier = ValueNotifier(null);
   ListNotifier<ZegoSDKUser> coHostUserListNotifier = ListNotifier([]);
 
   bool isHost(String userID) {
-    return hostNoti.value?.userID == userID;
+    return hostNotifier.value?.userID == userID;
   }
 
   bool isCoHost(String userID) {
@@ -37,7 +37,7 @@ class CoHostService {
 
   void clearData() {
     coHostUserListNotifier.clear();
-    hostNoti.value = null;
+    hostNotifier.value = null;
   }
 
   void startCoHost() {
@@ -54,7 +54,7 @@ class CoHostService {
     if (event.updateType == ZegoUpdateType.Add) {
       for (final element in event.streamList) {
         if (isHostStreamID(element.streamID)) {
-          hostNoti.value = ZEGOSDKManager().getUser(element.user.userID);
+          hostNotifier.value = ZEGOSDKManager().getUser(element.user.userID);
         } else if (element.streamID.endsWith('_cohost')) {
           final cohostUser = ZEGOSDKManager().getUser(element.user.userID);
           if (cohostUser != null) {
@@ -65,7 +65,7 @@ class CoHostService {
     } else {
       for (final element in event.streamList) {
         if (isHostStreamID(element.streamID)) {
-          hostNoti.value = null;
+          hostNotifier.value = null;
         } else if (element.streamID.endsWith('_cohost')) {
           coHostUserListNotifier.removeWhere((coHostUser) {
             return coHostUser.userID == element.user.userID;
@@ -79,8 +79,8 @@ class CoHostService {
     for (final user in event.userList) {
       if (event.updateType == ZegoUpdateType.Delete) {
         coHostUserListNotifier.removeWhere((element) => element.userID == ZEGOSDKManager().currentUser!.userID);
-        if (hostNoti.value?.userID == user.userID) {
-          hostNoti.value = null;
+        if (hostNotifier.value?.userID == user.userID) {
+          hostNotifier.value = null;
         }
       }
     }

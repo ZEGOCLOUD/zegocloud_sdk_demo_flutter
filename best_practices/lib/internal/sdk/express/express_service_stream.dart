@@ -111,6 +111,14 @@ extension ExpressServiceStream on ExpressService {
     String streamID,
     ZegoSDKUser anotherHost,
   ) async {
+    anotherHost.isCameraOnNotifier.value = true;
+    anotherHost.isMicOnNotifier.value = true;
+
+    if (null == getRemoteUser(anotherHost.userID)) {
+      remoteStreamUserInfoListNotifier.value.add(anotherHost);
+      remoteStreamUserInfoListNotifier.value = List.from(remoteStreamUserInfoListNotifier.value);
+    }
+
     await ZegoExpressEngine.instance.createCanvasView((viewID) async {
       anotherHost.viewID = viewID;
       final canvas = ZegoCanvas(

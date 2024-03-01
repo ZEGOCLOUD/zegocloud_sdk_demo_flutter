@@ -11,6 +11,7 @@ import '../../components/live_streaming/zego_live_bottom_bar.dart';
 import '../../components/pk/pk_button.dart';
 import '../../components/pk/pk_container.dart';
 import '../../internal/sdk/utils/login_notifier.dart';
+import '../../internal/sdk/utils/logout_notifier.dart';
 import '../../internal/sdk/zim/Define/zim_room_request.dart';
 import '../../utils/zegocloud_token.dart';
 import '../../zego_live_streaming_manager.dart';
@@ -32,7 +33,12 @@ class ZegoLivePage extends StatefulWidget {
 
   final String roomID;
   final ZegoLiveStreamingRole role;
+
+  /// Use the command-driven interface.
+  /// If external control is required, pass in an external command.
   final ZegoLivePageCommand? externalControlCommand;
+
+  /// Cross-room users, only for preview
   final String? previewHostID;
 
   @override
@@ -48,9 +54,17 @@ class ZegoLivePageState extends State<ZegoLivePage> {
   bool showingDialog = false;
   bool showingPKDialog = false;
 
-  var previewUserInfoNotifier = ValueNotifier<ZegoSDKUser?>(null);
-
+  /// room login notifiers, sliding up and down will cause changes in the state of the room
   var roomLoginNotifier = ZegoRoomLoginNotifier();
+
+  /// room logout notifiers, sliding up and down will cause changes in the state of the room
+  var roomLogoutNotifier = ZegoRoomLogoutNotifier();
+
+  /// room ready notifiers, sliding up and down will cause changes in the state of the room
+  var roomReadyNotifier = ValueNotifier<bool>(false);
+
+  /// notifier of preview user
+  var previewUserInfoNotifier = ValueNotifier<ZegoSDKUser?>(null);
 
   double get kButtonSize => 30;
 
@@ -58,27 +72,18 @@ class ZegoLivePageState extends State<ZegoLivePage> {
 
   ExpressService get expressService => ZEGOSDKManager().expressService;
 
-  bool get hasExternalCommand => null != widget.externalControlCommand;
-
-  ZegoLivePageCommand get command => widget.externalControlCommand ?? lazyCreateDefaultCommand();
-
-  ZegoLivePageCommand lazyCreateDefaultCommand() {
-    defaultCommand ??= ZegoLivePageCommand(roomID: widget.roomID);
-
-    return defaultCommand!;
-  }
-
   @override
   void initState() {
     super.initState();
-
-    ZegoLiveStreamingManager().init();
 
     ZegoLiveStreamingManager().currentUserRoleNotifier.value = widget.role;
 
     registerCommandEvent();
 
-    roomLoginNotifier.resetCheckingData(widget.roomID);
+    /// Monitor cross-room user updates
+    expressService.remoteStreamUserInfoListNotifier.addListener(onRemoteStreamUserUpdated);
+
+    registerLoginEvents();
 
     if (!hasExternalCommand) {
       command
@@ -92,6 +97,9 @@ class ZegoLivePageState extends State<ZegoLivePage> {
   @override
   void dispose() {
     super.dispose();
+
+    expressService.remoteStreamUserInfoListNotifier.removeListener(onRemoteStreamUserUpdated);
+    unregisterLoginEvents();
 
     uninitGift();
 
@@ -109,62 +117,11 @@ class ZegoLivePageState extends State<ZegoLivePage> {
     return ZegoLiveStreamingRole.host == widget.role
         ? liveRoomWidget()
         : ValueListenableBuilder<bool>(
-            valueListenable: roomLoginNotifier.notifier,
+            valueListenable: roomReadyNotifier,
             builder: (context, isRoomReady, _) {
               return isRoomReady ? liveRoomWidget() : previewRoomWidget();
             },
           );
-  }
-
-  Widget previewRoomWidget() {
-    if (null == widget.previewHostID) {
-      return Container();
-    }
-
-    if (expressService.streamMap.containsValue(widget.previewHostID)) {
-      final previewUserIndex = expressService.userInfoList.indexWhere((user) => user.userID == widget.previewHostID);
-      previewUserInfoNotifier.value = expressService.userInfoList[previewUserIndex];
-
-      return ZegoAudioVideoView(userInfo: previewUserInfoNotifier.value!);
-    } else {
-      expressService.streamListUpdateStreamCtrl.stream.listen(onStreamListUpdate);
-    }
-
-    return ValueListenableBuilder<ZegoSDKUser?>(
-      valueListenable: previewUserInfoNotifier,
-      builder: (context, previewUserInfo, _) {
-        return null == previewUserInfo
-            ? Container(
-                decoration: BoxDecoration(border: Border.all(color: Colors.red)),
-                child: Stack(
-                  children: [
-                    backgroundImage(),
-                    Center(
-                      child: Text(
-                        'Loading ${widget.previewHostID}',
-                        style: const TextStyle(
-                          decoration: TextDecoration.none,
-                          color: Colors.white,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ),
-                    const Center(child: CircularProgressIndicator()),
-                  ],
-                ),
-              )
-            : ZegoAudioVideoView(userInfo: previewUserInfo);
-      },
-    );
-  }
-
-  void onStreamListUpdate(ZegoRoomStreamListUpdateEvent event) {
-    if (!expressService.streamMap.containsValue(widget.previewHostID)) {
-      return;
-    }
-
-    final previewUserIndex = expressService.userInfoList.indexWhere((user) => user.userID == widget.previewHostID);
-    previewUserInfoNotifier.value = expressService.userInfoList[previewUserIndex];
   }
 
   Widget liveRoomWidget() {
@@ -196,6 +153,47 @@ class ZegoLivePageState extends State<ZegoLivePage> {
     );
   }
 
+  Widget previewRoomWidget() {
+    if (null == widget.previewHostID) {
+      return Container();
+    }
+
+    final previewUser = expressService.getRemoteUser(widget.previewHostID!);
+    if (null != previewUser) {
+      /// remote user's stream is playing
+      return ZegoAudioVideoView(userInfo: previewUser);
+    }
+
+    /// remote user's stream not play now, waiting
+    return ValueListenableBuilder<ZegoSDKUser?>(
+      valueListenable: previewUserInfoNotifier,
+      builder: (context, previewUserInfo, _) {
+        return null == previewUserInfo
+
+            /// waiting
+            ? Stack(
+                children: [
+                  backgroundImage(),
+                  Center(
+                    child: Text(
+                      'Loading ${widget.previewHostID}',
+                      style: const TextStyle(
+                        decoration: TextDecoration.none,
+                        color: Colors.white,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                  const Center(child: CircularProgressIndicator()),
+                ],
+              )
+
+            /// remote user's stream is playing
+            : ZegoAudioVideoView(userInfo: previewUserInfo);
+      },
+    );
+  }
+
   Widget bottomBar(bool isLiving, RoomPKState pkState) {
     if (!isLiving) return const SizedBox.shrink();
 
@@ -212,36 +210,39 @@ class ZegoLivePageState extends State<ZegoLivePage> {
 
   Widget hostVideoView(bool isLiving, RoomPKState pkState) {
     return ValueListenableBuilder(
-        valueListenable: ZegoLiveStreamingManager().onPKViewAvailableNotifier,
-        builder: (context, bool showPKView, _) {
-          if (pkState == RoomPKState.isStartPK) {
-            if (showPKView || ZegoLiveStreamingManager().iamHost()) {
-              return LayoutBuilder(builder: (context, constraints) {
-                return Stack(
-                  children: [
-                    Positioned(
-                        top: 100,
-                        child: SizedBox(
-                          width: constraints.maxWidth,
-                          height: constraints.maxWidth * 16 / 18,
-                          child: const ZegoPKContainerView(),
-                        )),
-                  ],
-                );
-              });
-            } else {
-              if (ZegoLiveStreamingManager().hostNotifier.value == null) {
-                return const SizedBox.shrink();
-              }
-              return ZegoAudioVideoView(userInfo: ZegoLiveStreamingManager().hostNotifier.value!);
-            }
+      valueListenable: ZegoLiveStreamingManager().onPKViewAvailableNotifier,
+      builder: (context, bool showPKView, _) {
+        if (pkState == RoomPKState.isStartPK) {
+          if (showPKView || ZegoLiveStreamingManager().iamHost()) {
+            return LayoutBuilder(builder: (context, constraints) {
+              return Stack(
+                children: [
+                  Positioned(
+                      top: 100,
+                      child: SizedBox(
+                        width: constraints.maxWidth,
+                        height: constraints.maxWidth * 16 / 18,
+                        child: const ZegoPKContainerView(),
+                      )),
+                ],
+              );
+            });
           } else {
             if (ZegoLiveStreamingManager().hostNotifier.value == null) {
               return const SizedBox.shrink();
             }
+
             return ZegoAudioVideoView(userInfo: ZegoLiveStreamingManager().hostNotifier.value!);
           }
-        });
+        } else {
+          if (ZegoLiveStreamingManager().hostNotifier.value == null) {
+            return const SizedBox.shrink();
+          }
+
+          return ZegoAudioVideoView(userInfo: ZegoLiveStreamingManager().hostNotifier.value!);
+        }
+      },
+    );
   }
 
   ZegoSDKUser? getHostUser() {
@@ -256,6 +257,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
         }
       }
     }
+
     return null;
   }
 
@@ -353,6 +355,16 @@ class ZegoLivePageState extends State<ZegoLivePage> {
     }
   }
 
+  void onRemoteStreamUserUpdated() {
+    final previewUser = expressService.getRemoteUser(widget.previewHostID!);
+    if (null == previewUser) {
+      return;
+    }
+
+    /// remote user's stream start playing
+    previewUserInfoNotifier.value = previewUser;
+  }
+
   void onExpressRoomStateChanged(ZegoRoomStateEvent event) {
     debugPrint('LivePage:onExpressRoomStateChanged: $event');
 
@@ -440,10 +452,49 @@ class ZegoLivePageState extends State<ZegoLivePage> {
   }
 }
 
-extension ZegoLivePageStateCommand on ZegoLivePageState {
-  void registerCommandEvent() {
-    debugPrint('1111 ${command} registerCommandEvent');
+extension ZegoLivePageStateLoginState on ZegoLivePageState {
+  void registerLoginEvents() {
+    roomLoginNotifier.notifier.addListener(onRoomLoginStateChanged);
+    roomLogoutNotifier.notifier.addListener(onRoomLogoutStateChanged);
+    roomLoginNotifier.resetCheckingData(widget.roomID);
+    roomLogoutNotifier.resetCheckingData(widget.roomID);
+  }
 
+  void unregisterLoginEvents() {
+    roomLoginNotifier.notifier.removeListener(onRoomLoginStateChanged);
+    roomLogoutNotifier.notifier.removeListener(onRoomLogoutStateChanged);
+  }
+
+  void onRoomLoginStateChanged() {
+    if (roomLoginNotifier.notifier.value) {
+      roomLogoutNotifier.resetCheckingData(widget.roomID);
+      roomReadyNotifier.value = true;
+    }
+  }
+
+  void onRoomLogoutStateChanged() {
+    if (roomLogoutNotifier.notifier.value) {
+      roomLoginNotifier.resetCheckingData(widget.roomID);
+      roomReadyNotifier.value = false;
+    }
+  }
+}
+
+extension ZegoLivePageStateCommand on ZegoLivePageState {
+  /// Whether to enable external command control, if not, then it is internal control
+  bool get hasExternalCommand => null != widget.externalControlCommand;
+
+  /// current command
+  ZegoLivePageCommand get command => widget.externalControlCommand ?? lazyCreateDefaultCommand();
+
+  /// default internal command
+  ZegoLivePageCommand lazyCreateDefaultCommand() {
+    defaultCommand ??= ZegoLivePageCommand(roomID: widget.roomID);
+
+    return defaultCommand!;
+  }
+
+  void registerCommandEvent() {
     command.joinRoomCommand.addListener(onJoinRoomCommand);
     command.leaveRoomCommand.addListener(onLeaveRoomCommand);
     command.registerEventCommand.addListener(onRegisterEventCommand);
@@ -451,8 +502,6 @@ extension ZegoLivePageStateCommand on ZegoLivePageState {
   }
 
   void unregisterCommandEvent() {
-    debugPrint('1111 ${command} unregisterCommandEvent');
-
     command.joinRoomCommand.removeListener(onJoinRoomCommand);
     command.leaveRoomCommand.removeListener(onLeaveRoomCommand);
     command.registerEventCommand.removeListener(onRegisterEventCommand);
@@ -519,8 +568,6 @@ extension ZegoLivePageStateCommand on ZegoLivePageState {
   void onLeaveRoomCommand() {
     ZEGOSDKManager().expressService.stopPreview();
 
-    ZegoLiveStreamingManager().leaveRoom().then((value) {
-      ZegoLiveStreamingManager().uninit();
-    });
+    ZegoLiveStreamingManager().leaveRoom();
   }
 }

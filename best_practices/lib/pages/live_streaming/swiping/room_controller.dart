@@ -27,8 +27,6 @@ class ZegoSwipingRoomController {
 
     debugPrint('room controller, init');
 
-    ZegoLiveStreamingManager().init();
-
     _data
       ..init = true
       ..roomLoginNotifier ??= ZegoRoomLoginNotifier()
@@ -57,9 +55,7 @@ class ZegoSwipingRoomController {
     _data.currentRoomLoginDone.removeListener(_onCurrentRoomLoginStateUpdated);
     _data.currentRoomLogoutDone.removeListener(_onCurrentRoomLogoutStateUpdated);
 
-    ZegoLiveStreamingManager().leaveRoom().then((value) {
-      ZegoLiveStreamingManager().uninit();
-    });
+    ZegoLiveStreamingManager().leaveRoom();
   }
 
   String get currentRoomID => _data.currentRoomID;
@@ -156,7 +152,7 @@ class ZegoSwipingRoomController {
 
     debugPrint('room controller, $currentRoomID leave');
 
-    _data.roomLogoutNotifier?.resetCheckingData();
+    _data.roomLogoutNotifier?.resetCheckingData(currentRoomID);
     _data.currentRoomLogoutDone.value = false;
 
     roomCommandsNotifier.value[currentRoomID]?.unregisterEvent();

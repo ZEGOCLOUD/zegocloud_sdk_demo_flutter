@@ -92,12 +92,13 @@ class _ZegoAudioVideoViewState extends State<ZegoAudioVideoView> {
             } else {
               return Center(
                 child: SizedBox(
-                    height: 20,
-                    child: Text(
-                      widget.userInfo.userName[0],
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    )),
+                  height: 20,
+                  child: Text(
+                    widget.userInfo.userName.isNotEmpty ? widget.userInfo.userName[0] : '',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
               );
             }
           }),
