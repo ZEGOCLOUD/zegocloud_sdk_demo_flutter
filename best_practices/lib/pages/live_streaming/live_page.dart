@@ -63,8 +63,8 @@ class ZegoLivePageState extends State<ZegoLivePage> {
   /// room ready notifiers, sliding up and down will cause changes in the state of the room
   var roomReadyNotifier = ValueNotifier<bool>(false);
 
-  /// notifier of preview user
-  var previewUserInfoNotifier = ValueNotifier<ZegoSDKUser?>(null);
+  /// preview host or real host
+  var hostNotifier = ValueNotifier<ZegoSDKUser?>(null);
 
   double get kButtonSize => 30;
 
@@ -81,7 +81,16 @@ class ZegoLivePageState extends State<ZegoLivePage> {
     registerCommandEvent();
 
     /// Monitor cross-room user updates
-    expressService.remoteStreamUserInfoListNotifier.addListener(onRemoteStreamUserUpdated);
+    if (widget.previewHostID != null) {
+      final previewUser = expressService.getRemoteUser(widget.previewHostID!);
+      if (null != previewUser) {
+        /// remote user's stream is playing
+        hostNotifier.value = previewUser;
+      }
+
+      expressService.remoteStreamUserInfoListNotifier.addListener(onRemoteStreamUserUpdated);
+      ZegoLiveStreamingManager().hostNotifier.addListener(onHostUpdated);
+    }
 
     registerLoginEvents();
 
@@ -114,17 +123,6 @@ class ZegoLivePageState extends State<ZegoLivePage> {
 
   @override
   Widget build(Object context) {
-    return ZegoLiveStreamingRole.host == widget.role
-        ? liveRoomWidget()
-        : ValueListenableBuilder<bool>(
-            valueListenable: roomReadyNotifier,
-            builder: (context, isRoomReady, _) {
-              return isRoomReady ? liveRoomWidget() : previewRoomWidget();
-            },
-          );
-  }
-
-  Widget liveRoomWidget() {
     return ValueListenableBuilder<bool>(
       valueListenable: ZegoLiveStreamingManager().isLivingNotifier,
       builder: (context, isLiving, _) {
@@ -136,60 +134,34 @@ class ZegoLivePageState extends State<ZegoLivePage> {
                 children: [
                   backgroundImage(),
                   hostVideoView(isLiving, pkState),
-                  Positioned(right: 20, top: 100, child: coHostVideoView(isLiving, pkState)),
-                  Positioned(bottom: 60, left: 0, right: 0, child: startLiveButton(isLiving, pkState)),
                   Positioned(top: 50, left: 20, child: hostText()),
-                  Positioned(top: 60, right: 30, child: leaveButton()),
-                  Positioned(bottom: 120, left: 30, child: cohostRequestListButton(isLiving, pkState)),
-                  Positioned(bottom: 80, left: 30, child: pkButton(isLiving, pkState)),
-                  Positioned(left: 0, right: 0, bottom: 20, child: bottomBar(isLiving, pkState)),
-                  giftForeground()
+
+                  ///
+                  ValueListenableBuilder<bool>(
+                    valueListenable: roomReadyNotifier,
+                    builder: (context, isRoomReady, _) {
+                      return Stack(
+                        children: [
+                          ...(isRoomReady
+                              ? [
+                                  Positioned(right: 20, top: 100, child: coHostVideoView(isLiving, pkState)),
+                                  Positioned(bottom: 60, left: 0, right: 0, child: startLiveButton(isLiving, pkState)),
+                                  Positioned(top: 60, right: 30, child: leaveButton()),
+                                  Positioned(bottom: 120, left: 30, child: cohostRequestListButton(isLiving, pkState)),
+                                  Positioned(bottom: 80, left: 30, child: pkButton(isLiving, pkState)),
+                                  Positioned(left: 0, right: 0, bottom: 20, child: bottomBar(isLiving, pkState)),
+                                  giftForeground()
+                                ]
+                              : [])
+                        ],
+                      );
+                    },
+                  ),
                 ],
               ),
             );
           },
         );
-      },
-    );
-  }
-
-  Widget previewRoomWidget() {
-    if (null == widget.previewHostID) {
-      return Container();
-    }
-
-    final previewUser = expressService.getRemoteUser(widget.previewHostID!);
-    if (null != previewUser) {
-      /// remote user's stream is playing
-      return ZegoAudioVideoView(userInfo: previewUser);
-    }
-
-    /// remote user's stream not play now, waiting
-    return ValueListenableBuilder<ZegoSDKUser?>(
-      valueListenable: previewUserInfoNotifier,
-      builder: (context, previewUserInfo, _) {
-        return null == previewUserInfo
-
-            /// waiting
-            ? Stack(
-                children: [
-                  backgroundImage(),
-                  Center(
-                    child: Text(
-                      'Loading ${widget.previewHostID}',
-                      style: const TextStyle(
-                        decoration: TextDecoration.none,
-                        color: Colors.white,
-                        fontSize: 20,
-                      ),
-                    ),
-                  ),
-                  const Center(child: CircularProgressIndicator()),
-                ],
-              )
-
-            /// remote user's stream is playing
-            : ZegoAudioVideoView(userInfo: previewUserInfo);
       },
     );
   }
@@ -218,12 +190,13 @@ class ZegoLivePageState extends State<ZegoLivePage> {
               return Stack(
                 children: [
                   Positioned(
-                      top: 100,
-                      child: SizedBox(
-                        width: constraints.maxWidth,
-                        height: constraints.maxWidth * 16 / 18,
-                        child: const ZegoPKContainerView(),
-                      )),
+                    top: 100,
+                    child: SizedBox(
+                      width: constraints.maxWidth,
+                      height: constraints.maxWidth * 16 / 18,
+                      child: const ZegoPKContainerView(),
+                    ),
+                  ),
                 ],
               );
             });
@@ -235,11 +208,12 @@ class ZegoLivePageState extends State<ZegoLivePage> {
             return ZegoAudioVideoView(userInfo: ZegoLiveStreamingManager().hostNotifier.value!);
           }
         } else {
-          if (ZegoLiveStreamingManager().hostNotifier.value == null) {
-            return const SizedBox.shrink();
-          }
-
-          return ZegoAudioVideoView(userInfo: ZegoLiveStreamingManager().hostNotifier.value!);
+          return ValueListenableBuilder<ZegoSDKUser?>(
+            valueListenable: hostNotifier,
+            builder: (context, host, _) {
+              return null == host ? const SizedBox.shrink() : ZegoAudioVideoView(userInfo: host);
+            },
+          );
         }
       },
     );
@@ -336,7 +310,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
 
   Widget hostText() {
     return ValueListenableBuilder<ZegoSDKUser?>(
-      valueListenable: ZegoLiveStreamingManager().hostNotifier,
+      valueListenable: hostNotifier,
       builder: (context, userInfo, _) {
         return Text(
           'RoomID: ${widget.roomID}\n'
@@ -362,7 +336,13 @@ class ZegoLivePageState extends State<ZegoLivePage> {
     }
 
     /// remote user's stream start playing
-    previewUserInfoNotifier.value = previewUser;
+    hostNotifier.value = previewUser;
+  }
+
+  void onHostUpdated() {
+    if (expressService.currentRoomID == widget.roomID) {
+      hostNotifier.value = ZegoLiveStreamingManager().hostNotifier.value;
+    }
   }
 
   void onExpressRoomStateChanged(ZegoRoomStateEvent event) {

@@ -45,7 +45,7 @@ class ExpressService {
     currentRoomID = '';
     currentRoomState = ZegoRoomStateChangedReason.Logout;
     userInfoList.clear();
-    remoteStreamUserInfoListNotifier.value = <ZegoSDKUser>[];
+    // remoteStreamUserInfoListNotifier.value = <ZegoSDKUser>[];
     clearLocalUserData();
     streamMap.clear();
     currentMixerTask = null;
@@ -203,20 +203,18 @@ class ExpressService {
       }
     }
     if (userInfo != null) {
-      await ZegoExpressEngine.instance.createCanvasView((viewID) async {
-        userInfo.viewID = viewID;
-        final canvas = ZegoCanvas(
-          userInfo.viewID,
-          viewMode: streamPlayViewMode,
-        );
-        await ZegoExpressEngine.instance.startPlayingStream(
-          streamID,
-          canvas: canvas,
-          config: config,
-        );
-      }).then((videoViewWidget) {
-        userInfo.videoViewNotifier.value = videoViewWidget;
-      });
+      if (userInfo.viewID != -1) {
+        final canvas = ZegoCanvas(userInfo.viewID, viewMode: streamPlayViewMode);
+        await ZegoExpressEngine.instance.startPlayingStream(streamID, canvas: canvas, config: config);
+      } else {
+        await ZegoExpressEngine.instance.createCanvasView((viewID) async {
+          userInfo.viewID = viewID;
+          final canvas = ZegoCanvas(userInfo.viewID, viewMode: streamPlayViewMode);
+          await ZegoExpressEngine.instance.startPlayingStream(streamID, canvas: canvas, config: config);
+        }).then((videoViewWidget) {
+          userInfo.videoViewNotifier.value = videoViewWidget;
+        });
+      }
     }
   }
 
@@ -271,9 +269,17 @@ class ExpressService {
   ) {
     if (updateType == ZegoUpdateType.Add) {
       for (final user in userList) {
-        final userInfo = getUser(user.userID);
+        var userInfo = getUser(user.userID);
         if (userInfo == null) {
-          userInfoList.add(ZegoSDKUser(userID: user.userID, userName: user.userName));
+          userInfo = getRemoteUser(user.userID);
+          if (userInfo == null) {
+            userInfoList.add(ZegoSDKUser(userID: user.userID, userName: user.userName));
+          } else {
+            ///  sync from remote user
+            userInfo
+              ..userID = user.userID
+              ..userName = user.userName;
+          }
         } else {
           userInfo
             ..userID = user.userID

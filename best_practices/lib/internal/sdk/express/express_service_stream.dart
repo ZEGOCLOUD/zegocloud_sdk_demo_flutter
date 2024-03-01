@@ -5,7 +5,8 @@ extension ExpressServiceStream on ExpressService {
 
   Future<void> stopPlayingStream(String streamID) async {
     final userID = streamMap[streamID];
-    final userInfo = getUser(userID ?? '');
+    var userInfo = getUser(userID ?? '');
+    userInfo ??= getRemoteUser(userID ?? '');
     if (userInfo != null) {
       userInfo.streamID = '';
       userInfo.videoViewNotifier.value = null;
@@ -73,14 +74,26 @@ extension ExpressServiceStream on ExpressService {
     List<ZegoStream> streamList,
     Map<String, dynamic> extendedData,
   ) async {
+    debugPrint('onRoomStreamUpdate,'
+        'roomID:$roomID, '
+        'updateType:$updateType, '
+        'streamList:$streamList, '
+        'extendedData:$extendedData, ');
+
     for (final stream in streamList) {
       if (updateType == ZegoUpdateType.Add) {
-        debugPrint('onRoomStreamUpdate: ${stream.streamID}');
         streamMap[stream.streamID] = stream.user.userID;
         var userInfo = getUser(stream.user.userID);
         if (userInfo == null) {
-          userInfo = ZegoSDKUser(userID: stream.user.userID, userName: stream.user.userName);
+          /// re-use from remote user object
+          userInfo = getRemoteUser(stream.user.userID);
+
+          userInfo ??= ZegoSDKUser(userID: stream.user.userID, userName: stream.user.userName);
+
           userInfoList.add(userInfo);
+        }
+        if (userInfo.userName.isEmpty) {
+          userInfo.userName = stream.user.userName;
         }
         userInfo.streamID = stream.streamID;
 
@@ -116,22 +129,21 @@ extension ExpressServiceStream on ExpressService {
 
     if (null == getRemoteUser(anotherHost.userID)) {
       remoteStreamUserInfoListNotifier.value.add(anotherHost);
-      remoteStreamUserInfoListNotifier.value = List.from(remoteStreamUserInfoListNotifier.value);
     }
+    remoteStreamUserInfoListNotifier.value = List.from(remoteStreamUserInfoListNotifier.value);
 
-    await ZegoExpressEngine.instance.createCanvasView((viewID) async {
-      anotherHost.viewID = viewID;
-      final canvas = ZegoCanvas(
-        anotherHost.viewID,
-        viewMode: streamPlayViewMode,
-      );
-      await ZegoExpressEngine.instance.startPlayingStream(
-        streamID,
-        canvas: canvas,
-      );
-    }).then((videoViewWidget) {
-      anotherHost.videoViewNotifier.value = videoViewWidget;
-    });
+    if (anotherHost.viewID != -1) {
+      final canvas = ZegoCanvas(anotherHost.viewID, viewMode: streamPlayViewMode);
+      await ZegoExpressEngine.instance.startPlayingStream(streamID, canvas: canvas);
+    } else {
+      await ZegoExpressEngine.instance.createCanvasView((viewID) async {
+        anotherHost.viewID = viewID;
+        final canvas = ZegoCanvas(anotherHost.viewID, viewMode: streamPlayViewMode);
+        await ZegoExpressEngine.instance.startPlayingStream(streamID, canvas: canvas);
+      }).then((videoViewWidget) {
+        anotherHost.videoViewNotifier.value = videoViewWidget;
+      });
+    }
   }
 
   Future<void> startPlayingMixerStream(String streamID) async {

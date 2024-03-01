@@ -126,6 +126,11 @@ class ZegoSwipingRoomController {
   }
 
   Future<bool> switchRoom(String roomID) async {
+    if (roomID == _data.currentRoomID) {
+      debugPrint('room controller, room id $currentRoomID is empty');
+      return true;
+    }
+
     if (_data.currentRoomLoginDone.value) {
       debugPrint('room controller, previous room login, leave pending $roomID');
       _data.pendingRoomID = roomID;

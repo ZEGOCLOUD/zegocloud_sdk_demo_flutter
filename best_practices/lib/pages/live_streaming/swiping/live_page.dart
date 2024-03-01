@@ -150,6 +150,7 @@ class ZegoSwipingLivePageState extends State<ZegoSwipingLivePage> {
 
     return ZegoSwipingPageBuilder(
       onPageChanged: onPageChanged,
+      swipingRoomListNotifier: swipingRoomListNotifier,
       itemBuilder: (context, pageIndex) {
         final targetRoom = swipingRoomListNotifier.value[getRoomIDIndexOfPage(pageIndex)];
 
@@ -189,6 +190,8 @@ class ZegoSwipingLivePageState extends State<ZegoSwipingLivePage> {
   }
 
   void onPageChanged(int pageIndex) {
+    debugPrint('swiping page, onPageChanged $pageIndex');
+
     currentPageIndex = pageIndex;
 
     /// current page, switch room(leave previous and login current room)
@@ -200,6 +203,7 @@ class ZegoSwipingLivePageState extends State<ZegoSwipingLivePage> {
     pageRoomLoginNotifier ??= ZegoRoomLoginNotifier(roomID: targetRoom.roomID);
     pageRoomLoginNotifier?.notifier.addListener(onCurrentPageRoomLoginStateChanged);
 
+    _streamController.clear();
     _roomController.switchRoom(targetRoom.roomID);
   }
 

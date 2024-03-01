@@ -19,4 +19,9 @@ class ZegoSDKUser {
   ValueNotifier<bool> isUsingFrontCameraNotifier = ValueNotifier(true);
 
   ValueNotifier<String?> avatarUrlNotifier = ValueNotifier(null);
+
+  @override
+  String toString() {
+    return 'ZegoSDKUser:{id:$userID, name:$userName, roomID:$roomID, streamID:$streamID, viewID:$viewID}';
+  }
 }

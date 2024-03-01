@@ -17,7 +17,7 @@
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
     <application
-        android:label="pkbattles"
+        android:label="ZegoCloud-BestPractice"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
