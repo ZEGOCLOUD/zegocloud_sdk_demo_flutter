@@ -114,54 +114,39 @@ class ZegoLivePageState extends State<ZegoLivePage> {
                   backgroundImage(),
                   hostVideoView(isLiving, pkState),
                   Positioned(top: 50, left: 20, child: hostText()),
-
-                  ///
-                  ValueListenableBuilder<bool>(
-                    valueListenable: swipingData.roomReadyNotifier,
-                    builder: (context, isRoomReady, _) {
-                      return Stack(
-                        children: [
-                          ...(isRoomReady
-                              ? [
-                                  Positioned(
-                                    right: 20,
-                                    top: 100,
-                                    child: coHostVideoView(isLiving, pkState),
-                                  ),
-                                  Positioned(
-                                    bottom: 60,
-                                    left: 0,
-                                    right: 0,
-                                    child: startLiveButton(isLiving, pkState),
-                                  ),
-                                  Positioned(
-                                    top: 60,
-                                    right: 30,
-                                    child: leaveButton(),
-                                  ),
-                                  Positioned(
-                                    bottom: 120,
-                                    left: 30,
-                                    child: cohostRequestListButton(isLiving, pkState),
-                                  ),
-                                  Positioned(
-                                    bottom: 80,
-                                    left: 30,
-                                    child: pkButton(isLiving, pkState),
-                                  ),
-                                  Positioned(
-                                    left: 0,
-                                    right: 0,
-                                    bottom: 20,
-                                    child: bottomBar(isLiving, pkState),
-                                  ),
-                                  giftForeground()
-                                ]
-                              : [])
-                        ],
-                      );
-                    },
+                  Positioned(
+                    right: 20,
+                    top: 100,
+                    child: coHostVideoView(isLiving, pkState),
                   ),
+                  Positioned(
+                    bottom: 120,
+                    left: 30,
+                    child: cohostRequestListButton(isLiving, pkState),
+                  ),
+                  Positioned(
+                    bottom: 80,
+                    left: 30,
+                    child: pkButton(isLiving, pkState),
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 20,
+                    child: bottomBar(isLiving, pkState),
+                  ),
+                  Positioned(
+                    bottom: 60,
+                    left: 0,
+                    right: 0,
+                    child: startLiveButton(isLiving, pkState),
+                  ),
+                  Positioned(
+                    top: 60,
+                    right: 30,
+                    child: leaveButton(),
+                  ),
+                  giftForeground(),
                 ],
               ),
             );
@@ -196,52 +181,57 @@ class ZegoLivePageState extends State<ZegoLivePage> {
       builder: (context, bool showPKView, _) {
         if (pkState == RoomPKState.isStartPK) {
           if (showPKView || ZegoLiveStreamingManager().iamHost()) {
-            return LayoutBuilder(builder: (context, constraints) {
-              return Stack(
-                children: [
-                  Positioned(
-                    top: 100,
-                    child: SizedBox(
-                      width: constraints.maxWidth,
-                      height: constraints.maxWidth * 16 / 18,
-                      child: const ZegoPKContainerView(),
-                    ),
-                  ),
-                ],
-              );
-            });
+            return hostVideoViewInPK();
           } else {
-            if (ZegoLiveStreamingManager().hostNotifier.value == null) {
-              return const SizedBox.shrink();
-            }
-
-            return ZegoAudioVideoView(
-              userInfo: ZegoLiveStreamingManager().hostNotifier.value!,
-            );
+            return hostVideoViewFromManagerNotifier();
           }
         } else {
-          /// Core rendering logic for scrolling up and down preview
-          return Stack(
-            children: [
-              ValueListenableBuilder<ZegoSDKUser?>(
-                valueListenable: swipingData.hostNotifier,
-                builder: (context, host, _) {
-                  return null == host ? const SizedBox.shrink() : ZegoAudioVideoView(userInfo: host);
-                },
-              ),
-              ValueListenableBuilder<ZegoSDKUser?>(
-                valueListenable: swipingData.hostNotifier,
-                builder: (context, host, _) {
-                  return expressService.streamMap.containsValue(host?.userID)
-                      ? const SizedBox.shrink()
-                      : const Center(
-                          child: CircularProgressIndicator(backgroundColor: Colors.white, color: Colors.black),
-                        );
-                },
-              ),
-            ],
-          );
+          return ZegoLiveStreamingRole.host == widget.role
+              ? hostVideoViewFromManagerNotifier()
+              : hostVideoViewFromSwipingNotifier();
         }
+      },
+    );
+  }
+
+  Widget hostVideoViewInPK() {
+    return LayoutBuilder(builder: (context, constraints) {
+      return Stack(
+        children: [
+          Positioned(
+            top: 100,
+            child: SizedBox(
+              width: constraints.maxWidth,
+              height: constraints.maxWidth * 16 / 18,
+              child: const ZegoPKContainerView(),
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget hostVideoViewFromManagerNotifier() {
+    return ValueListenableBuilder(
+      valueListenable: ZegoLiveStreamingManager().hostNotifier,
+      builder: (context, host, _) {
+        if (ZegoLiveStreamingManager().hostNotifier.value == null) {
+          return const SizedBox.shrink();
+        }
+
+        return ZegoAudioVideoView(
+          userInfo: ZegoLiveStreamingManager().hostNotifier.value!,
+        );
+      },
+    );
+  }
+
+  Widget hostVideoViewFromSwipingNotifier() {
+    /// Core rendering logic for scrolling up and down preview
+    return ValueListenableBuilder<ZegoSDKUser?>(
+      valueListenable: swipingData.hostNotifier,
+      builder: (context, host, _) {
+        return null == host ? const SizedBox.shrink() : ZegoAudioVideoView(userInfo: host);
       },
     );
   }
@@ -520,6 +510,7 @@ extension ZegoLivePageStateCommand on ZegoLivePageState {
 
       /// cache host
       ZegoLiveStreamingManager().hostNotifier.value = ZEGOSDKManager().currentUser;
+      swipingData.hostNotifier.value = ZEGOSDKManager().currentUser;
 
       /// start preview
       ZEGOSDKManager().expressService.turnCameraOn(true);
@@ -584,12 +575,12 @@ extension ZegoLivePageStateSwiping on ZegoLivePageState {
         /// remote user's stream is playing
         swipingData.hostNotifier.value = previewUser;
       }
-
-      ///  in sliding, the room/host will switch, so need to listen for
-      ///  changes in the flow
-      expressService.remoteStreamUserInfoListNotifier.addListener(onRemoteStreamUserUpdated);
-      ZegoLiveStreamingManager().hostNotifier.addListener(onHostUpdated);
     }
+
+    ///  in sliding, the room/host will switch, so need to listen for
+    ///  changes in the flow
+    expressService.remoteStreamUserInfoListNotifier.addListener(onRemoteStreamUserUpdated);
+    ZegoLiveStreamingManager().hostNotifier.addListener(onHostUpdated);
   }
 
   void removePreviewUserUpdateListeners() {

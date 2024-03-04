@@ -27,8 +27,8 @@ extension PKServiceExpressExtension on PKService {
 
   void onRoomUserUpdate(ZegoRoomUserListUpdateEvent event) {
     if (event.updateType == ZegoUpdateType.Delete) {
-      if (ZegoLiveStreamingManager().hostNotifier.value == null && pkStateNoti.value == RoomPKState.isStartPK) {
-        pkStateNoti.value = RoomPKState.isNoPK;
+      if (ZegoLiveStreamingManager().hostNotifier.value == null && pkStateNotifier.value == RoomPKState.isStartPK) {
+        pkStateNotifier.value = RoomPKState.isNoPK;
         onPKEndStreamCtrl.add(null);
         cancelTime();
       }
@@ -38,14 +38,14 @@ extension PKServiceExpressExtension on PKService {
   void onReceiveAudioFirstFrame(ZegoRecvAudioFirstFrameEvent event) {
     if (event.streamID.endsWith('_mix')) {
       muteMainStream();
-      onPKViewAvaliableNoti.value = true;
+      onPKViewAvailableNotifier.value = true;
     }
   }
 
   void onReceiveVideoFirstFrame(ZegoRecvVideoFirstFrameEvent event) {
     if (event.streamID.endsWith('_mix')) {
       muteMainStream();
-      onPKViewAvaliableNoti.value = true;
+      onPKViewAvailableNotifier.value = true;
     }
   }
 

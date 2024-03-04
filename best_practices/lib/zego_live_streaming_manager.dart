@@ -33,11 +33,11 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
 
   ListNotifier<ZegoSDKUser> get coHostUserListNotifier => cohostService?.coHostUserListNotifier ?? ListNotifier([]);
 
-  ValueNotifier<RoomPKState> get pkStateNotifier => pkService?.pkStateNoti ?? ValueNotifier(RoomPKState.isNoPK);
+  ValueNotifier<RoomPKState> get pkStateNotifier => pkService?.pkStateNotifier ?? ValueNotifier(RoomPKState.isNoPK);
 
-  ValueNotifier<bool> get isMuteAnotherAudioNotifier => pkService?.isMuteAnotherAudioNoti ?? ValueNotifier(false);
+  ValueNotifier<bool> get isMuteAnotherAudioNotifier => pkService?.isMuteAnotherAudioNotifier ?? ValueNotifier(false);
 
-  ValueNotifier<bool> get onPKViewAvailableNotifier => pkService?.onPKViewAvaliableNoti ?? ValueNotifier(false);
+  ValueNotifier<bool> get onPKViewAvailableNotifier => pkService?.onPKViewAvailableNotifier ?? ValueNotifier(false);
 
   ZegoSDKUser? get pkUser => pkService?.pkUser;
 

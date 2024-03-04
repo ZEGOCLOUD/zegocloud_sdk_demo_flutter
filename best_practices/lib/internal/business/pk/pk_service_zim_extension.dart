@@ -169,12 +169,12 @@ extension PKServiceZIMExtension on PKService {
           }
         }
       }
-      if (meHasAccepted && moreThanOneAcceptedExceptMe && pkStateNoti.value != RoomPKState.isStartPK) {
+      if (meHasAccepted && moreThanOneAcceptedExceptMe && pkStateNotifier.value != RoomPKState.isStartPK) {
         updatePKMixTask().then((value) {
           if (value.errorCode == 0) {
             startSendSEI();
             checkSEITime();
-            pkStateNoti.value = RoomPKState.isStartPK;
+            pkStateNotifier.value = RoomPKState.isStartPK;
             onPKStartStreamCtrl.add(null);
             for (final pkuser in pkInfo!.pkUserList.value) {
               if (pkuser.hasAccepted) {
@@ -182,7 +182,7 @@ extension PKServiceZIMExtension on PKService {
               }
             }
           } else {
-            pkStateNoti.value = RoomPKState.isNoPK;
+            pkStateNotifier.value = RoomPKState.isNoPK;
             quitPKBattle(pkInfo?.requestID ?? '');
           }
         });
@@ -214,7 +214,7 @@ extension PKServiceZIMExtension on PKService {
           }
         }
       }
-      if (moreThanOneAcceptedExceptMe && pkStateNoti.value == RoomPKState.isStartPK) {
+      if (moreThanOneAcceptedExceptMe && pkStateNotifier.value == RoomPKState.isStartPK) {
         updatePKMixTask().then((value) {
           onPKBattleUserQuitCtrl
               .add(PKBattleUserQuitEvent(userID: userInfo.userID, extendedData: userInfo.extendedData));
@@ -296,7 +296,7 @@ extension PKServiceZIMExtension on PKService {
             ..pkUserList.value = pkUserList;
           checkSEITime();
           ZEGOSDKManager().expressService.startPlayingMixerStream(generateMixerStreamID());
-          pkStateNoti.value = RoomPKState.isStartPK;
+          pkStateNotifier.value = RoomPKState.isStartPK;
           onPKStartStreamCtrl.add(null);
 
           for (final pkuser in pkInfo!.pkUserList.value) {

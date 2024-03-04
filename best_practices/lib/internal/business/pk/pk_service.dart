@@ -18,9 +18,9 @@ class PKService implements PKServiceInterface {
 
   late final List<ZegoMixerInput> Function(List<String> streamIDList, ZegoMixerVideoConfig videoConfig)? setMixerLayout;
 
-  ValueNotifier<bool> isMuteAnotherAudioNoti = ValueNotifier(false);
-  ValueNotifier<bool> onPKViewAvaliableNoti = ValueNotifier(false);
-  ValueNotifier<RoomPKState> pkStateNoti = ValueNotifier(RoomPKState.isNoPK);
+  ValueNotifier<bool> isMuteAnotherAudioNotifier = ValueNotifier(false);
+  ValueNotifier<bool> onPKViewAvailableNotifier = ValueNotifier(false);
+  ValueNotifier<RoomPKState> pkStateNotifier = ValueNotifier(RoomPKState.isNoPK);
 
   Map<String, String> pkRoomAttribute = {};
   Map<String, int> seiTimeMap = {};
@@ -88,9 +88,9 @@ class PKService implements PKServiceInterface {
       final Map<String, dynamic> pkExtendedMap = jsonDecode(pkExtendedData) ?? {};
       pkExtendedMap['user_id'] = localUser?.userID;
       pkExtendedMap['auto_accept'] = autoAccept;
-      pkStateNoti.value = RoomPKState.isRequestPK;
+      pkStateNotifier.value = RoomPKState.isRequestPK;
       final result = await sendUserRequest(targetUserIDList, jsonEncode(pkExtendedMap), true).catchError((error) {
-        pkStateNoti.value = RoomPKState.isNoPK;
+        pkStateNotifier.value = RoomPKState.isNoPK;
         throw error;
       });
       pkInfo!.requestID = result.callID;
@@ -219,7 +219,7 @@ class PKService implements PKServiceInterface {
     pkInfo = null;
     cancelTime();
     seiTimeMap.clear();
-    pkStateNoti.value = RoomPKState.isNoPK;
+    pkStateNotifier.value = RoomPKState.isNoPK;
     onPKEndStreamCtrl.add(null);
   }
 
@@ -542,9 +542,9 @@ class PKService implements PKServiceInterface {
   void cleanPKState() {
     pkSeq = 0;
     pkUser = null;
-    onPKViewAvaliableNoti.value = false;
-    pkStateNoti.value = RoomPKState.isNoPK;
-    isMuteAnotherAudioNoti.value = false;
+    onPKViewAvailableNotifier.value = false;
+    pkStateNotifier.value = RoomPKState.isNoPK;
+    isMuteAnotherAudioNotifier.value = false;
     cancelTime();
     onPKEndStreamCtrl.add(null);
     ZEGOSDKManager().expressService.stopPlayingStream(generateMixerStreamID());
