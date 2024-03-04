@@ -542,6 +542,7 @@ class PKService implements PKServiceInterface {
   void cleanPKState() {
     pkSeq = 0;
     pkUser = null;
+    pkInfo = null;
     onPKViewAvailableNotifier.value = false;
     pkStateNotifier.value = RoomPKState.isNoPK;
     isMuteAnotherAudioNotifier.value = false;

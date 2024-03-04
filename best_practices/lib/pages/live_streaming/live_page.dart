@@ -568,6 +568,10 @@ extension ZegoLivePageStateSwiping on ZegoLivePageState {
   }
 
   void addPreviewUserUpdateListeners() {
+    if (ZegoLiveStreamingRole.host == widget.role) {
+      return;
+    }
+
     /// Monitor cross-room user updates
     if (widget.previewHostID != null) {
       final previewUser = expressService.getRemoteUser(widget.previewHostID!);
