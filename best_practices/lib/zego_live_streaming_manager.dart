@@ -230,25 +230,25 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
 
   @override
   Future<PKInviteSentResult> startPKBattle(String anotherHostID) async {
-    return await pkService?.invitePKbattle([anotherHostID], true) ??
+    return await pkService?.invitePKBattle([anotherHostID], true) ??
         PKInviteSentResult(requestID: '-1', errorUserList: []);
   }
 
   @override
   Future<PKInviteSentResult> startPKBattleWith(List<String> anotherHostIDList) async {
-    return await pkService?.invitePKbattle(anotherHostIDList, true) ??
+    return await pkService?.invitePKBattle(anotherHostIDList, true) ??
         PKInviteSentResult(requestID: '-1', errorUserList: []);
   }
 
   @override
   Future<PKInviteSentResult> invitePKBattle(String targetUserID) async {
-    return await pkService?.invitePKbattle([targetUserID], false) ??
+    return await pkService?.invitePKBattle([targetUserID], false) ??
         PKInviteSentResult(requestID: '-1', errorUserList: []);
   }
 
   @override
   Future<PKInviteSentResult> invitePKBattleWith(List<String> targetUserIDList) async {
-    return await pkService?.invitePKbattle(targetUserIDList, false) ??
+    return await pkService?.invitePKBattle(targetUserIDList, false) ??
         PKInviteSentResult(requestID: '-1', errorUserList: []);
   }
 

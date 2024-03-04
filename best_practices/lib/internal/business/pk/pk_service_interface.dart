@@ -6,7 +6,7 @@ abstract class PKServiceInterface {
   void uninit();
   void removeUserFromPKBattle(String userID);
   void stopPKBattle();
-  Future<PKInviteSentResult> invitePKbattle(List<String> targetUserIDList, bool autoAccept);
+  Future<PKInviteSentResult> invitePKBattle(List<String> targetUserIDList, bool autoAccept);
   Future<void> acceptPKBattle(String requestID);
   Future<ZIMCallQuitSentResult> quitPKBattle(String requestID);
   Future<ZIMCallEndSentResult> endPKBattle(String requestID);

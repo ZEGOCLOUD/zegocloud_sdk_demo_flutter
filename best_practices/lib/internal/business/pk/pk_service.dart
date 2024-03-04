@@ -78,7 +78,7 @@ class PKService implements PKServiceInterface {
   }
 
   @override
-  Future<PKInviteSentResult> invitePKbattle(List<String> targetUserIDList, bool autoAccept) async {
+  Future<PKInviteSentResult> invitePKBattle(List<String> targetUserIDList, bool autoAccept) async {
     if (pkInfo != null) {
       final result = await addUserToRequest(targetUserIDList, pkInfo!.requestID ?? '');
       return PKInviteSentResult(requestID: result.callID, errorUserList: result.info.errorUserList);
