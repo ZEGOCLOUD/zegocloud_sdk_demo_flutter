@@ -203,7 +203,6 @@ class ZegoSwipingLivePageState extends State<ZegoSwipingLivePage> {
     pageRoomLoginNotifier ??= ZegoRoomLoginNotifier(roomID: targetRoom.roomID);
     pageRoomLoginNotifier?.notifier.addListener(onCurrentPageRoomLoginStateChanged);
 
-    _streamController.clear();
     _roomController.switchRoom(targetRoom.roomID);
   }
 

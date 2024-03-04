@@ -34,7 +34,7 @@ class ZegoLivePage extends StatefulWidget {
   final String roomID;
   final ZegoLiveStreamingRole role;
 
-  /// Use the command-driven interface.
+  /// Use the command-driven APIs.
   /// If external control is required, pass in an external command.
   final ZegoLivePageCommand? externalControlCommand;
 
@@ -54,17 +54,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
   bool showingDialog = false;
   bool showingPKDialog = false;
 
-  /// room login notifiers, sliding up and down will cause changes in the state of the room
-  var roomLoginNotifier = ZegoRoomLoginNotifier();
-
-  /// room logout notifiers, sliding up and down will cause changes in the state of the room
-  var roomLogoutNotifier = ZegoRoomLogoutNotifier();
-
-  /// room ready notifiers, sliding up and down will cause changes in the state of the room
-  var roomReadyNotifier = ValueNotifier<bool>(false);
-
-  /// preview host or real host
-  var hostNotifier = ValueNotifier<ZegoSDKUser?>(null);
+  var swipingData = ZegoLivePageSwipingData();
 
   double get kButtonSize => 30;
 
@@ -80,19 +70,8 @@ class ZegoLivePageState extends State<ZegoLivePage> {
 
     registerCommandEvent();
 
-    /// Monitor cross-room user updates
-    if (widget.previewHostID != null) {
-      final previewUser = expressService.getRemoteUser(widget.previewHostID!);
-      if (null != previewUser) {
-        /// remote user's stream is playing
-        hostNotifier.value = previewUser;
-      }
-
-      expressService.remoteStreamUserInfoListNotifier.addListener(onRemoteStreamUserUpdated);
-      ZegoLiveStreamingManager().hostNotifier.addListener(onHostUpdated);
-    }
-
-    registerLoginEvents();
+    addPreviewUserUpdateListeners();
+    addRoomLoginListeners();
 
     if (!hasExternalCommand) {
       command
@@ -107,8 +86,8 @@ class ZegoLivePageState extends State<ZegoLivePage> {
   void dispose() {
     super.dispose();
 
-    expressService.remoteStreamUserInfoListNotifier.removeListener(onRemoteStreamUserUpdated);
-    unregisterLoginEvents();
+    removePreviewUserUpdateListeners();
+    removeRoomLoginListeners();
 
     uninitGift();
 
@@ -138,18 +117,44 @@ class ZegoLivePageState extends State<ZegoLivePage> {
 
                   ///
                   ValueListenableBuilder<bool>(
-                    valueListenable: roomReadyNotifier,
+                    valueListenable: swipingData.roomReadyNotifier,
                     builder: (context, isRoomReady, _) {
                       return Stack(
                         children: [
                           ...(isRoomReady
                               ? [
-                                  Positioned(right: 20, top: 100, child: coHostVideoView(isLiving, pkState)),
-                                  Positioned(bottom: 60, left: 0, right: 0, child: startLiveButton(isLiving, pkState)),
-                                  Positioned(top: 60, right: 30, child: leaveButton()),
-                                  Positioned(bottom: 120, left: 30, child: cohostRequestListButton(isLiving, pkState)),
-                                  Positioned(bottom: 80, left: 30, child: pkButton(isLiving, pkState)),
-                                  Positioned(left: 0, right: 0, bottom: 20, child: bottomBar(isLiving, pkState)),
+                                  Positioned(
+                                    right: 20,
+                                    top: 100,
+                                    child: coHostVideoView(isLiving, pkState),
+                                  ),
+                                  Positioned(
+                                    bottom: 60,
+                                    left: 0,
+                                    right: 0,
+                                    child: startLiveButton(isLiving, pkState),
+                                  ),
+                                  Positioned(
+                                    top: 60,
+                                    right: 30,
+                                    child: leaveButton(),
+                                  ),
+                                  Positioned(
+                                    bottom: 120,
+                                    left: 30,
+                                    child: cohostRequestListButton(isLiving, pkState),
+                                  ),
+                                  Positioned(
+                                    bottom: 80,
+                                    left: 30,
+                                    child: pkButton(isLiving, pkState),
+                                  ),
+                                  Positioned(
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 20,
+                                    child: bottomBar(isLiving, pkState),
+                                  ),
                                   giftForeground()
                                 ]
                               : [])
@@ -177,7 +182,12 @@ class ZegoLivePageState extends State<ZegoLivePage> {
   }
 
   Widget backgroundImage() {
-    return Image.asset('assets/images/live_bg.png', width: double.infinity, height: double.infinity, fit: BoxFit.fill);
+    return Image.asset(
+      'assets/images/live_bg.png',
+      width: double.infinity,
+      height: double.infinity,
+      fit: BoxFit.fill,
+    );
   }
 
   Widget hostVideoView(bool isLiving, RoomPKState pkState) {
@@ -205,14 +215,31 @@ class ZegoLivePageState extends State<ZegoLivePage> {
               return const SizedBox.shrink();
             }
 
-            return ZegoAudioVideoView(userInfo: ZegoLiveStreamingManager().hostNotifier.value!);
+            return ZegoAudioVideoView(
+              userInfo: ZegoLiveStreamingManager().hostNotifier.value!,
+            );
           }
         } else {
-          return ValueListenableBuilder<ZegoSDKUser?>(
-            valueListenable: hostNotifier,
-            builder: (context, host, _) {
-              return null == host ? const SizedBox.shrink() : ZegoAudioVideoView(userInfo: host);
-            },
+          /// Core rendering logic for scrolling up and down preview
+          return Stack(
+            children: [
+              ValueListenableBuilder<ZegoSDKUser?>(
+                valueListenable: swipingData.hostNotifier,
+                builder: (context, host, _) {
+                  return null == host ? const SizedBox.shrink() : ZegoAudioVideoView(userInfo: host);
+                },
+              ),
+              ValueListenableBuilder<ZegoSDKUser?>(
+                valueListenable: swipingData.hostNotifier,
+                builder: (context, host, _) {
+                  return expressService.streamMap.containsValue(host?.userID)
+                      ? const SizedBox.shrink()
+                      : const Center(
+                          child: CircularProgressIndicator(backgroundColor: Colors.white, color: Colors.black),
+                        );
+                },
+              ),
+            ],
           );
         }
       },
@@ -310,7 +337,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
 
   Widget hostText() {
     return ValueListenableBuilder<ZegoSDKUser?>(
-      valueListenable: hostNotifier,
+      valueListenable: swipingData.hostNotifier,
       builder: (context, userInfo, _) {
         return Text(
           'RoomID: ${widget.roomID}\n'
@@ -326,22 +353,6 @@ class ZegoLivePageState extends State<ZegoLivePage> {
       return const PKButton();
     } else {
       return const SizedBox.shrink();
-    }
-  }
-
-  void onRemoteStreamUserUpdated() {
-    final previewUser = expressService.getRemoteUser(widget.previewHostID!);
-    if (null == previewUser) {
-      return;
-    }
-
-    /// remote user's stream start playing
-    hostNotifier.value = previewUser;
-  }
-
-  void onHostUpdated() {
-    if (expressService.currentRoomID == widget.roomID) {
-      hostNotifier.value = ZegoLiveStreamingManager().hostNotifier.value;
     }
   }
 
@@ -429,34 +440,6 @@ class ZegoLivePageState extends State<ZegoLivePage> {
     zimService.rejectRoomRequest(roomRequest.requestID ?? '').then((value) {}).catchError((error) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Disagree cohost failed: $error')));
     });
-  }
-}
-
-extension ZegoLivePageStateLoginState on ZegoLivePageState {
-  void registerLoginEvents() {
-    roomLoginNotifier.notifier.addListener(onRoomLoginStateChanged);
-    roomLogoutNotifier.notifier.addListener(onRoomLogoutStateChanged);
-    roomLoginNotifier.resetCheckingData(widget.roomID);
-    roomLogoutNotifier.resetCheckingData(widget.roomID);
-  }
-
-  void unregisterLoginEvents() {
-    roomLoginNotifier.notifier.removeListener(onRoomLoginStateChanged);
-    roomLogoutNotifier.notifier.removeListener(onRoomLogoutStateChanged);
-  }
-
-  void onRoomLoginStateChanged() {
-    if (roomLoginNotifier.notifier.value) {
-      roomLogoutNotifier.resetCheckingData(widget.roomID);
-      roomReadyNotifier.value = true;
-    }
-  }
-
-  void onRoomLogoutStateChanged() {
-    if (roomLogoutNotifier.notifier.value) {
-      roomLoginNotifier.resetCheckingData(widget.roomID);
-      roomReadyNotifier.value = false;
-    }
   }
 }
 
@@ -549,5 +532,85 @@ extension ZegoLivePageStateCommand on ZegoLivePageState {
     ZEGOSDKManager().expressService.stopPreview();
 
     ZegoLiveStreamingManager().leaveRoom();
+  }
+}
+
+class ZegoLivePageSwipingData {
+  /// room login notifiers, sliding up and down will cause changes in the state of the room
+  var roomLoginNotifier = ZegoRoomLoginNotifier();
+
+  /// room logout notifiers, sliding up and down will cause changes in the state of the room
+  var roomLogoutNotifier = ZegoRoomLogoutNotifier();
+
+  /// room ready notifiers, sliding up and down will cause changes in the state of the room
+  var roomReadyNotifier = ValueNotifier<bool>(false);
+
+  /// preview host or real host
+  var hostNotifier = ValueNotifier<ZegoSDKUser?>(null);
+}
+
+extension ZegoLivePageStateSwiping on ZegoLivePageState {
+  void addRoomLoginListeners() {
+    swipingData.roomLoginNotifier.notifier.addListener(onRoomLoginStateChanged);
+    swipingData.roomLogoutNotifier.notifier.addListener(onRoomLogoutStateChanged);
+    swipingData.roomLoginNotifier.resetCheckingData(widget.roomID);
+    swipingData.roomLogoutNotifier.resetCheckingData(widget.roomID);
+  }
+
+  void removeRoomLoginListeners() {
+    swipingData.roomLoginNotifier.notifier.removeListener(onRoomLoginStateChanged);
+    swipingData.roomLogoutNotifier.notifier.removeListener(onRoomLogoutStateChanged);
+  }
+
+  void onRoomLoginStateChanged() {
+    if (swipingData.roomLoginNotifier.notifier.value) {
+      swipingData.roomLogoutNotifier.resetCheckingData(widget.roomID);
+      swipingData.roomReadyNotifier.value = true;
+    }
+  }
+
+  void onRoomLogoutStateChanged() {
+    if (swipingData.roomLogoutNotifier.notifier.value) {
+      swipingData.roomLoginNotifier.resetCheckingData(widget.roomID);
+      swipingData.roomReadyNotifier.value = false;
+    }
+  }
+
+  void addPreviewUserUpdateListeners() {
+    /// Monitor cross-room user updates
+    if (widget.previewHostID != null) {
+      final previewUser = expressService.getRemoteUser(widget.previewHostID!);
+      if (null != previewUser) {
+        /// remote user's stream is playing
+        swipingData.hostNotifier.value = previewUser;
+      }
+
+      ///  in sliding, the room/host will switch, so need to listen for
+      ///  changes in the flow
+      expressService.remoteStreamUserInfoListNotifier.addListener(onRemoteStreamUserUpdated);
+      ZegoLiveStreamingManager().hostNotifier.addListener(onHostUpdated);
+    }
+  }
+
+  void removePreviewUserUpdateListeners() {
+    expressService.remoteStreamUserInfoListNotifier.removeListener(onRemoteStreamUserUpdated);
+  }
+
+  void onRemoteStreamUserUpdated() {
+    final previewUser = expressService.getRemoteUser(widget.previewHostID!);
+    if (null != previewUser) {
+      /// remote user's stream start playing
+      swipingData.hostNotifier.value = previewUser;
+    }
+  }
+
+  void onHostUpdated() {
+    if (expressService.currentRoomID == widget.roomID) {
+      /// Sliding the LIVE room will trigger it, which only takes effect for updates caused by the current room
+      if (null != ZegoLiveStreamingManager().hostNotifier.value) {
+        /// To prevent the preview from flashing when sliding the LIVE room, the host caused by checking out is null
+        swipingData.hostNotifier.value = ZegoLiveStreamingManager().hostNotifier.value;
+      }
+    }
   }
 }
