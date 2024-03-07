@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../internal/sdk/express/express_service.dart';
+import '../../zego_sdk_manager.dart';
 
 class ZegoAudioVideoView extends StatefulWidget {
   const ZegoAudioVideoView({required this.userInfo, super.key});

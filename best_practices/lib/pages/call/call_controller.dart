@@ -3,10 +3,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
-import '../../components/call/zego_call_invitation_dialog.dart';
+import '../../components/components.dart';
 import '../../main.dart';
 import '../../zego_call_manager.dart';
-import '../../zego_sdk_manager.dart';
 import 'calling_page.dart';
 import 'waiting_page.dart';
 

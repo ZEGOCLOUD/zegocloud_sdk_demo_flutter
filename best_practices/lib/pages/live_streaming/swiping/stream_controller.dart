@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
 import '../../../zego_live_streaming_manager.dart';
-import '../../../zego_sdk_manager.dart';
 
 class ZegoSwipingStreamController {
   bool _isInit = false;

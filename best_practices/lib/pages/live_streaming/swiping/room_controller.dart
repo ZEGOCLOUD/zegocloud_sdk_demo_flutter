@@ -2,12 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import '../../../internal/sdk/utils/login_notifier.dart';
-import '../../../internal/sdk/utils/logout_notifier.dart';
 import '../../../utils/zegocloud_token.dart';
 import '../../../zego_live_streaming_manager.dart';
 import '../../../zego_sdk_key_center.dart';
-import '../../../zego_sdk_manager.dart';
 import '../live_command.dart';
 
 class ZegoSwipingRoomController {

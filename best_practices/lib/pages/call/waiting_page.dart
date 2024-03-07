@@ -2,14 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../components/call/zego_accept_button.dart';
-import '../../components/call/zego_cancel_button.dart';
-import '../../components/call/zego_defines.dart';
-import '../../components/call/zego_reject_button.dart';
-import '../../internal/business/call/call_data.dart';
-import '../../internal/business/call/call_user_info.dart';
+import '../../components/components.dart';
 import '../../zego_call_manager.dart';
-import '../../zego_sdk_manager.dart';
 import 'call_controller.dart';
 
 class CallWaitingPage extends StatefulWidget {

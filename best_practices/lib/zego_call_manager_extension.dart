@@ -1,7 +1,5 @@
 import 'package:flutter/cupertino.dart';
 
-import 'internal/business/call/call_extended_data.dart';
-import 'internal/business/call/call_user_info.dart';
 import 'pages/call/call.dart';
 
 extension ZegoCallManagerExtension on ZegoCallManager {

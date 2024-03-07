@@ -2,7 +2,6 @@ import 'dart:async';
 
 import '../../../live_audio_room_manager.dart';
 import '../../../zego_sdk_manager.dart';
-import '../../sdk/zim/Define/zim_room_request.dart';
 import 'live_audio_room_seat.dart';
 
 class RoomSeatService {

@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-import '../../../internal/sdk/utils/login_notifier.dart';
+import '../../../zego_sdk_manager.dart';
 import 'live_page.dart';
 
 class ZegoSwipingPageBuilder extends StatefulWidget {

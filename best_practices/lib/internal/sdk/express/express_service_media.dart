@@ -1,4 +1,4 @@
-import '../../../zego_sdk_manager.dart';
+part of 'express_service.dart';
 
 extension ExpressServiceMedia on ExpressService {
   // void onMediaPlayerFirstFrameEvent(ZegoMediaPlayer mediaPlayer, ZegoMediaPlayerFirstFrameEvent event) {

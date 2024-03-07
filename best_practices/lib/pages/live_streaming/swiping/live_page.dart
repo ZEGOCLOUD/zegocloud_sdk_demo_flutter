@@ -3,10 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../../../internal/sdk/utils/login_notifier.dart';
-import '../../../internal/sdk/utils/logout_notifier.dart';
 import '../../../zego_live_streaming_manager.dart';
-import '../../../zego_sdk_manager.dart';
 import '../live_command.dart';
 import '../live_page.dart';
 import 'page_builder.dart';

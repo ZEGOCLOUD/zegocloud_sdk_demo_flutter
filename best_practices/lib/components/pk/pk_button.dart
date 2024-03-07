@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../../internal/internal_defines.dart';
 import '../../zego_live_streaming_manager.dart';
 import '../common/common_button.dart';
 

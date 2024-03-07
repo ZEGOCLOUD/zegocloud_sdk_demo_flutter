@@ -3,10 +3,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
-import 'internal/business/audioRoom/live_audio_room_seat.dart';
-import 'internal/business/audioRoom/room_seat_service.dart';
 import 'main.dart';
 import 'zego_sdk_manager.dart';
+
+export 'zego_sdk_manager.dart';
 
 class ZegoLiveAudioRoomManager {
   factory ZegoLiveAudioRoomManager() => instance;

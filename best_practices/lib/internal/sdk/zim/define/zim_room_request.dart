@@ -1,7 +1,7 @@
 import 'dart:convert' as convert;
 import 'dart:math';
 
-import '../../../../zego_sdk_manager.dart';
+import '../zim_service.dart';
 import 'zim_define.dart';
 
 class RoomRequest {

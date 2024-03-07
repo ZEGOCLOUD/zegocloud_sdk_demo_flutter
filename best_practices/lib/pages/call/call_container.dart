@@ -2,10 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../components/call/zego_group_call_view.dart';
-import '../../components/common/zego_audio_video_view.dart';
-import '../../internal/business/call/call_user_info.dart';
-import '../../internal/sdk/utils/flutter_extension.dart';
+import '../../components/components.dart';
 import 'call.dart';
 
 class CallContainer extends StatefulWidget {

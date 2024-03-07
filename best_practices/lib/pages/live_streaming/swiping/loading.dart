@@ -1,7 +1,7 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 
-import '../../../internal/sdk/utils/logout_notifier.dart';
+import '../../../zego_sdk_manager.dart';
 
 class ZegoLiveSwipingLoading extends StatefulWidget {
   const ZegoLiveSwipingLoading({

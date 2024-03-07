@@ -4,14 +4,10 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../components/audio_room/seat_item_view.dart';
-import '../../components/common/zego_apply_cohost_list_page.dart';
-import '../../internal/business/gift/gift_controller.dart';
-import '../../internal/business/gift/gift_widget.dart';
+import '../../components/components.dart';
 import '../../live_audio_room_manager.dart';
 import '../../utils/zegocloud_token.dart';
 import '../../zego_sdk_key_center.dart';
-import '../../zego_sdk_manager.dart';
 
 part 'audio_room_gift.dart';
 
@@ -179,8 +175,6 @@ class AudioRoomPageState extends State<AudioRoomPage> {
           }
         });
   }
-
-
 
   Widget lockSeatButton() {
     return ElevatedButton(onPressed: () => ZegoLiveAudioRoomManager().lockSeat(), child: const Icon(Icons.lock));

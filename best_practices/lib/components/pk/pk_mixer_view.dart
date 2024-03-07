@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../internal/business/pk/pk_user.dart';
 import '../../zego_sdk_manager.dart';
 
 class PKMixerView extends StatefulWidget {

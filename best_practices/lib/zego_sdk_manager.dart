@@ -1,8 +1,6 @@
-import 'internal/sdk/express/express_service.dart';
-import 'internal/sdk/zim/zim_service.dart';
+import 'internal/internal.dart';
 
-export 'internal/sdk/express/express_service.dart';
-export 'internal/sdk/zim/zim_service.dart';
+export 'internal/internal.dart';
 
 class ZEGOSDKManager {
   ZEGOSDKManager._internal();

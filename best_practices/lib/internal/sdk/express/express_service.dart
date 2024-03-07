@@ -8,13 +8,12 @@ import 'package:flutter/material.dart';
 
 import '../../internal_defines.dart';
 import 'express_service.dart';
-import 'express_service_media.dart';
 
-export 'package:pkbattles/internal/business/business_define.dart';
 export 'package:zego_express_engine/zego_express_engine.dart';
 
 export '../../internal_defines.dart';
 
+part 'express_service_media.dart';
 part 'express_service_mixer.dart';
 part 'express_service_room_extra_info.dart';
 part 'express_service_sei.dart';

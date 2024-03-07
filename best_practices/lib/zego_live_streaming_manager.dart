@@ -2,16 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import 'internal/business/coHost/cohost_service.dart';
-import 'internal/business/pk/pk_define.dart';
-import 'internal/business/pk/pk_info.dart';
-import 'internal/business/pk/pk_service.dart';
-import 'internal/sdk/utils/flutter_extension.dart';
 import 'utils/zegocloud_token.dart';
 import 'zego_live_streaming_manager_extension.dart';
 import 'zego_live_streaming_manager_interface.dart';
 import 'zego_sdk_key_center.dart';
 import 'zego_sdk_manager.dart';
+
+export 'zego_live_streaming_manager_extension.dart';
+export 'zego_live_streaming_manager_interface.dart';
+export 'zego_sdk_manager.dart';
 
 class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
   ZegoLiveStreamingManager._internal() {

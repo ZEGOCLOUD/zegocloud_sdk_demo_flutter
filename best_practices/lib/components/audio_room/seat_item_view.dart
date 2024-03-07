@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../../internal/sdk/express/express_service.dart';
 import '../../live_audio_room_manager.dart';
 
 class ZegoSeatItemView extends StatelessWidget {

@@ -2,11 +2,6 @@ import 'dart:convert';
 
 import '../../../zego_live_streaming_manager.dart';
 import '../../../zego_sdk_manager.dart';
-import '../../sdk/zim/Define/zim_define.dart';
-import 'pk_extended.dart';
-import 'pk_info.dart';
-import 'pk_service.dart';
-import 'pk_user.dart';
 
 extension PKServiceZIMExtension on PKService {
   // zim listener

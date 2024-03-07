@@ -3,17 +3,10 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../components/call/add_user_button.dart';
-import '../../components/call/zego_cancel_button.dart';
-import '../../components/common/zego_speaker_button.dart';
-import '../../components/common/zego_switch_camera_button.dart';
-import '../../components/common/zego_toggle_camera_button.dart';
-import '../../components/common/zego_toggle_microphone_button.dart';
-import '../../internal/business/call/call_data.dart';
+import '../../components/components.dart';
 import '../../utils/zegocloud_token.dart';
 import '../../zego_call_manager.dart';
 import '../../zego_sdk_key_center.dart';
-import '../../zego_sdk_manager.dart';
 import 'call_container.dart';
 
 class CallingPage extends StatefulWidget {
