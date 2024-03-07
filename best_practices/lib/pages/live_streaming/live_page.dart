@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -7,9 +9,13 @@ import '../../components/common/common_button.dart';
 import '../../components/common/zego_apply_cohost_list_page.dart';
 import '../../components/common/zego_audio_video_view.dart';
 import '../../components/common/zego_member_button.dart';
-import '../../components/live_streaming/zego_live_bottom_bar.dart';
+import '../../components/common/zego_switch_camera_button.dart';
+import '../../components/common/zego_toggle_camera_button.dart';
+import '../../components/common/zego_toggle_microphone_button.dart';
 import '../../components/pk/pk_button.dart';
 import '../../components/pk/pk_container.dart';
+import '../../internal/business/gift/gift_controller.dart';
+import '../../internal/business/gift/gift_widget.dart';
 import '../../internal/sdk/utils/login_notifier.dart';
 import '../../internal/sdk/utils/logout_notifier.dart';
 import '../../internal/sdk/zim/Define/zim_room_request.dart';
@@ -17,10 +23,11 @@ import '../../utils/zegocloud_token.dart';
 import '../../zego_live_streaming_manager.dart';
 import '../../zego_sdk_key_center.dart';
 import '../../zego_sdk_manager.dart';
-
 import 'live_command.dart';
-import 'live_page_gift.dart';
-import 'live_page_pk.dart';
+
+part 'live_page_buttons.dart';
+part 'live_page_gift.dart';
+part 'live_page_pk.dart';
 
 class ZegoLivePage extends StatefulWidget {
   const ZegoLivePage({

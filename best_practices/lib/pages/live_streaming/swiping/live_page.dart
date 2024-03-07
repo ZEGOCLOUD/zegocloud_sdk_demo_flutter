@@ -9,7 +9,6 @@ import '../../../zego_live_streaming_manager.dart';
 import '../../../zego_sdk_manager.dart';
 import '../live_command.dart';
 import '../live_page.dart';
-
 import 'page_builder.dart';
 import 'room_controller.dart';
 import 'stream_controller.dart';
@@ -242,7 +241,7 @@ class ZegoSwipingLivePageState extends State<ZegoSwipingLivePage> {
             ),
             CupertinoDialogAction(
               onPressed: () {
-                var tempRoomList = <ZegoSwipingLiveInfo>[];
+                final tempRoomList = <ZegoSwipingLiveInfo>[];
                 void addRoomID(String roomID, String hostID) {
                   if (roomID.isNotEmpty && hostID.isNotEmpty) {
                     tempRoomList.add(ZegoSwipingLiveInfo(roomID: roomID, hostID: hostID));

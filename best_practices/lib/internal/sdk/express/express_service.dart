@@ -16,11 +16,8 @@ export 'package:zego_express_engine/zego_express_engine.dart';
 export '../../internal_defines.dart';
 
 part 'express_service_mixer.dart';
-
 part 'express_service_room_extra_info.dart';
-
 part 'express_service_sei.dart';
-
 part 'express_service_stream.dart';
 
 class ExpressService {
@@ -69,6 +66,8 @@ class ExpressService {
     }
     currentScenario = scenario;
     await ZegoExpressEngine.createEngineWithProfile(profile);
+    ZegoExpressEngine.instance.enableHardwareEncoder(true);
+    ZegoExpressEngine.instance.enableHardwareDecoder(true);
     ZegoExpressEngine.setEngineConfig(ZegoEngineConfig(advancedConfig: {
       'notify_remote_device_unknown_status': 'true',
       'notify_remote_device_init_status': 'true',

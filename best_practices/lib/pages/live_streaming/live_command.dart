@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 
 class ZegoLivePageCommand {
@@ -11,8 +9,7 @@ class ZegoLivePageCommand {
     return 'ZegoLivePageCommand{key:$key, room:$roomID}';
   }
 
-  ZegoLivePageCommand({required String roomID}) {
-    this.roomID = roomID;
+  ZegoLivePageCommand({required this.roomID}) {
     key = DateTime.now().millisecondsSinceEpoch.toString();
   }
 

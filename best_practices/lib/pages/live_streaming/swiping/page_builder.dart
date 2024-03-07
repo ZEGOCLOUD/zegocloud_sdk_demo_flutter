@@ -1,6 +1,3 @@
-import 'dart:async';
-import 'dart:ffi';
-
 import 'package:flutter/cupertino.dart';
 
 import '../../../internal/sdk/utils/login_notifier.dart';
