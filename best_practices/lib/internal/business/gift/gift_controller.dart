@@ -12,9 +12,50 @@ part 'gift_service.dart';
 class ZegoGiftController with GiftService {
   static final ZegoGiftController _instance = ZegoGiftController._internal();
   factory ZegoGiftController() => _instance;
-  ZegoGiftController._internal();
+  ZegoGiftController._internal() {
+    ZEGOSDKManager().expressService.onMediaPlayerStateUpdateCtrl.stream.listen(onGiftPlayerStateUpdate);
+    createMediaPlayer();
+    playingGiftDataNotifier.addListener(onPlayingGiftDataUpdate);
+    giftWidget = ValueListenableBuilder(
+      valueListenable: shouldShowNotifier,
+      builder: (context, shouldShow, _) {
+        return shouldShow
+            ? IgnorePointer(ignoring: true, child: _mediaPlayerView ?? const SizedBox.shrink())
+            : const SizedBox.shrink();
+      },
+    );
+  }
 
-  Widget? _mediaPlayerWidget;
+  void onPlayingGiftDataUpdate() {
+    if (playingGiftDataNotifier.value != null) {
+      loadResource(playingGiftDataNotifier.value!.giftPath!);
+      startMediaPlayer();
+    }
+  }
+
+  void onGiftPlayerStateUpdate(ZegoPlayerStateChangeEvent event) {
+    switch (event.state) {
+      case ZegoMediaPlayerState.NoPlay:
+        shouldShowNotifier.value = false;
+        break;
+      case ZegoMediaPlayerState.Playing:
+        shouldShowNotifier.value = true;
+        break;
+      case ZegoMediaPlayerState.Pausing:
+        shouldShowNotifier.value = false;
+        break;
+      case ZegoMediaPlayerState.PlayEnded:
+        shouldShowNotifier.value = false;
+        clearView();
+        next();
+        break;
+    }
+  }
+
+  late Widget giftWidget;
+
+  ValueNotifier<bool> shouldShowNotifier = ValueNotifier<bool>(false);
+  Widget? _mediaPlayerView;
   ZegoMediaPlayer? _mediaPlayer;
   int _mediaPlayerViewID = -1;
   String? currentResource;
@@ -51,24 +92,21 @@ class ZegoGiftController with GiftService {
     _mediaPlayer?.clearView();
     // create widget
     if (_mediaPlayerViewID == -1) {
-      _mediaPlayerWidget = await ZegoExpressEngine.instance.createCanvasView((viewID) {
+      _mediaPlayerView = await ZegoExpressEngine.instance.createCanvasView((viewID) {
         _mediaPlayerViewID = viewID;
         _mediaPlayer?.setPlayerCanvas(ZegoCanvas(viewID, alphaBlend: true));
       });
     }
-    return _mediaPlayerWidget;
+    return _mediaPlayerView;
   }
 
   void destroyMediaPlayer() {
     currentResource = null;
+    _mediaPlayerView = null;
     if (_mediaPlayer != null) {
       ZegoExpressEngine.instance.destroyMediaPlayer(_mediaPlayer!);
       _mediaPlayer = null;
     }
-    destroyPlayerView();
-  }
-
-  void destroyPlayerView() {
     if (_mediaPlayerViewID != -1) {
       ZegoExpressEngine.instance.destroyCanvasView(_mediaPlayerViewID);
       _mediaPlayerViewID = -1;

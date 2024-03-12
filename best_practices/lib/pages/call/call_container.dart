@@ -1,3 +1,5 @@
+// ignore_for_file: omit_local_variable_types, prefer_final_locals
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -151,8 +153,8 @@ class CallContainerState extends State<CallContainer> {
       double left = 0;
       double top = 0;
       for (var i = 0; i < userList.length; i++) {
-        left = cellWidth * (i % column).toInt();
-        top = cellHeight * (i / column).toInt();
+        left = cellWidth * (i % column);
+        top = cellHeight * (i ~/ column);
         final callUser = userList[i];
         final positionedView = Positioned(
             top: top, left: left, width: cellWidth, height: cellHeight, child: GroupCallView(callUserInfo: callUser));

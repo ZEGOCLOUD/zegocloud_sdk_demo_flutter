@@ -1,5 +1,4 @@
 import '../../../zego_sdk_manager.dart';
-import 'pk_define.dart';
 
 abstract class PKServiceInterface {
   void addListener();

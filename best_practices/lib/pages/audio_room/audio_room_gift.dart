@@ -39,15 +39,7 @@ extension ZegoLivePageStateGiftExtension on AudioRoomPageState {
   }
 
   Widget giftForeground() {
-    return ValueListenableBuilder<ZegoGiftData?>(
-      valueListenable: ZegoGiftController().playingGiftDataNotifier,
-      builder: (context, giftData, _) {
-        if (null == giftData) {
-          return const SizedBox.shrink();
-        }
-        return ZegoGiftWidget(key: UniqueKey(), giftData: giftData);
-      },
-    );
+    return ZegoGiftController().giftWidget;
   }
 
   Future<void> onGiftReceived() async {

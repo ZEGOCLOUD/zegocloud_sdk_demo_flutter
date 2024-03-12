@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../zego_sdk_manager.dart';
-import '../../sdk/utils/flutter_extension.dart';
 
 bool isHostStreamID(String streamID) {
   return streamID.endsWith('_host');

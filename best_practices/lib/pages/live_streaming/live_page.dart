@@ -378,7 +378,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
       );
     }
     if (event.state == ZIMRoomState.disconnected) {
-      Navigator.pop(context);
+      if(mounted) Navigator.pop(context);
     }
   }
 

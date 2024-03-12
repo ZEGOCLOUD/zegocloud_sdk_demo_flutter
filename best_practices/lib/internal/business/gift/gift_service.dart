@@ -57,7 +57,7 @@ class GiftServiceImpl {
 
     debugPrint('try send gift, giftName:$giftName, data:$data');
     ZEGOSDKManager().zimService.sendRoomCommand(data).then((result) {
-      debugPrint('send gift result:$result');
+      debugPrint('send gift success');
     });
     return true;
   }

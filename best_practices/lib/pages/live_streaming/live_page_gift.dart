@@ -20,15 +20,7 @@ extension ZegoLivePageStateGiftExtension on ZegoLivePageState {
   }
 
   Widget giftForeground() {
-    return ValueListenableBuilder<ZegoGiftData?>(
-      valueListenable: ZegoGiftController().playingGiftDataNotifier,
-      builder: (context, giftData, _) {
-        if (null == giftData) {
-          return const SizedBox.shrink();
-        }
-        return ZegoGiftWidget(key: ValueKey(giftData.giftPath), giftData: giftData);
-      },
-    );
+    return ZegoGiftController().giftWidget;
   }
 
   Future<void> onGiftReceived() async {

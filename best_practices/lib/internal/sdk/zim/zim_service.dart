@@ -7,9 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../zego_sdk_manager.dart';
-import '../utils/flutter_extension.dart';
-import 'define/zim_define.dart';
-import 'define/zim_room_request.dart';
 
 part 'zim_service_avatar.dart';
 part 'zim_service_room_attributes.dart';

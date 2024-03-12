@@ -63,6 +63,7 @@ class ExpressService {
     if (Platform.isIOS) {
       profile.enablePlatformView = true;
     }
+
     currentScenario = scenario;
     await ZegoExpressEngine.createEngineWithProfile(profile);
     ZegoExpressEngine.instance.enableHardwareEncoder(true);
@@ -226,6 +227,7 @@ class ExpressService {
   final recvSEICtrl = StreamController<ZegoRecvSEIEvent>.broadcast();
   final mixerSoundLevelUpdateCtrl = StreamController<ZegoMixerSoundLevelUpdateEvent>.broadcast();
   final onMediaPlayerStateUpdateCtrl = StreamController<ZegoPlayerStateChangeEvent>.broadcast();
+  final onMediaPlayerFirstFrameEventCtrl = StreamController<ZegoMediaPlayerFirstFrameEvent>.broadcast();
 
   void uninitEventHandle() {
     ZegoExpressEngine.onRoomStreamUpdate = null;
@@ -258,6 +260,7 @@ class ExpressService {
     ZegoExpressEngine.onRoomExtraInfoUpdate = ExpressService().onRoomExtraInfoUpdate;
     ZegoExpressEngine.onPublisherStateUpdate = ExpressService().onPublisherStateUpdate;
     ZegoExpressEngine.onMediaPlayerStateUpdate = ExpressService().onMediaPlayerStateUpdate;
+    ZegoExpressEngine.onMediaPlayerFirstFrameEvent = ExpressService().onMediaPlayerFirstFrameEvent;
   }
 
   void onRoomUserUpdate(
