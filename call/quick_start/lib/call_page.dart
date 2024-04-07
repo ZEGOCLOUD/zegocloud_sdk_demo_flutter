@@ -173,10 +173,12 @@ class _CallPageState extends State<CallPage> {
     ZegoExpressEngine.instance.stopPreview();
     if (localViewID != null) {
       await ZegoExpressEngine.instance.destroyCanvasView(localViewID!);
-      setState(() {
-        localViewID = null;
-        localView = null;
-      });
+      if (mounted) {
+        setState(() {
+          localViewID = null;
+          localView = null;
+        });
+      }
     }
   }
 
