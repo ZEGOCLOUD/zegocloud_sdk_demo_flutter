@@ -208,10 +208,12 @@ class _CallPageState extends State<CallPage> {
     ZegoExpressEngine.instance.stopPlayingStream(streamID);
     if (remoteViewID != null) {
       ZegoExpressEngine.instance.destroyCanvasView(remoteViewID!);
-      setState(() {
-        remoteViewID = null;
-        remoteView = null;
-      });
+      if (mounted) {
+        setState(() {
+          remoteViewID = null;
+          remoteView = null;
+        });
+      }
     }
   }
 }
