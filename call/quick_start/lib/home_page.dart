@@ -25,11 +25,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final buttonStyle = ElevatedButton.styleFrom(
-      fixedSize: const Size(120, 60),
-      backgroundColor: const Color(0xff2C2F3E).withOpacity(0.6),
-    );
-
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -50,7 +45,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             const SizedBox(height: 20),
             // click me to navigate to CallPage
             ElevatedButton(
-              style: buttonStyle,
               child: const Text('Call Page'),
               onPressed: () => jumpToCallPage(
                 context,
