@@ -57,11 +57,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final buttonStyle = ElevatedButton.styleFrom(
-      fixedSize: const Size(120, 60),
-      backgroundColor: const Color(0xff2C2F3E).withOpacity(0.6),
-    );
-
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -82,7 +77,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
             const SizedBox(height: 20),
             // click me to navigate to CallPage
             ElevatedButton(
-              style: buttonStyle,
               child: const Text('Login'),
               onPressed: () => jumpToHomePage(
                 context,
