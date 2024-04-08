@@ -122,11 +122,11 @@ class ZegoSwipingLivePageState extends State<ZegoSwipingLivePage> {
           role: ZegoLiveStreamingRole.audience,
         ),
         Positioned(
-          bottom: 20,
+          bottom: 80,
           left: 20,
           child: ElevatedButton(
             onPressed: updateRoomLists,
-            child: const Text('UpdateRoomLists'),
+            child: const Text('Test swip to switch Live'),
           ),
         )
       ],
