@@ -16,21 +16,16 @@ export 'package:zego_express_engine/zego_express_engine.dart';
 export '../../internal_defines.dart';
 
 part 'express_service_mixer.dart';
-
 part 'express_service_room_extra_info.dart';
-
 part 'express_service_sei.dart';
-
 part 'express_service_stream.dart';
 
 class ExpressService {
   ExpressService._internal();
-
   factory ExpressService() => instance;
   static final ExpressService instance = ExpressService._internal();
 
   String currentRoomID = '';
-  ZegoRoomStateChangedReason currentRoomState = ZegoRoomStateChangedReason.Logout;
   ZegoSDKUser? currentUser;
   List<ZegoSDKUser> userInfoList = [];
   Map<String, String> streamMap = {};
@@ -42,7 +37,6 @@ class ExpressService {
   void clearRoomData() {
     currentScenario = ZegoScenario.Default;
     currentRoomID = '';
-    currentRoomState = ZegoRoomStateChangedReason.Logout;
     userInfoList.clear();
     clearLocalUserData();
     streamMap.clear();
@@ -103,18 +97,14 @@ class ExpressService {
 
   Future<ZegoRoomLoginResult> loginRoom(String roomID, {String? token}) async {
     assert(!kIsWeb || token != null, 'token is required for web platform!');
-
-    currentRoomID = roomID;
-
     final joinRoomResult = await ZegoExpressEngine.instance.loginRoom(
       roomID,
       ZegoUser(currentUser!.userID, currentUser!.userName),
       config: ZegoRoomConfig(0, true, token ?? ''),
     );
-    if (joinRoomResult.errorCode != 0) {
-      currentRoomID = '';
+    if (joinRoomResult.errorCode == 0) {
+      currentRoomID = roomID;
     }
-
     return joinRoomResult;
   }
 
@@ -278,13 +268,7 @@ class ExpressService {
   }
 
   void onRoomStateChanged(
-    String roomID,
-    ZegoRoomStateChangedReason reason,
-    int errorCode,
-    Map<String, dynamic> extendedData,
-  ) {
-    currentRoomState = reason;
-
+      String roomID, ZegoRoomStateChangedReason reason, int errorCode, Map<String, dynamic> extendedData) {
     roomStateChangedStreamCtrl.add(ZegoRoomStateEvent(roomID, reason, errorCode, extendedData));
   }
 }

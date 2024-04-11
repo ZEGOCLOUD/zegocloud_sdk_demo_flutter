@@ -157,7 +157,7 @@ class ZegoLivePageState extends State<ZegoLivePage> {
   }
 
   Widget backgroundImage() {
-    return Image.asset('assets/images/live_bg.png', width: double.infinity, height: double.infinity, fit: BoxFit.fill);
+    return Image.asset('assets/images/audio_bg.png', width: double.infinity, height: double.infinity, fit: BoxFit.fill);
   }
 
   Widget hostVideoView(bool isLiving, RoomPKState pkState) {

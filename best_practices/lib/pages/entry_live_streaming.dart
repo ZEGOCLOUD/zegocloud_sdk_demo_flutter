@@ -9,7 +9,6 @@ class LiveStreamingEntry extends StatefulWidget {
 
 class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
   final roomIDController = TextEditingController(text: Random().nextInt(9999999).toString());
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -21,45 +20,25 @@ class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
         roomIDTextField(roomIDController),
         const SizedBox(height: 20),
         Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-          hostJoinLivePageButton(),
-          audienceJoinLivePageButton(),
+          hostJoinLivePageButton(ZegoLiveStreamingRole.host),
+          hostJoinLivePageButton(ZegoLiveStreamingRole.audience),
         ]),
         const SizedBox(height: 30),
       ],
     );
   }
 
-  Widget hostJoinLivePageButton() {
+  Widget hostJoinLivePageButton(ZegoLiveStreamingRole role) {
     return ElevatedButton(
       onPressed: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ZegoLivePage(roomID: roomIDController.text, role: ZegoLiveStreamingRole.host),
+            builder: (context) => ZegoLivePage(roomID: roomIDController.text, role: role),
           ),
         );
       },
-      child: const Text('Host enter'),
-    );
-  }
-
-  Widget audienceJoinLivePageButton() {
-    final normalLivePage = ZegoLivePage(roomID: roomIDController.text, role: ZegoLiveStreamingRole.audience);
-    final swipingLivePage = ZegoSwipingLivePage(
-      initialRoomID: roomIDController.text,
-      roomIDList: const <String>[],
-    );
-
-    return ElevatedButton(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => swipingLivePage,
-          ),
-        );
-      },
-      child: const Text('Audience enter'),
+      child: role == ZegoLiveStreamingRole.host ? const Text('Host enter') : const Text('Audience enter'),
     );
   }
 }
