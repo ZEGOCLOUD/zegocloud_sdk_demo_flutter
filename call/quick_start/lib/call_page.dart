@@ -173,10 +173,12 @@ class _CallPageState extends State<CallPage> {
     ZegoExpressEngine.instance.stopPreview();
     if (localViewID != null) {
       await ZegoExpressEngine.instance.destroyCanvasView(localViewID!);
-      setState(() {
-        localViewID = null;
-        localView = null;
-      });
+      if (mounted) {
+        setState(() {
+          localViewID = null;
+          localView = null;
+        });
+      }
     }
   }
 
@@ -206,10 +208,12 @@ class _CallPageState extends State<CallPage> {
     ZegoExpressEngine.instance.stopPlayingStream(streamID);
     if (remoteViewID != null) {
       ZegoExpressEngine.instance.destroyCanvasView(remoteViewID!);
-      setState(() {
-        remoteViewID = null;
-        remoteView = null;
-      });
+      if (mounted) {
+        setState(() {
+          remoteViewID = null;
+          remoteView = null;
+        });
+      }
     }
   }
 }
