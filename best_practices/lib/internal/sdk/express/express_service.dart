@@ -123,6 +123,7 @@ class ExpressService {
       ZegoUser(currentUser!.userID, currentUser!.userName),
       config: ZegoRoomConfig(0, true, token ?? ''),
     );
+    debugPrint('express service, loginRoom, id:$roomID, result:${joinRoomResult.errorCode}');
     if (joinRoomResult.errorCode != 0) {
       currentRoomID = '';
     }
@@ -132,6 +133,7 @@ class ExpressService {
 
   Future<ZegoRoomLogoutResult> logoutRoom([String roomID = '']) async {
     final leaveResult = await ZegoExpressEngine.instance.logoutRoom(roomID.isNotEmpty ? roomID : currentRoomID);
+    debugPrint('express service, logoutRoom, id:$currentRoomID, result:${leaveResult.errorCode}');
     if (leaveResult.errorCode == 0) {
       clearRoomData();
     }
@@ -186,8 +188,7 @@ class ExpressService {
     ZegoExpressEngine.instance.mutePublishStreamAudio(!isOn);
   }
 
-  Future<void> startPlayingStream(String streamID,
-      {ZegoViewMode viewMode = ZegoViewMode.AspectFill, ZegoPlayerConfig? config}) async {
+  Future<void> startPlayingStream(String streamID, {ZegoViewMode viewMode = ZegoViewMode.AspectFill, ZegoPlayerConfig? config}) async {
     final userID = streamMap[streamID];
     final userInfo = getUser(userID ?? '');
     if (currentScenario == ZegoScenario.HighQualityChatroom ||

@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 import 'internal/internal.dart';
 
 export 'internal/internal.dart';
@@ -51,6 +53,8 @@ class ZEGOSDKManager {
   }
 
   Future<void> logoutRoom() async {
+    debugPrint('sdk manager, logoutRoom');
+
     await expressService.logoutRoom();
     await zimService.logoutRoom();
   }

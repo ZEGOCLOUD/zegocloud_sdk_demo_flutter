@@ -151,8 +151,11 @@ class ZIMService {
               ..roomAttributes = roomAttributes
               ..roomDestroyDelayTime = roomDestroyDelayTime)
         .then((value) {
+      debugPrint('zim service, loginRoom, room id:$currentRoomID');
       result.errorCode = 0;
     }).catchError((error) {
+      debugPrint('zim service, loginRoom, room id:$currentRoomID, error:$error');
+
       result.extendedData['error'] = error;
       if (error is PlatformException) {
         result.errorCode = int.tryParse(error.code) ?? -1;
@@ -168,8 +171,10 @@ class ZIMService {
   Future<ZIMRoomLeftResult> logoutRoom() async {
     if (currentRoomID != null) {
       final ret = await ZIM.getInstance()!.leaveRoom(currentRoomID!).then((value) {
-        debugPrint('zim leave result:value');
+        debugPrint('zim service, logoutRoom, room id:$currentRoomID');
         return value;
+      }).catchError((error) {
+        debugPrint('zim service, logoutRoom, room id:$currentRoomID, error:$error');
       });
       clearRoomData();
       return ret;

@@ -46,10 +46,10 @@ class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
   Widget audienceJoinLivePageButton() {
     return ElevatedButton(
       onPressed: () {
-        final normalAudiencePage = ZegoLivePage(
-          roomID: roomIDController.text,
-          role: ZegoLiveStreamingRole.audience,
-        );
+        // final normalAudiencePage = ZegoLivePage(
+        //   roomID: roomIDController.text,
+        //   role: ZegoLiveStreamingRole.audience,
+        // );
 
         final swipingAudiencePage = ZegoSwipingLivePage(
           roomList: <ZegoSwipingLiveInfo>[ZegoSwipingLiveInfo(roomID: roomIDController.text, hostID: '')],

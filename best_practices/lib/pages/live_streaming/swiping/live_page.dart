@@ -85,7 +85,9 @@ class ZegoSwipingLivePageState extends State<ZegoSwipingLivePage> {
       subscription?.cancel();
     }
 
-    ZegoLiveStreamingManager().leaveRoom();
+    if (widget.roomList.length > 1) {
+      ZegoLiveStreamingManager().leaveRoom();
+    }
   }
 
   @override
@@ -204,10 +206,8 @@ class ZegoSwipingLivePageState extends State<ZegoSwipingLivePage> {
 
   void updateRoomLists() {
     const roomCount = 6;
-    final roomIDEditors = List<TextEditingController>.generate(
-        roomCount, (index) => TextEditingController(text: (200 + index).toString()));
-    final hostIDEditors = List<TextEditingController>.generate(
-        roomCount, (index) => TextEditingController(text: (200 + index).toString()));
+    final roomIDEditors = List<TextEditingController>.generate(roomCount, (index) => TextEditingController(text: (200 + index).toString()));
+    final hostIDEditors = List<TextEditingController>.generate(roomCount, (index) => TextEditingController(text: (200 + index).toString()));
 
     showCupertinoDialog(
       context: context,

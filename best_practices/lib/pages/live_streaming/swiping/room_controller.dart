@@ -52,7 +52,9 @@ class ZegoSwipingRoomController {
     _data.currentRoomLoginDone.removeListener(_onCurrentRoomLoginStateUpdated);
     _data.currentRoomLogoutDone.removeListener(_onCurrentRoomLogoutStateUpdated);
 
-    ZegoLiveStreamingManager().leaveRoom();
+    if (currentRoomID.isNotEmpty) {
+      ZegoLiveStreamingManager().leaveRoom();
+    }
   }
 
   String get currentRoomID => _data.currentRoomID;
@@ -183,8 +185,7 @@ class ZegoSwipingRoomControllerData {
 
 extension ZegoSwipingRoomControllerEvent on ZegoSwipingRoomController {
   void _onLoginRoomStateChanged() {
-    final expressDone = expressService.currentRoomID == currentRoomID &&
-        ZegoRoomStateChangedReason.Logined == expressService.currentRoomState;
+    final expressDone = expressService.currentRoomID == currentRoomID && ZegoRoomStateChangedReason.Logined == expressService.currentRoomState;
 
     debugPrint('room controller, swiping page, on room state changed, '
         'target room id:$currentRoomID, '
@@ -203,8 +204,7 @@ extension ZegoSwipingRoomControllerEvent on ZegoSwipingRoomController {
   }
 
   void _onLogoutRoomStateChanged() {
-    debugPrint(
-        'swiping loading, room ${_data.roomLogoutNotifier?.checkingRoomID} state changed, logout:${_data.roomLogoutNotifier?.value}');
+    debugPrint('swiping loading, room ${_data.roomLogoutNotifier?.checkingRoomID} state changed, logout:${_data.roomLogoutNotifier?.value}');
 
     if (_data.roomLogoutNotifier?.value ?? false) {
       debugPrint('swiping loading, room ${_data.roomLogoutNotifier?.checkingRoomID} had logout..');
