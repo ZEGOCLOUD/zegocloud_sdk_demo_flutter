@@ -21,7 +21,7 @@ abstract class ZegoLiveStreamingManagerInterface {
   Future<ZegoMixerStartResult> mutePKUser(List<String> muteUserList, bool mute);
 
   Future<void> leaveRoom();
-  void clearData();
+  Future<void> clearData();
   void stopPKBattle();
 
   bool iamHost();

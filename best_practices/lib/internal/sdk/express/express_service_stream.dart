@@ -77,7 +77,7 @@ extension ExpressServiceStream on ExpressService {
     debugPrint('onRoomStreamUpdate,'
         'roomID:$roomID, '
         'updateType:$updateType, '
-        'streamList:$streamList, '
+        'streamList:${streamList.map((e) => 'user id:${e.user.userID}, stream id:${e.streamID}, ')}, '
         'extendedData:$extendedData, ');
 
     for (final stream in streamList) {
@@ -159,7 +159,7 @@ extension ExpressServiceStream on ExpressService {
   }
 
   Future<void> stopPlayingMixerStream(String streamID) async {
-    ZegoExpressEngine.instance.stopPlayingStream(streamID).then((value) {
+    await ZegoExpressEngine.instance.stopPlayingStream(streamID).then((value) {
       mixerStreamNotifier.value = null;
     });
   }

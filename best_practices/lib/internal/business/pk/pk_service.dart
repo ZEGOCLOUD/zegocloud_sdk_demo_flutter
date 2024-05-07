@@ -107,7 +107,7 @@ class PKService implements PKServiceInterface {
   Future<ZIMCallQuitSentResult> quitPKBattle(String requestID) async {
     if (isPKUser(ZEGOSDKManager().currentUser!.userID)) {
       if (ZegoLiveStreamingManager().iamHost()) {
-        stopPlayAnotherHostStream();
+        await stopPlayAnotherHostStream();
       }
       return quitUserRequest(requestID, '');
     }
@@ -199,15 +199,16 @@ class PKService implements PKServiceInterface {
   }
 
   @override
-  void stopPKBattle() {
+  Future<void> stopPKBattle() async {
     if (ZegoLiveStreamingManager().iamHost()) {
-      delectPKAttributes();
-      stopMixTask();
+      await deletePKAttributes();
+      await stopMixTask();
       //...
     } else {
-      muteHostAudioVideo(false);
-      ZEGOSDKManager().expressService.stopPlayingMixerStream(generateMixerStreamID());
+      await muteHostAudioVideo(false);
+      await ZEGOSDKManager().expressService.stopPlayingMixerStream(generateMixerStreamID());
     }
+
     pkInfo = null;
     cancelTime();
     seiTimeMap.clear();
@@ -215,30 +216,30 @@ class PKService implements PKServiceInterface {
     onPKEndStreamCtrl.add(null);
   }
 
-  void muteHostAudioVideo(bool mute) {
+  Future<void> muteHostAudioVideo(bool mute) async {
     if (ZegoLiveStreamingManager().hostNotifier.value != null) {
       final hostMainStreamID = ZegoLiveStreamingManager().hostStreamID();
-      ZEGOSDKManager().expressService.mutePlayStreamAudio(hostMainStreamID, mute);
-      ZEGOSDKManager().expressService.mutePlayStreamVideo(hostMainStreamID, mute);
+      await ZEGOSDKManager().expressService.mutePlayStreamAudio(hostMainStreamID, mute);
+      await ZEGOSDKManager().expressService.mutePlayStreamVideo(hostMainStreamID, mute);
     }
   }
 
-  void stopPlayAnotherHostStream() {
+  Future<void> stopPlayAnotherHostStream() async {
     if (pkInfo == null) {
       return;
     }
     for (final pkuser in pkInfo!.pkUserList.value) {
       if (pkuser.userID != ZegoLiveStreamingManager().hostNotifier.value?.userID) {
-        ZEGOSDKManager().expressService.stopPlayingStream(pkuser.pkUserStream);
+        await ZEGOSDKManager().expressService.stopPlayingStream(pkuser.pkUserStream);
       }
     }
   }
 
-  void stopMixTask() {
+  Future<void> stopMixTask() async {
     if (task == null) {
       return;
     }
-    ZEGOSDKManager().expressService.stopMixerTask().then((value) {
+    await ZEGOSDKManager().expressService.stopMixerTask().then((value) {
       if (value.errorCode == 0) {
         task = null;
       }
@@ -276,13 +277,13 @@ class PKService implements PKServiceInterface {
     ZEGOSDKManager().zimService.setRoomAttributes(pkMap, isDeleteAfterOwnerLeft: false);
   }
 
-  void delectPKAttributes() {
+  Future<void> deletePKAttributes() async {
     if (pkRoomAttribute.keys.isEmpty) {
       return;
     }
     if (pkRoomAttribute.keys.contains('pk_users')) {
       final keys = ['request_id', 'host_user_id', 'pk_users'];
-      ZEGOSDKManager().zimService.deleteRoomAttributes(keys);
+      await ZEGOSDKManager().zimService.deleteRoomAttributes(keys);
     }
   }
 
@@ -531,7 +532,7 @@ class PKService implements PKServiceInterface {
     return '${ZEGOSDKManager().expressService.currentRoomID}_mix';
   }
 
-  void cleanPKState() {
+  Future<void> cleanPKState() async {
     pkSeq = 0;
     pkUser = null;
     pkInfo = null;
@@ -540,14 +541,15 @@ class PKService implements PKServiceInterface {
     isMuteAnotherAudioNotifier.value = false;
     cancelTime();
     onPKEndStreamCtrl.add(null);
-    ZEGOSDKManager().expressService.stopPlayingStream(generateMixerStreamID());
+    await ZEGOSDKManager().expressService.stopPlayingStream(generateMixerStreamID());
   }
 
-  void clearData() {
-    cleanPKState();
+  Future<void> clearData() async {
+    await cleanPKState();
     if (ZegoLiveStreamingManager().iamHost() && pkRoomAttribute.keys.isNotEmpty) {
-      ZEGOSDKManager().zimService.deleteRoomAttributes(pkRoomAttribute.keys.toList());
+      await ZEGOSDKManager().zimService.deleteRoomAttributes(pkRoomAttribute.keys.toList());
     }
+    pkRoomAttribute.clear();
   }
 
   String hostStreamID() {

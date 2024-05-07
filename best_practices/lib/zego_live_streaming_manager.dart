@@ -178,17 +178,19 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
   @override
   Future<void> leaveRoom() async {
     if (iamHost()) {
-      quitPKBattle();
+      await quitPKBattle();
     }
+
     isLivingNotifier.value = false;
+    await clearData();
+
     await ZEGOSDKManager().logoutRoom();
-    clearData();
   }
 
   @override
-  void clearData() {
+  Future<void> clearData() async {
     cohostService?.clearData();
-    pkService?.clearData();
+    await pkService?.clearData();
   }
 
   @override
@@ -287,9 +289,9 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
   @override
   Future<void> quitPKBattle() async {
     if (pkService?.pkInfo != null) {
-      pkService?.stopPlayAnotherHostStream();
-      pkService?.quitPKBattle(pkService?.pkInfo!.requestID ?? '');
-      pkService?.stopPKBattle();
+      await pkService?.stopPlayAnotherHostStream();
+      await pkService?.quitPKBattle(pkService?.pkInfo!.requestID ?? '');
+      await pkService?.stopPKBattle();
     }
   }
 

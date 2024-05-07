@@ -173,15 +173,27 @@ class ZegoLivePageState extends State<ZegoLivePage> {
       valueListenable: ZegoLiveStreamingManager().onPKViewAvailableNotifier,
       builder: (context, bool showPKView, _) {
         if (pkState == RoomPKState.isStartPK) {
-          if (showPKView || ZegoLiveStreamingManager().iamHost()) {
-            return hostVideoViewInPK();
-          } else {
-            return hostVideoViewFromManagerNotifier();
-          }
+          return ValueListenableBuilder<List<PKUser>>(
+              valueListenable: ZegoLiveStreamingManager().pkInfo!.pkUserList,
+              builder: (context, pkUsers, _) {
+                /// in sliding, if it is not the current display room, the PK view is not displayed
+                var isCurrentRoomHostTakingPK = false;
+                if (pkUsers.isNotEmpty) {
+                  final mainHost = pkUsers.first;
+                  isCurrentRoomHostTakingPK = mainHost.userID == ZegoLiveStreamingManager().hostNotifier.value?.userID && mainHost.roomID == widget.roomID;
+                }
+                if (isCurrentRoomHostTakingPK) {
+                  if (showPKView || ZegoLiveStreamingManager().iamHost()) {
+                    return hostVideoViewInPK();
+                  } else {
+                    return hostVideoViewFromManagerNotifier();
+                  }
+                } else {
+                  return ZegoLiveStreamingRole.host == widget.role ? hostVideoViewFromManagerNotifier() : hostVideoViewFromSwipingNotifier();
+                }
+              });
         } else {
-          return ZegoLiveStreamingRole.host == widget.role
-              ? hostVideoViewFromManagerNotifier()
-              : hostVideoViewFromSwipingNotifier();
+          return ZegoLiveStreamingRole.host == widget.role ? hostVideoViewFromManagerNotifier() : hostVideoViewFromSwipingNotifier();
         }
       },
     );

@@ -277,7 +277,7 @@ extension PKServiceZIMExtension on PKService {
 
     if (ZegoLiveStreamingManager().iamHost()) {
       if (pkInfo == null) {
-        delectPKAttributes();
+        deletePKAttributes();
       }
     } else {
       for (final pkuser in pkUserList) {
