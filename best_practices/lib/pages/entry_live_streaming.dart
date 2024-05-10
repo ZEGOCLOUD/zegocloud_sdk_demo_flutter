@@ -8,14 +8,31 @@ class LiveStreamingEntry extends StatefulWidget {
 }
 
 class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
-  final roomIDController = TextEditingController(text: Random().nextInt(9999999).toString());
+  final roomIDController =
+      TextEditingController(text: Random().nextInt(9999999).toString());
+
+  int swipingRoomInfoListIndex = 0;
+  final swipingRoomInfoList = <ZegoSwipingPageRoomInfo>[];
+
+  @override
+  void initState() {
+    super.initState();
+
+    for (var i = 0; i < 6; i++) {
+      swipingRoomInfoList.add(ZegoSwipingPageRoomInfo(
+        roomID: (200 + i).toString(),
+        hostID: (200 + i).toString(),
+      ));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         const Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-          Text('LiveStreaming Demo:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400)),
+          Text('LiveStreaming Demo:',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400)),
         ]),
         const SizedBox(height: 10),
         roomIDTextField(roomIDController),
@@ -35,7 +52,9 @@ class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ZegoLivePage(roomID: roomIDController.text, role: ZegoLiveStreamingRole.host),
+            builder: (context) => ZegoNormalLivePage(
+                roomID: roomIDController.text,
+                role: ZegoLiveStreamingRole.host),
           ),
         );
       },
@@ -51,8 +70,27 @@ class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
         //   role: ZegoLiveStreamingRole.audience,
         // );
 
-        final swipingAudiencePage = ZegoSwipingLivePage(
-          roomList: <ZegoSwipingLiveInfo>[ZegoSwipingLiveInfo(roomID: roomIDController.text, hostID: '')],
+        final swipingAudiencePage = ZegoLivePage(
+          swipingConfig: ZegoLiveSwipingConfig(
+            onPageChanged: (int pageIndex) {
+              swipingRoomInfoListIndex = pageIndex % swipingRoomInfoList.length;
+            },
+            requiredCurrentLive: () async {
+              return swipingRoomInfoList[swipingRoomInfoListIndex];
+            },
+            requiredPreviousLive: () async {
+              if (swipingRoomInfoListIndex == 0) {
+                return swipingRoomInfoList[swipingRoomInfoList.length - 1];
+              }
+              return swipingRoomInfoList[swipingRoomInfoListIndex - 1];
+            },
+            requiredNextLive: () async {
+              if (swipingRoomInfoListIndex == swipingRoomInfoList.length - 1) {
+                return swipingRoomInfoList[0];
+              }
+              return swipingRoomInfoList[swipingRoomInfoListIndex + 1];
+            },
+          ),
         );
 
         Navigator.push(

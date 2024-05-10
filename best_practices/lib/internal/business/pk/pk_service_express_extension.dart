@@ -75,7 +75,7 @@ extension PKServiceExpressExtension on PKService {
         }
       }
     } catch (e) {
-      debugPrint('onReceiveSEIEvent.data: ${event.data}.');
+      // debugPrint('onReceiveSEIEvent.data: ${event.data}.');
     }
   }
 

@@ -1,6 +1,6 @@
 part of 'live_page.dart';
 
-extension ZegoLivePageStateGiftExtension on ZegoLivePageState {
+extension ZegoLivePageStateGiftExtension on ZegoNormalLivePageState {
   void initGift() {
     ZegoGiftController().service.recvNotifier.addListener(onGiftReceived);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -29,7 +29,8 @@ extension ZegoLivePageStateGiftExtension on ZegoLivePageState {
       return;
     }
 
-    final giftPath = await getPathFromAssetOrCache('assets/gift/${receivedGiftCommand.giftName}.mp4');
+    final giftPath = await getPathFromAssetOrCache(
+        'assets/gift/${receivedGiftCommand.giftName}.mp4');
     ZegoGiftController().addToPlayingList(ZegoGiftData(giftPath: giftPath));
   }
 }

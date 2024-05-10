@@ -7,7 +7,10 @@ import 'package:flutter/material.dart';
 
 import 'audio_room/audio_room.dart';
 import 'call/call.dart';
+import 'live_streaming/live_page.dart';
 import 'live_streaming/live_streaming.dart';
+import 'live_streaming/swiping/defines.dart';
+import 'live_streaming/swiping/page_builder.dart';
 
 part 'entry_audio_room.dart';
 part 'entry_call.dart';
@@ -60,7 +63,8 @@ class HomePage extends StatelessWidget {
             ? CachedNetworkImage(
                 imageUrl: avatarUrl!,
                 fit: BoxFit.cover,
-                progressIndicatorBuilder: (context, url, _) => const CupertinoActivityIndicator(),
+                progressIndicatorBuilder: (context, url, _) =>
+                    const CupertinoActivityIndicator(),
                 errorWidget: (context, url, error) => const SizedBox.shrink(),
               )
             : const SizedBox.shrink();

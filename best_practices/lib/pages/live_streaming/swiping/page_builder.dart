@@ -1,19 +1,31 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 import '../../../zego_sdk_manager.dart';
-import 'live_page.dart';
+import 'defines.dart';
 
 class ZegoSwipingPageBuilder extends StatefulWidget {
   const ZegoSwipingPageBuilder({
     super.key,
     required this.itemBuilder,
+    required this.defaultRoomInfo,
+    required this.onPageWillChanged,
     required this.onPageChanged,
-    required this.swipingRoomListNotifier,
   });
 
-  final NullableIndexedWidgetBuilder itemBuilder;
-  final ValueChanged<int> onPageChanged;
-  final ValueNotifier<List<ZegoSwipingLiveInfo>> swipingRoomListNotifier;
+  final Widget Function(
+    BuildContext context,
+    int pageIndex,
+    ZegoSwipingPageRoomInfo pageRoomInfo,
+  ) itemBuilder;
+
+  final ZegoSwipingPageRoomInfo defaultRoomInfo;
+
+  final Future<ZegoSwipingPageChangedContext> Function(int pageIndex)
+      onPageWillChanged;
+  final void Function(
+    ZegoSwipingPageChangedContext changedContext,
+  ) onPageChanged;
 
   @override
   State<ZegoSwipingPageBuilder> createState() => _ZegoSwipingPageBuilderState();
@@ -24,6 +36,8 @@ class _ZegoSwipingPageBuilderState extends State<ZegoSwipingPageBuilder> {
 
   int currentPageIndex = 0;
   int? cachePageIndex;
+  final pageRoomInfoMapNotifier =
+      ValueNotifier<Map<int, ZegoSwipingPageRoomInfo>>({});
 
   int get initialPageIndex => 0;
 
@@ -31,9 +45,11 @@ class _ZegoSwipingPageBuilderState extends State<ZegoSwipingPageBuilder> {
   void initState() {
     super.initState();
 
+    pageRoomInfoMapNotifier.value[0] = widget.defaultRoomInfo;
+
     roomLoginNotifier.notifier.addListener(onRoomLoginStatedChanged);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      onPageChanged(initialPageIndex);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await onPageChanged(initialPageIndex);
     });
   }
 
@@ -55,31 +71,74 @@ class _ZegoSwipingPageBuilderState extends State<ZegoSwipingPageBuilder> {
     return PageView.builder(
       allowImplicitScrolling: true,
       scrollDirection: Axis.vertical,
-      itemBuilder: widget.itemBuilder,
+      itemBuilder: (BuildContext context, int pageIndex) {
+        return ValueListenableBuilder<Map<int, ZegoSwipingPageRoomInfo>>(
+          valueListenable: pageRoomInfoMapNotifier,
+          builder: (context, pageRoomInfoMap, _) {
+            if (!pageRoomInfoMap.keys.contains(pageIndex)) {
+              return Stack(
+                children: [
+                  const Center(
+                    child: CupertinoActivityIndicator(color: Colors.white),
+                  ),
+                  Text(
+                    'index:$pageIndex',
+                    style: TextStyle(
+                      decoration: TextDecoration.none,
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+              );
+            }
+
+            return Stack(
+              children: [
+                widget.itemBuilder(
+                  context,
+                  pageIndex,
+                  pageRoomInfoMap[pageIndex]!,
+                ),
+                Text(
+                  'index:$pageIndex, roomID:${pageRoomInfoMap[pageIndex]!.roomID}',
+                  style: TextStyle(
+                    decoration: TextDecoration.none,
+                    fontSize: 10,
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
       onPageChanged: onPageChangedRequest,
     );
   }
 
-  int getRoomIDIndexOfPage(int pageIndex) {
-    if (pageIndex > widget.swipingRoomListNotifier.value.length - 1) {
-      return pageIndex % widget.swipingRoomListNotifier.value.length;
-    }
-
-    return pageIndex;
-  }
-
-  void onPageChangedRequest(int page) {
+  Future<void> onPageChangedRequest(int page) async {
     if (!roomLoginNotifier.notifier.value) {
       /// To prevent failures caused by fast scrolling, cache the scroll page index before the previous room login is completed
       cachePageIndex = page;
     } else {
-      onPageChanged(page);
+      await onPageChanged(page);
     }
   }
 
-  void onPageChanged(int page) {
-    final roomID = widget.swipingRoomListNotifier.value[getRoomIDIndexOfPage(page)].roomID;
-    roomLoginNotifier.resetCheckingData(roomID);
-    widget.onPageChanged.call(page);
+  Future<void> onPageChanged(int pageIndex) async {
+    currentPageIndex = pageIndex;
+
+    final pageChangedContext = await widget.onPageWillChanged.call(pageIndex);
+
+    final updatedValue =
+        Map<int, ZegoSwipingPageRoomInfo>.from(pageRoomInfoMapNotifier.value);
+    updatedValue[pageIndex - 1] = pageChangedContext.previousRoomInfo;
+    updatedValue[pageIndex] = pageChangedContext.currentRoomInfo;
+    updatedValue[pageIndex + 1] = pageChangedContext.nextRoomInfo;
+    pageRoomInfoMapNotifier.value = updatedValue;
+
+    roomLoginNotifier
+        .resetCheckingData(pageChangedContext.currentRoomInfo.roomID);
+
+    widget.onPageChanged(pageChangedContext);
   }
 }
