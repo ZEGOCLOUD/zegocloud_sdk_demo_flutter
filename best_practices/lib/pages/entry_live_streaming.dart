@@ -8,8 +8,7 @@ class LiveStreamingEntry extends StatefulWidget {
 }
 
 class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
-  final roomIDController =
-      TextEditingController(text: Random().nextInt(9999999).toString());
+  final roomIDController = TextEditingController(text: Random().nextInt(9999999).toString());
 
   int swipingRoomInfoListIndex = 0;
   final swipingRoomInfoList = <ZegoSwipingPageRoomInfo>[];
@@ -31,8 +30,7 @@ class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
     return Column(
       children: [
         const Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-          Text('LiveStreaming Demo:',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400)),
+          Text('LiveStreaming Demo:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400)),
         ]),
         const SizedBox(height: 10),
         roomIDTextField(roomIDController),
@@ -52,9 +50,10 @@ class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ZegoNormalLivePage(
-                roomID: roomIDController.text,
-                role: ZegoLiveStreamingRole.host),
+            builder: (context) => ZegoLivePage(
+              roomID: roomIDController.text,
+              role: ZegoLiveStreamingRole.host,
+            ),
           ),
         );
       },

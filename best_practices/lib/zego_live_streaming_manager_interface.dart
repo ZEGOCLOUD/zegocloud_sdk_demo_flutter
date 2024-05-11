@@ -31,8 +31,6 @@ abstract class ZegoLiveStreamingManagerInterface {
 
   String hostStreamID();
   String coHostStreamID();
-  String hostStreamIDFormat(String roomID, String userID);
-  String coHostStreamIDFormat(String roomID, String userID);
 
   bool isPKUser(String userID);
   bool isPKUserMuted(String userID);

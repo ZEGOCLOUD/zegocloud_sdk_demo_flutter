@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:ffi';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 import '../../../zego_live_streaming_manager.dart';
 import '../normal/live_command.dart';
@@ -16,8 +15,10 @@ class ZegoSwipingLivePage extends StatefulWidget {
   const ZegoSwipingLivePage({
     super.key,
     required this.config,
+    required this.liveStreamingManager,
   });
   final ZegoLiveSwipingConfig config;
+  final ZegoLiveStreamingManager liveStreamingManager;
 
   @override
   State<ZegoSwipingLivePage> createState() => ZegoSwipingLivePageState();
@@ -27,11 +28,9 @@ class ZegoSwipingLivePageState extends State<ZegoSwipingLivePage> {
   final _roomController = ZegoSwipingRoomController();
   final _streamController = ZegoSwipingStreamController();
 
-  var roomCommandsNotifier =
-      ValueNotifier<Map<String, ZegoLivePageCommand>>({});
+  var roomCommandsNotifier = ValueNotifier<Map<String, ZegoLivePageCommand>>({});
   ZegoRoomLoginNotifier? pageRoomLoginNotifier;
-  ZegoSwipingPageChangedContext currentPageChangeContext =
-      ZegoSwipingPageChangedContext(
+  ZegoSwipingPageChangedContext currentPageChangeContext = ZegoSwipingPageChangedContext(
     currentPageIndex: 0,
     currentRoomInfo: ZegoSwipingPageRoomInfo.empty(),
     previousRoomInfo: ZegoSwipingPageRoomInfo.empty(),
@@ -56,15 +55,17 @@ class ZegoSwipingLivePageState extends State<ZegoSwipingLivePage> {
   void initState() {
     super.initState();
 
-    _roomController.init(roomCommandsNotifier: roomCommandsNotifier);
+    _roomController.init(
+      roomCommandsNotifier: roomCommandsNotifier,
+      liveStreamingManager: widget.liveStreamingManager,
+    );
   }
 
   @override
   void dispose() {
     super.dispose();
 
-    pageRoomLoginNotifier?.notifier
-        .removeListener(onCurrentPageRoomLoginStateChanged);
+    pageRoomLoginNotifier?.notifier.removeListener(onCurrentPageRoomLoginStateChanged);
     _roomController.uninit();
   }
 
@@ -85,10 +86,8 @@ class ZegoSwipingLivePageState extends State<ZegoSwipingLivePage> {
             onPageWillChanged: (int pageIndex) async {
               widget.config.onPageChanged.call(pageIndex);
 
-              final currentLiveRoomInfo =
-                  await widget.config.requiredCurrentLive();
-              final previousLiveRoomInfo =
-                  await widget.config.requiredPreviousLive();
+              final currentLiveRoomInfo = await widget.config.requiredCurrentLive();
+              final previousLiveRoomInfo = await widget.config.requiredPreviousLive();
               final nextLiveRoomInfo = await widget.config.requiredNextLive();
               return ZegoSwipingPageChangedContext(
                 currentPageIndex: pageIndex,
@@ -104,6 +103,7 @@ class ZegoSwipingLivePageState extends State<ZegoSwipingLivePage> {
               ZegoSwipingPageRoomInfo pageRoomInfo,
             ) {
               return ZegoNormalLivePage(
+                liveStreamingManager: widget.liveStreamingManager,
                 roomID: pageRoomInfo.roomID,
                 role: ZegoLiveStreamingRole.audience,
 

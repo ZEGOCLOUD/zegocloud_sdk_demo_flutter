@@ -3,8 +3,15 @@ import 'package:flutter/material.dart';
 import '../../zego_live_streaming_manager.dart';
 
 class PKMuteButton extends StatefulWidget {
+  const PKMuteButton({
+    super.key,
+    required this.pkUser,
+    required this.liveStreamingManager,
+  });
+
   final PKUser pkUser;
-  const PKMuteButton({super.key, required this.pkUser});
+
+  final ZegoLiveStreamingManager liveStreamingManager;
 
   @override
   State<PKMuteButton> createState() => _PKMuteButtonState();
@@ -26,7 +33,7 @@ class _PKMuteButtonState extends State<PKMuteButton> {
     return IconButton(
         onPressed: () {
           ZEGOSDKManager().expressService.mutePlayStreamAudio(widget.pkUser.pkUserStream, !widget.pkUser.isMute);
-          ZegoLiveStreamingManager().mutePKUser([widget.pkUser.userID], !widget.pkUser.isMute);
+          widget.liveStreamingManager.mutePKUser([widget.pkUser.userID], !widget.pkUser.isMute);
         },
         icon: widget.pkUser.isMute
             ? const Image(image: AssetImage('assets/icons/icon_speaker_off.png'))

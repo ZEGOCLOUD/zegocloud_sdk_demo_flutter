@@ -1,7 +1,13 @@
 part of 'live_page.dart';
 
 class ZegoLiveBottomBar extends StatefulWidget {
-  const ZegoLiveBottomBar({this.applying, super.key});
+  const ZegoLiveBottomBar({
+    super.key,
+    this.applying,
+    required this.liveStreamingManager,
+  });
+
+  final ZegoLiveStreamingManager liveStreamingManager;
 
   final ValueNotifier<bool>? applying;
 
@@ -18,7 +24,7 @@ class _ZegoLiveBottomBarState extends State<ZegoLiveBottomBar> {
       return const SizedBox.shrink();
     } else {
       return ValueListenableBuilder<ZegoLiveStreamingRole>(
-        valueListenable: ZegoLiveStreamingManager().currentUserRoleNotifier,
+        valueListenable: widget.liveStreamingManager.currentUserRoleNotifier,
         builder: (context, role, _) {
           return bottomBar(role);
         },
@@ -121,10 +127,7 @@ class _ZegoLiveBottomBarState extends State<ZegoLiveBottomBar> {
           final signaling = jsonEncode({
             'room_request_type': RoomRequestType.audienceApplyToBecomeCoHost,
           });
-          ZEGOSDKManager()
-              .zimService
-              .sendRoomRequest(ZegoLiveStreamingManager().hostNotifier.value?.userID ?? '', signaling)
-              .then((value) {
+          ZEGOSDKManager().zimService.sendRoomRequest(widget.liveStreamingManager.hostNotifier.value?.userID ?? '', signaling).then((value) {
             widget.applying?.value = true;
             myRoomRequest = ZEGOSDKManager().zimService.roomRequestMapNoti.value[value.requestID];
           }).catchError((error) {
@@ -146,8 +149,7 @@ class _ZegoLiveBottomBarState extends State<ZegoLiveBottomBar> {
           ZEGOSDKManager().zimService.cancelRoomRequest(myRoomRequest?.requestID ?? '').then((value) {
             widget.applying?.value = false;
           }).catchError((error) {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text('Cancel the application failed: $error')));
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cancel the application failed: $error')));
           });
         },
         child: const Text('Cancel the application', style: TextStyle(color: Colors.white)));
@@ -157,7 +159,7 @@ class _ZegoLiveBottomBarState extends State<ZegoLiveBottomBar> {
     return OutlinedButton(
       style: OutlinedButton.styleFrom(side: const BorderSide(width: 1, color: Colors.white)),
       onPressed: () {
-        ZegoLiveStreamingManager().endCoHost();
+        widget.liveStreamingManager.endCoHost();
       },
       child: const Text('End co-host', style: TextStyle(color: Colors.white)),
     );

@@ -9,12 +9,13 @@ import '../normal/live_command.dart';
 
 class ZegoSwipingRoomController {
   final _data = ZegoSwipingRoomControllerData();
-  var roomCommandsNotifier =
-      ValueNotifier<Map<String, ZegoLivePageCommand>>({});
+  var roomCommandsNotifier = ValueNotifier<Map<String, ZegoLivePageCommand>>({});
+
+  ZegoLiveStreamingManager? liveStreamingManager;
 
   void init({
-    required ValueNotifier<Map<String, ZegoLivePageCommand>>
-        roomCommandsNotifier,
+    required ValueNotifier<Map<String, ZegoLivePageCommand>> roomCommandsNotifier,
+    required ZegoLiveStreamingManager liveStreamingManager,
   }) {
     if (_data.init) {
       debugPrint('room controller, init before');
@@ -23,6 +24,7 @@ class ZegoSwipingRoomController {
     }
 
     this.roomCommandsNotifier = roomCommandsNotifier;
+    this.liveStreamingManager = liveStreamingManager;
 
     debugPrint('room controller, init');
 
@@ -50,15 +52,15 @@ class ZegoSwipingRoomController {
     _data.init = false;
 
     _data.roomLoginNotifier?.notifier.removeListener(_onLoginRoomStateChanged);
-    _data.roomLogoutNotifier?.notifier
-        .removeListener(_onLogoutRoomStateChanged);
+    _data.roomLogoutNotifier?.notifier.removeListener(_onLogoutRoomStateChanged);
     _data.currentRoomLoginDone.removeListener(_onCurrentRoomLoginStateUpdated);
-    _data.currentRoomLogoutDone
-        .removeListener(_onCurrentRoomLogoutStateUpdated);
+    _data.currentRoomLogoutDone.removeListener(_onCurrentRoomLogoutStateUpdated);
 
     if (currentRoomID.isNotEmpty) {
-      ZegoLiveStreamingManager().leaveRoom();
+      liveStreamingManager?.leaveRoom();
     }
+
+    liveStreamingManager = null;
   }
 
   String get currentRoomID => _data.currentRoomID;
@@ -84,15 +86,13 @@ class ZegoSwipingRoomController {
     }
 
     if (_data.currentRoomID.isNotEmpty && !_data.currentRoomLoginDone.value) {
-      debugPrint(
-          'room $currentRoomID is not login done, pending room id:$roomID');
+      debugPrint('room $currentRoomID is not login done, pending room id:$roomID');
 
       _data.pendingRoomID = roomID;
       return false;
     }
     if (!_data.currentRoomLogoutDone.value) {
-      debugPrint(
-          'room $currentRoomID is not logout done, pending room id:$roomID');
+      debugPrint('room $currentRoomID is not logout done, pending room id:$roomID');
 
       _data.pendingRoomID = roomID;
       return false;
@@ -119,9 +119,7 @@ class ZegoSwipingRoomController {
 
     roomCommandsNotifier.value[currentRoomID]?.registerEvent();
 
-    return ZEGOSDKManager()
-        .loginRoom(_data.currentRoomID, ZegoScenario.Broadcast, token: token)
-        .then(
+    return ZEGOSDKManager().loginRoom(_data.currentRoomID, ZegoScenario.Broadcast, token: token).then(
       (value) {
         if (value.errorCode != 0) {
           debugPrint('Login room failed: ${value.errorCode}');
@@ -169,7 +167,7 @@ class ZegoSwipingRoomController {
 
     roomCommandsNotifier.value[currentRoomID]?.unregisterEvent();
 
-    await ZegoLiveStreamingManager().leaveRoom();
+    await liveStreamingManager?.leaveRoom();
 
     return true;
   }
@@ -193,34 +191,29 @@ class ZegoSwipingRoomControllerData {
 
 extension ZegoSwipingRoomControllerEvent on ZegoSwipingRoomController {
   void _onLoginRoomStateChanged() {
-    final expressDone = expressService.currentRoomID == currentRoomID &&
-        ZegoRoomStateChangedReason.Logined == expressService.currentRoomState;
+    final expressDone = expressService.currentRoomID == currentRoomID && ZegoRoomStateChangedReason.Logined == expressService.currentRoomState;
 
     debugPrint('room controller, swiping page, on room state changed, '
         'target room id:$currentRoomID, '
         'express room id:${expressService.currentRoomID}, '
         'express room state:${expressService.currentRoomState}, ');
 
-    final zimDone = zimService.currentRoomID == currentRoomID &&
-        ZIMRoomState.connected == zimService.currentRoomState;
+    final zimDone = zimService.currentRoomID == currentRoomID && ZIMRoomState.connected == zimService.currentRoomState;
     debugPrint('room controller, swiping page, on room state changed, '
         'ZIM room id:${zimService.currentRoomID}, '
         'ZIM room state:${zimService.currentRoomState},');
 
-    debugPrint(
-        'swiping page, on room state changed, express done:$expressDone, ZIM done:$zimDone');
+    debugPrint('swiping page, on room state changed, express done:$expressDone, ZIM done:$zimDone');
     if (expressDone && zimDone) {
       _data.currentRoomLoginDone.value = true;
     }
   }
 
   void _onLogoutRoomStateChanged() {
-    debugPrint(
-        'swiping loading, room ${_data.roomLogoutNotifier?.checkingRoomID} state changed, logout:${_data.roomLogoutNotifier?.value}');
+    debugPrint('swiping loading, room ${_data.roomLogoutNotifier?.checkingRoomID} state changed, logout:${_data.roomLogoutNotifier?.value}');
 
     if (_data.roomLogoutNotifier?.value ?? false) {
-      debugPrint(
-          'swiping loading, room ${_data.roomLogoutNotifier?.checkingRoomID} had logout..');
+      debugPrint('swiping loading, room ${_data.roomLogoutNotifier?.checkingRoomID} had logout..');
 
       _data.currentRoomLogoutDone.value = true;
     }

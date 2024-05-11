@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../zego_live_streaming_manager.dart';
 import 'audio_room/audio_room.dart';
 import 'call/call.dart';
 import 'live_streaming/live_page.dart';
@@ -63,8 +64,7 @@ class HomePage extends StatelessWidget {
             ? CachedNetworkImage(
                 imageUrl: avatarUrl!,
                 fit: BoxFit.cover,
-                progressIndicatorBuilder: (context, url, _) =>
-                    const CupertinoActivityIndicator(),
+                progressIndicatorBuilder: (context, url, _) => const CupertinoActivityIndicator(),
                 errorWidget: (context, url, error) => const SizedBox.shrink(),
               )
             : const SizedBox.shrink();

@@ -21,8 +21,7 @@ class ZegoSwipingPageBuilder extends StatefulWidget {
 
   final ZegoSwipingPageRoomInfo defaultRoomInfo;
 
-  final Future<ZegoSwipingPageChangedContext> Function(int pageIndex)
-      onPageWillChanged;
+  final Future<ZegoSwipingPageChangedContext> Function(int pageIndex) onPageWillChanged;
   final void Function(
     ZegoSwipingPageChangedContext changedContext,
   ) onPageChanged;
@@ -36,8 +35,7 @@ class _ZegoSwipingPageBuilderState extends State<ZegoSwipingPageBuilder> {
 
   int currentPageIndex = 0;
   int? cachePageIndex;
-  final pageRoomInfoMapNotifier =
-      ValueNotifier<Map<int, ZegoSwipingPageRoomInfo>>({});
+  final pageRoomInfoMapNotifier = ValueNotifier<Map<int, ZegoSwipingPageRoomInfo>>({});
 
   int get initialPageIndex => 0;
 
@@ -72,9 +70,11 @@ class _ZegoSwipingPageBuilderState extends State<ZegoSwipingPageBuilder> {
       allowImplicitScrolling: true,
       scrollDirection: Axis.vertical,
       itemBuilder: (BuildContext context, int pageIndex) {
+        debugPrint('xxx 1 $pageIndex ${pageRoomInfoMapNotifier.value}');
         return ValueListenableBuilder<Map<int, ZegoSwipingPageRoomInfo>>(
           valueListenable: pageRoomInfoMapNotifier,
           builder: (context, pageRoomInfoMap, _) {
+            debugPrint('xxx 2 $pageIndex ${pageRoomInfoMapNotifier.value}');
             if (!pageRoomInfoMap.keys.contains(pageIndex)) {
               return Stack(
                 children: [
@@ -129,15 +129,15 @@ class _ZegoSwipingPageBuilderState extends State<ZegoSwipingPageBuilder> {
 
     final pageChangedContext = await widget.onPageWillChanged.call(pageIndex);
 
-    final updatedValue =
-        Map<int, ZegoSwipingPageRoomInfo>.from(pageRoomInfoMapNotifier.value);
+    final updatedValue = Map<int, ZegoSwipingPageRoomInfo>.from(pageRoomInfoMapNotifier.value);
     updatedValue[pageIndex - 1] = pageChangedContext.previousRoomInfo;
     updatedValue[pageIndex] = pageChangedContext.currentRoomInfo;
     updatedValue[pageIndex + 1] = pageChangedContext.nextRoomInfo;
     pageRoomInfoMapNotifier.value = updatedValue;
 
-    roomLoginNotifier
-        .resetCheckingData(pageChangedContext.currentRoomInfo.roomID);
+    debugPrint('xxx 3 $pageIndex ${pageRoomInfoMapNotifier.value}, context:$pageChangedContext');
+
+    roomLoginNotifier.resetCheckingData(pageChangedContext.currentRoomInfo.roomID);
 
     widget.onPageChanged(pageChangedContext);
   }

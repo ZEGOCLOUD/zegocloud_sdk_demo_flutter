@@ -23,10 +23,33 @@ class ZegoLivePage extends StatefulWidget {
 }
 
 class ZegoLivePageState extends State<ZegoLivePage> {
+  final liveStreamingManager = ZegoLiveStreamingManager();
+
+  @override
+  void initState() {
+    super.initState();
+
+    liveStreamingManager.init();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    liveStreamingManager.uninit();
+  }
+
   @override
   Widget build(BuildContext context) {
     return null == widget.swipingConfig
-        ? ZegoNormalLivePage(roomID: widget.roomID, role: widget.role)
-        : ZegoSwipingLivePage(config: widget.swipingConfig!);
+        ? ZegoNormalLivePage(
+            liveStreamingManager: liveStreamingManager,
+            roomID: widget.roomID,
+            role: widget.role,
+          )
+        : ZegoSwipingLivePage(
+            liveStreamingManager: liveStreamingManager,
+            config: widget.swipingConfig!,
+          );
   }
 }

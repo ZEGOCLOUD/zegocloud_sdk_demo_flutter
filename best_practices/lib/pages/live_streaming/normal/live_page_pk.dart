@@ -3,32 +3,14 @@ part of 'live_page.dart';
 extension ZegoLiveStreamingPKBattleManagerEventConv on ZegoNormalLivePageState {
   void listenPKEvents() {
     subscriptions.addAll([
-      ZegoLiveStreamingManager()
-          .onPKBattleReceived
-          .stream
-          .listen(onPKRequestReceived),
-      ZegoLiveStreamingManager()
-          .onPKBattleCancelStreamCtrl
-          .stream
-          .listen(onPKRequestCancelled),
-      ZegoLiveStreamingManager()
-          .onPKBattleRejectedStreamCtrl
-          .stream
-          .listen(onPKRequestRejected),
-      ZegoLiveStreamingManager()
-          .incomingPKRequestTimeoutStreamCtrl
-          .stream
-          .listen(onIncomingPKRequestTimeout),
-      ZegoLiveStreamingManager()
-          .outgoingPKRequestAnsweredTimeoutStreamCtrl
-          .stream
-          .listen(onOutgoingPKRequestTimeout),
-      ZegoLiveStreamingManager().onPKStartStreamCtrl.stream.listen(onPKStart),
-      ZegoLiveStreamingManager().onPKEndStreamCtrl.stream.listen(onPKEnd),
-      ZegoLiveStreamingManager()
-          .onPKUserConnectingCtrl
-          .stream
-          .listen(onPKUserConnecting),
+      widget.liveStreamingManager.onPKBattleReceived.stream.listen(onPKRequestReceived),
+      widget.liveStreamingManager.onPKBattleCancelStreamCtrl.stream.listen(onPKRequestCancelled),
+      widget.liveStreamingManager.onPKBattleRejectedStreamCtrl.stream.listen(onPKRequestRejected),
+      widget.liveStreamingManager.incomingPKRequestTimeoutStreamCtrl.stream.listen(onIncomingPKRequestTimeout),
+      widget.liveStreamingManager.outgoingPKRequestAnsweredTimeoutStreamCtrl.stream.listen(onOutgoingPKRequestTimeout),
+      widget.liveStreamingManager.onPKStartStreamCtrl.stream.listen(onPKStart),
+      widget.liveStreamingManager.onPKEndStreamCtrl.stream.listen(onPKEnd),
+      widget.liveStreamingManager.onPKUserConnectingCtrl.stream.listen(onPKUserConnecting),
     ]);
   }
 
@@ -37,8 +19,7 @@ extension ZegoLiveStreamingPKBattleManagerEventConv on ZegoNormalLivePageState {
   }
 
   void onPKRequestRejected(PKBattleRejectedEvent event) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('pk request is rejected')));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('pk request is rejected')));
   }
 
   void onPKRequestCancelled(PKBattleCancelledEvent event) {
@@ -58,26 +39,20 @@ extension ZegoLiveStreamingPKBattleManagerEventConv on ZegoNormalLivePageState {
   void onPKUserConnecting(PKBattleUserConnectingEvent event) {
     if (event.duration > 60000) {
       if (event.userID != ZEGOSDKManager().currentUser!.userID) {
-        ZegoLiveStreamingManager().removeUserFromPKBattle(event.userID);
+        widget.liveStreamingManager.removeUserFromPKBattle(event.userID);
       } else {
-        ZegoLiveStreamingManager().quitPKBattle();
+        widget.liveStreamingManager.quitPKBattle();
       }
     }
   }
 
   void onPKStart(dynamic event) {
     //stop cohost
-    if (!ZegoLiveStreamingManager().iamHost()) {
-      ZegoLiveStreamingManager().endCoHost();
+    if (!widget.liveStreamingManager.iamHost()) {
+      widget.liveStreamingManager.endCoHost();
     }
-    if (ZegoLiveStreamingManager().iamHost()) {
-      ZEGOSDKManager()
-          .zimService
-          .roomRequestMapNoti
-          .value
-          .values
-          .toList()
-          .forEach((element) {
+    if (widget.liveStreamingManager.iamHost()) {
+      ZEGOSDKManager().zimService.roomRequestMapNoti.value.values.toList().forEach((element) {
         refuseApplyCohost(element);
       });
     }
@@ -104,14 +79,14 @@ extension ZegoLiveStreamingPKBattleManagerEventConv on ZegoNormalLivePageState {
             CupertinoDialogAction(
               child: const Text('Disagree'),
               onPressed: () {
-                ZegoLiveStreamingManager().rejectPKStartRequest(requestID);
+                widget.liveStreamingManager.rejectPKStartRequest(requestID);
                 Navigator.pop(context);
               },
             ),
             CupertinoDialogAction(
               child: const Text('Agree'),
               onPressed: () {
-                ZegoLiveStreamingManager().acceptPKStartRequest(requestID);
+                widget.liveStreamingManager.acceptPKStartRequest(requestID);
                 Navigator.pop(context);
               },
             ),

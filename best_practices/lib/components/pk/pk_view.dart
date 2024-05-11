@@ -6,8 +6,14 @@ import '../../zego_live_streaming_manager.dart';
 import 'pk_mute_button.dart';
 
 class PKView extends StatefulWidget {
+  const PKView({
+    super.key,
+    required this.pkUser,
+    required this.liveStreamingManager,
+  });
+
   final PKUser pkUser;
-  const PKView({super.key, required this.pkUser});
+  final ZegoLiveStreamingManager liveStreamingManager;
 
   @override
   State<PKView> createState() => _PKViewState();
@@ -19,7 +25,7 @@ class _PKViewState extends State<PKView> {
   @override
   void initState() {
     super.initState();
-    subscriptions.add(ZegoLiveStreamingManager().onPKUserConnectingCtrl.stream.listen(onPKUserConnecting));
+    subscriptions.add(widget.liveStreamingManager.onPKUserConnectingCtrl.stream.listen(onPKUserConnecting));
 
     if (widget.pkUser.userID == ZEGOSDKManager().currentUser!.userID) {
     } else {
@@ -37,18 +43,18 @@ class _PKViewState extends State<PKView> {
 
   void onPKUserConnecting(PKBattleUserConnectingEvent event) {
     // if (event.userID == widget.pkUser.userID) {
-    //   final pkUserMuted = ZegoLiveStreamingManager().isPKUserMuted(event.userID);
+    //   final pkUserMuted = widget.liveStreamingManager.isPKUserMuted(event.userID);
     //   if (event.duration > 5000) {
     //     if (!pkUserMuted) {
-    //       ZegoLiveStreamingManager().mutePKUser([event.userID], true).then((value) {
+    //       widget.liveStreamingManager.mutePKUser([event.userID], true).then((value) {
     //         if (value.errorCode == 0) {
-    //           mutePlayAudio(true);
+    mutePlayAudio(true);
     //         }
     //       });
     //     }
     //   } else {
     //     if (pkUserMuted) {
-    //       ZegoLiveStreamingManager().mutePKUser([event.userID], false).then((value) {
+    //       widget.liveStreamingManager.mutePKUser([event.userID], false).then((value) {
     //         if (value.errorCode == 0) {
     //           mutePlayAudio(false);
     //         }
@@ -134,7 +140,10 @@ class _PKViewState extends State<PKView> {
               top: 20,
               width: 60,
               height: 60,
-              child: PKMuteButton(pkUser: widget.pkUser),
+              child: PKMuteButton(
+                pkUser: widget.pkUser,
+                liveStreamingManager: widget.liveStreamingManager,
+              ),
             )
           ],
         );

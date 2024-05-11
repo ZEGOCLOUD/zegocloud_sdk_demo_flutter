@@ -18,11 +18,14 @@ part 'live_page_pk.dart';
 class ZegoNormalLivePage extends StatefulWidget {
   const ZegoNormalLivePage({
     super.key,
+    required this.liveStreamingManager,
     required this.roomID,
     required this.role,
     this.externalControlCommand,
     this.previewHostID,
   });
+
+  final ZegoLiveStreamingManager liveStreamingManager;
 
   final String roomID;
   final ZegoLiveStreamingRole role;
@@ -59,7 +62,7 @@ class ZegoNormalLivePageState extends State<ZegoNormalLivePage> {
   void initState() {
     super.initState();
 
-    ZegoLiveStreamingManager().currentUserRoleNotifier.value = widget.role;
+    widget.liveStreamingManager.currentUserRoleNotifier.value = widget.role;
 
     registerCommandEvent();
 
@@ -96,10 +99,10 @@ class ZegoNormalLivePageState extends State<ZegoNormalLivePage> {
   @override
   Widget build(Object context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: ZegoLiveStreamingManager().isLivingNotifier,
+      valueListenable: widget.liveStreamingManager.isLivingNotifier,
       builder: (context, isLiving, _) {
         return ValueListenableBuilder<RoomPKState>(
-          valueListenable: ZegoLiveStreamingManager().pkStateNotifier,
+          valueListenable: widget.liveStreamingManager.pkStateNotifier,
           builder: (context, RoomPKState pkState, child) {
             return Scaffold(
               body: Stack(
@@ -152,9 +155,11 @@ class ZegoNormalLivePageState extends State<ZegoNormalLivePage> {
   Widget bottomBar(bool isLiving, RoomPKState pkState) {
     if (!isLiving) return const SizedBox.shrink();
 
-    if (pkState != RoomPKState.isStartPK ||
-        ZegoLiveStreamingManager().iamHost()) {
-      return ZegoLiveBottomBar(applying: applying);
+    if (pkState != RoomPKState.isStartPK || widget.liveStreamingManager.iamHost()) {
+      return ZegoLiveBottomBar(
+        applying: applying,
+        liveStreamingManager: widget.liveStreamingManager,
+      );
     } else {
       return const SizedBox.shrink();
     }
@@ -171,39 +176,30 @@ class ZegoNormalLivePageState extends State<ZegoNormalLivePage> {
 
   Widget hostVideoView(bool isLiving, RoomPKState pkState) {
     return ValueListenableBuilder(
-      valueListenable: ZegoLiveStreamingManager().onPKViewAvailableNotifier,
+      valueListenable: widget.liveStreamingManager.onPKViewAvailableNotifier,
       builder: (context, bool showPKView, _) {
         if (pkState == RoomPKState.isStartPK) {
           return ValueListenableBuilder<List<PKUser>>(
-              valueListenable: ZegoLiveStreamingManager().pkInfo!.pkUserList,
+              valueListenable: widget.liveStreamingManager.pkInfo!.pkUserList,
               builder: (context, pkUsers, _) {
                 /// in sliding, if it is not the current display room, the PK view is not displayed
                 var isCurrentRoomHostTakingPK = false;
                 if (pkUsers.isNotEmpty) {
                   final mainHost = pkUsers.first;
-                  isCurrentRoomHostTakingPK = mainHost.userID ==
-                          ZegoLiveStreamingManager()
-                              .hostNotifier
-                              .value
-                              ?.userID &&
-                      mainHost.roomID == widget.roomID;
+                  isCurrentRoomHostTakingPK = mainHost.userID == widget.liveStreamingManager.hostNotifier.value?.userID && mainHost.roomID == widget.roomID;
                 }
                 if (isCurrentRoomHostTakingPK) {
-                  if (showPKView || ZegoLiveStreamingManager().iamHost()) {
+                  if (showPKView || widget.liveStreamingManager.iamHost()) {
                     return hostVideoViewInPK();
                   } else {
                     return hostVideoViewFromManagerNotifier();
                   }
                 } else {
-                  return ZegoLiveStreamingRole.host == widget.role
-                      ? hostVideoViewFromManagerNotifier()
-                      : hostVideoViewFromSwipingNotifier();
+                  return ZegoLiveStreamingRole.host == widget.role ? hostVideoViewFromManagerNotifier() : hostVideoViewFromSwipingNotifier();
                 }
               });
         } else {
-          return ZegoLiveStreamingRole.host == widget.role
-              ? hostVideoViewFromManagerNotifier()
-              : hostVideoViewFromSwipingNotifier();
+          return ZegoLiveStreamingRole.host == widget.role ? hostVideoViewFromManagerNotifier() : hostVideoViewFromSwipingNotifier();
         }
       },
     );
@@ -218,7 +214,9 @@ class ZegoNormalLivePageState extends State<ZegoNormalLivePage> {
             child: SizedBox(
               width: constraints.maxWidth,
               height: constraints.maxWidth * 16 / 18,
-              child: const ZegoPKContainerView(),
+              child: ZegoPKContainerView(
+                liveStreamingManager: widget.liveStreamingManager,
+              ),
             ),
           ),
         ],
@@ -228,14 +226,14 @@ class ZegoNormalLivePageState extends State<ZegoNormalLivePage> {
 
   Widget hostVideoViewFromManagerNotifier() {
     return ValueListenableBuilder(
-      valueListenable: ZegoLiveStreamingManager().hostNotifier,
+      valueListenable: widget.liveStreamingManager.hostNotifier,
       builder: (context, host, _) {
-        if (ZegoLiveStreamingManager().hostNotifier.value == null) {
+        if (widget.liveStreamingManager.hostNotifier.value == null) {
           return const SizedBox.shrink();
         }
 
         return ZegoAudioVideoView(
-          userInfo: ZegoLiveStreamingManager().hostNotifier.value!,
+          userInfo: widget.liveStreamingManager.hostNotifier.value!,
         );
       },
     );
@@ -246,9 +244,8 @@ class ZegoNormalLivePageState extends State<ZegoNormalLivePage> {
     return ValueListenableBuilder<ZegoSDKUser?>(
       valueListenable: swipingData.hostNotifier,
       builder: (context, host, _) {
-        return null == host
-            ? const SizedBox.shrink()
-            : ZegoAudioVideoView(userInfo: host);
+        final r = widget.roomID;
+        return null == host ? const SizedBox.shrink() : ZegoAudioVideoView(userInfo: host);
       },
     );
   }
@@ -272,17 +269,13 @@ class ZegoNormalLivePageState extends State<ZegoNormalLivePage> {
   Widget coHostVideoView(bool isLiving, RoomPKState pkState) {
     if (pkState != RoomPKState.isStartPK) {
       return Builder(builder: (context) {
-        final height =
-            (MediaQuery.of(context).size.height - kButtonSize - 100) / 4;
+        final height = (MediaQuery.of(context).size.height - kButtonSize - 100) / 4;
         final width = height * (9 / 16);
 
         return ValueListenableBuilder<List<ZegoSDKUser>>(
-          valueListenable: ZegoLiveStreamingManager().coHostUserListNotifier,
+          valueListenable: widget.liveStreamingManager.coHostUserListNotifier,
           builder: (context, cohostList, _) {
-            final videoList = ZegoLiveStreamingManager()
-                .coHostUserListNotifier
-                .value
-                .map((user) {
+            final videoList = widget.liveStreamingManager.coHostUserListNotifier.value.map((user) {
               return ZegoAudioVideoView(userInfo: user);
             }).toList();
 
@@ -293,8 +286,7 @@ class ZegoNormalLivePageState extends State<ZegoNormalLivePage> {
                 reverse: true,
                 itemCount: videoList.length,
                 itemBuilder: (context, index) {
-                  return SizedBox(
-                      width: width, height: height, child: videoList[index]);
+                  return SizedBox(width: width, height: height, child: videoList[index]);
                 },
                 separatorBuilder: (context, index) {
                   return const SizedBox(height: 10);
@@ -311,28 +303,21 @@ class ZegoNormalLivePageState extends State<ZegoNormalLivePage> {
 
   Widget startLiveButton(bool isLiving, RoomPKState pkState) {
     if (!isLiving && widget.role == ZegoLiveStreamingRole.host) {
-      return CommonButton(
-          width: 100,
-          height: 40,
-          onTap: startLive,
-          child: const Text('Start Live'));
+      return CommonButton(width: 100, height: 40, onTap: startLive, child: const Text('Start Live'));
     } else {
       return const SizedBox.shrink();
     }
   }
 
   void startLive() {
-    ZegoLiveStreamingManager().startLive(widget.roomID).then((value) {
+    widget.liveStreamingManager.startLive(widget.roomID).then((value) {
       if (value.errorCode != 0) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('login room failed: ${value.errorCode}')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('login room failed: ${value.errorCode}')));
       } else {
-        expressService
-            .startPublishingStream(ZegoLiveStreamingManager().hostStreamID());
+        expressService.startPublishingStream(widget.liveStreamingManager.hostStreamID());
       }
     }).catchError((error) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('login room failed: $error}')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('login room failed: $error}')));
     });
   }
 
@@ -347,9 +332,7 @@ class ZegoNormalLivePageState extends State<ZegoNormalLivePage> {
   }
 
   Widget cohostRequestListButton(bool isLiving, RoomPKState pkState) {
-    if (isLiving &&
-        (widget.role == ZegoLiveStreamingRole.host) &&
-        (pkState != RoomPKState.isStartPK)) {
+    if (isLiving && (widget.role == ZegoLiveStreamingRole.host) && (pkState != RoomPKState.isStartPK)) {
       return const CoHostRequestListButton();
     } else {
       return const SizedBox.shrink();
@@ -363,8 +346,7 @@ class ZegoNormalLivePageState extends State<ZegoNormalLivePage> {
         return Text(
           'RoomID: ${widget.roomID}\n'
           'HostID: ${userInfo?.userID ?? ''}',
-          style: const TextStyle(
-              fontSize: 16, color: Color.fromARGB(255, 104, 94, 94)),
+          style: const TextStyle(fontSize: 16, color: Color.fromARGB(255, 104, 94, 94)),
         );
       },
     );
@@ -372,7 +354,9 @@ class ZegoNormalLivePageState extends State<ZegoNormalLivePage> {
 
   Widget pkButton(bool isLiving, RoomPKState pkState) {
     if (isLiving && widget.role == ZegoLiveStreamingRole.host) {
-      return const PKButton();
+      return PKButton(
+        liveStreamingManager: widget.liveStreamingManager,
+      );
     } else {
       return const SizedBox.shrink();
     }
@@ -389,8 +373,7 @@ class ZegoNormalLivePageState extends State<ZegoNormalLivePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           duration: const Duration(milliseconds: 1000),
-          content: Text(
-              'onExpressRoomStateChanged: reason:${event.reason.name}, errorCode:${event.errorCode}'),
+          content: Text('onExpressRoomStateChanged: reason:${event.reason.name}, errorCode:${event.errorCode}'),
         ),
       );
     }
@@ -409,8 +392,7 @@ class ZegoNormalLivePageState extends State<ZegoNormalLivePage> {
       return;
     }
 
-    if ((event.event != ZIMRoomEvent.success) &&
-        (event.state != ZIMRoomState.connected)) {
+    if ((event.event != ZIMRoomEvent.success) && (event.state != ZIMRoomState.connected)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           duration: const Duration(milliseconds: 1000),
@@ -423,8 +405,7 @@ class ZegoNormalLivePageState extends State<ZegoNormalLivePage> {
     }
   }
 
-  void onZIMConnectionStateChanged(
-      ZIMServiceConnectionStateChangedEvent event) {
+  void onZIMConnectionStateChanged(ZIMServiceConnectionStateChangedEvent event) {
     debugPrint('LivePage:onZIMConnectionStateChanged: $event');
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -444,7 +425,7 @@ class ZegoNormalLivePageState extends State<ZegoNormalLivePage> {
 
   void onOutgoingRoomRequestAccepted(OnOutgoingRoomRequestAcceptedEvent event) {
     applying.value = false;
-    ZegoLiveStreamingManager().startCoHost();
+    widget.liveStreamingManager.startCoHost();
   }
 
   void onOutgoingRoomRequestRejected(OnOutgoingRoomRequestRejectedEvent event) {
@@ -452,8 +433,7 @@ class ZegoNormalLivePageState extends State<ZegoNormalLivePage> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         duration: Duration(milliseconds: 1000),
-        content:
-            Text('Your request to co-host with the host has been refused.'),
+        content: Text('Your request to co-host with the host has been refused.'),
       ),
     );
   }
@@ -463,12 +443,8 @@ class ZegoNormalLivePageState extends State<ZegoNormalLivePage> {
   }
 
   void refuseApplyCohost(RoomRequest roomRequest) {
-    zimService
-        .rejectRoomRequest(roomRequest.requestID ?? '')
-        .then((value) {})
-        .catchError((error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Disagree cohost failed: $error')));
+    zimService.rejectRoomRequest(roomRequest.requestID ?? '').then((value) {}).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Disagree cohost failed: $error')));
     });
   }
 }
@@ -478,8 +454,7 @@ extension ZegoLivePageStateCommand on ZegoNormalLivePageState {
   bool get hasExternalCommand => null != widget.externalControlCommand;
 
   /// current command
-  ZegoLivePageCommand get command =>
-      widget.externalControlCommand ?? lazyCreateDefaultCommand();
+  ZegoLivePageCommand get command => widget.externalControlCommand ?? lazyCreateDefaultCommand();
 
   /// default internal command
   ZegoLivePageCommand lazyCreateDefaultCommand() {
@@ -503,30 +478,26 @@ extension ZegoLivePageStateCommand on ZegoNormalLivePageState {
   }
 
   void onRegisterEventCommand() {
+    debugPrint('xxxx onRegisterEventCommand');
     for (final subscription in subscriptions) {
       subscription.cancel();
     }
 
     subscriptions.addAll([
-      expressService.roomStateChangedStreamCtrl.stream
-          .listen(onExpressRoomStateChanged),
-      zimService.roomStateChangedStreamCtrl.stream
-          .listen(onZIMRoomStateChanged),
-      zimService.connectionStateStreamCtrl.stream
-          .listen(onZIMConnectionStateChanged),
-      zimService.onInComingRoomRequestStreamCtrl.stream
-          .listen(onInComingRoomRequest),
-      zimService.onInComingRoomRequestCancelledStreamCtrl.stream
-          .listen(onInComingRoomRequestCancel),
-      zimService.onOutgoingRoomRequestAcceptedStreamCtrl.stream
-          .listen(onOutgoingRoomRequestAccepted),
-      zimService.onOutgoingRoomRequestRejectedStreamCtrl.stream
-          .listen(onOutgoingRoomRequestRejected),
+      expressService.roomStateChangedStreamCtrl.stream.listen(onExpressRoomStateChanged),
+      zimService.roomStateChangedStreamCtrl.stream.listen(onZIMRoomStateChanged),
+      zimService.connectionStateStreamCtrl.stream.listen(onZIMConnectionStateChanged),
+      zimService.onInComingRoomRequestStreamCtrl.stream.listen(onInComingRoomRequest),
+      zimService.onInComingRoomRequestCancelledStreamCtrl.stream.listen(onInComingRoomRequestCancel),
+      zimService.onOutgoingRoomRequestAcceptedStreamCtrl.stream.listen(onOutgoingRoomRequestAccepted),
+      zimService.onOutgoingRoomRequestRejectedStreamCtrl.stream.listen(onOutgoingRoomRequestRejected),
     ]);
     listenPKEvents();
   }
 
   void onUnregisterEventCommand() {
+    debugPrint('xxxx onUnregisterEventCommand');
+
     for (final subscription in subscriptions) {
       subscription.cancel();
     }
@@ -546,9 +517,7 @@ extension ZegoLivePageStateCommand on ZegoNormalLivePageState {
         );
       }
 
-      ZEGOSDKManager()
-          .loginRoom(widget.roomID, ZegoScenario.Broadcast, token: token)
-          .then(
+      ZEGOSDKManager().loginRoom(widget.roomID, ZegoScenario.Broadcast, token: token).then(
         (value) {
           if (value.errorCode != 0) {
             debugPrint('login room failed: ${value.errorCode}');
@@ -559,8 +528,7 @@ extension ZegoLivePageStateCommand on ZegoNormalLivePageState {
       /// will join room on startLive
 
       /// cache host
-      ZegoLiveStreamingManager().hostNotifier.value =
-          ZEGOSDKManager().currentUser;
+      widget.liveStreamingManager.hostNotifier.value = ZEGOSDKManager().currentUser;
       swipingData.hostNotifier.value = ZEGOSDKManager().currentUser;
 
       /// start preview
@@ -573,7 +541,7 @@ extension ZegoLivePageStateCommand on ZegoNormalLivePageState {
   void onLeaveRoomCommand() {
     ZEGOSDKManager().expressService.stopPreview();
 
-    ZegoLiveStreamingManager().leaveRoom();
+    widget.liveStreamingManager.leaveRoom();
   }
 }
 
@@ -594,17 +562,14 @@ class ZegoLivePageSwipingData {
 extension ZegoLivePageStateSwiping on ZegoNormalLivePageState {
   void addRoomLoginListeners() {
     swipingData.roomLoginNotifier.notifier.addListener(onRoomLoginStateChanged);
-    swipingData.roomLogoutNotifier.notifier
-        .addListener(onRoomLogoutStateChanged);
+    swipingData.roomLogoutNotifier.notifier.addListener(onRoomLogoutStateChanged);
     swipingData.roomLoginNotifier.resetCheckingData(widget.roomID);
     swipingData.roomLogoutNotifier.resetCheckingData(widget.roomID);
   }
 
   void removeRoomLoginListeners() {
-    swipingData.roomLoginNotifier.notifier
-        .removeListener(onRoomLoginStateChanged);
-    swipingData.roomLogoutNotifier.notifier
-        .removeListener(onRoomLogoutStateChanged);
+    swipingData.roomLoginNotifier.notifier.removeListener(onRoomLoginStateChanged);
+    swipingData.roomLogoutNotifier.notifier.removeListener(onRoomLogoutStateChanged);
   }
 
   void onRoomLoginStateChanged() {
@@ -637,14 +602,14 @@ extension ZegoLivePageStateSwiping on ZegoNormalLivePageState {
 
     ///  in sliding, the room/host will switch, so need to listen for
     ///  changes in the flow
-    expressService.remoteStreamUserInfoListNotifier
-        .addListener(onRemoteStreamUserUpdated);
-    ZegoLiveStreamingManager().hostNotifier.addListener(onHostUpdated);
+    onRemoteStreamUserUpdated();
+    expressService.remoteStreamUserInfoListNotifier.addListener(onRemoteStreamUserUpdated);
+    onHostUpdated();
+    widget.liveStreamingManager.hostNotifier.addListener(onHostUpdated);
   }
 
   void removePreviewUserUpdateListeners() {
-    expressService.remoteStreamUserInfoListNotifier
-        .removeListener(onRemoteStreamUserUpdated);
+    expressService.remoteStreamUserInfoListNotifier.removeListener(onRemoteStreamUserUpdated);
   }
 
   void onRemoteStreamUserUpdated() {
@@ -659,10 +624,9 @@ extension ZegoLivePageStateSwiping on ZegoNormalLivePageState {
   void onHostUpdated() {
     if (expressService.currentRoomID == widget.roomID) {
       /// Sliding the LIVE room will trigger it, which only takes effect for updates caused by the current room
-      if (null != ZegoLiveStreamingManager().hostNotifier.value) {
+      if (null != widget.liveStreamingManager.hostNotifier.value) {
         /// To prevent the preview from flashing when sliding the LIVE room, the host caused by checking out is null
-        swipingData.hostNotifier.value =
-            ZegoLiveStreamingManager().hostNotifier.value;
+        swipingData.hostNotifier.value = widget.liveStreamingManager.hostNotifier.value;
       }
     }
   }

@@ -24,6 +24,8 @@ class PKService implements PKServiceInterface {
   PKInfo? pkInfo;
   ZegoMixerTask? task;
 
+  CoHostService? cohostService;
+
   List<StreamSubscription> subscriptions = [];
 
   ZegoSDKUser? get localUser => ZEGOSDKManager().currentUser;
@@ -44,6 +46,8 @@ class PKService implements PKServiceInterface {
   final onPKBattleUserUpdateCtrl = StreamController<PKBattleUserUpdateEvent>.broadcast();
   final onPKUserConnectingCtrl = StreamController<PKBattleUserConnectingEvent>.broadcast();
 
+  bool get iamHost => cohostService?.iamHost() ?? false;
+
   @override
   void addListener() {
     final zimService = ZEGOSDKManager().zimService;
@@ -63,7 +67,14 @@ class PKService implements PKServiceInterface {
   }
 
   @override
+  void init(CoHostService cohostService) {
+    this.cohostService = cohostService;
+  }
+
+  @override
   void uninit() {
+    cohostService = null;
+
     for (final subscription in subscriptions) {
       subscription.cancel();
     }
@@ -106,7 +117,7 @@ class PKService implements PKServiceInterface {
   @override
   Future<ZIMCallQuitSentResult> quitPKBattle(String requestID) async {
     if (isPKUser(ZEGOSDKManager().currentUser!.userID)) {
-      if (ZegoLiveStreamingManager().iamHost()) {
+      if (iamHost) {
         await stopPlayAnotherHostStream();
       }
       return quitUserRequest(requestID, '');
@@ -200,7 +211,7 @@ class PKService implements PKServiceInterface {
 
   @override
   Future<void> stopPKBattle() async {
-    if (ZegoLiveStreamingManager().iamHost()) {
+    if (iamHost) {
       await deletePKAttributes();
       await stopMixTask();
       //...
@@ -217,8 +228,11 @@ class PKService implements PKServiceInterface {
   }
 
   Future<void> muteHostAudioVideo(bool mute) async {
-    if (ZegoLiveStreamingManager().hostNotifier.value != null) {
-      final hostMainStreamID = ZegoLiveStreamingManager().hostStreamID();
+    if (cohostService?.hostNotifier.value != null) {
+      final hostMainStreamID = hostStreamIDFormat(
+        ZEGOSDKManager().expressService.currentRoomID,
+        ZEGOSDKManager().currentUser!.userID,
+      );
       await ZEGOSDKManager().expressService.mutePlayStreamAudio(hostMainStreamID, mute);
       await ZEGOSDKManager().expressService.mutePlayStreamVideo(hostMainStreamID, mute);
     }
@@ -228,9 +242,9 @@ class PKService implements PKServiceInterface {
     if (pkInfo == null) {
       return;
     }
-    for (final pkuser in pkInfo!.pkUserList.value) {
-      if (pkuser.userID != ZegoLiveStreamingManager().hostNotifier.value?.userID) {
-        await ZEGOSDKManager().expressService.stopPlayingStream(pkuser.pkUserStream);
+    for (final pkUser in pkInfo!.pkUserList.value) {
+      if (pkUser.userID != cohostService?.hostNotifier.value?.userID) {
+        await ZEGOSDKManager().expressService.stopPlayingStream(pkUser.pkUserStream);
       }
     }
   }
@@ -251,8 +265,8 @@ class PKService implements PKServiceInterface {
       return;
     }
     final pkMap = <String, String>{};
-    if (ZegoLiveStreamingManager().hostNotifier.value != null) {
-      pkMap['host_user_id'] = ZegoLiveStreamingManager().hostNotifier.value?.userID ?? '';
+    if (cohostService?.hostNotifier.value != null) {
+      pkMap['host_user_id'] = cohostService?.hostNotifier.value?.userID ?? '';
     }
     pkMap['request_id'] = pkInfo!.requestID ?? '';
 
@@ -546,7 +560,7 @@ class PKService implements PKServiceInterface {
 
   Future<void> clearData() async {
     await cleanPKState();
-    if (ZegoLiveStreamingManager().iamHost() && pkRoomAttribute.keys.isNotEmpty) {
+    if (iamHost && pkRoomAttribute.keys.isNotEmpty) {
       await ZEGOSDKManager().zimService.deleteRoomAttributes(pkRoomAttribute.keys.toList());
     }
     pkRoomAttribute.clear();

@@ -2,6 +2,7 @@ import '../../../zego_sdk_manager.dart';
 
 abstract class PKServiceInterface {
   void addListener();
+  void init(CoHostService cohostService);
   void uninit();
   void removeUserFromPKBattle(String userID);
   Future<void> stopPKBattle();

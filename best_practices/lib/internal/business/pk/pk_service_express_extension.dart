@@ -23,7 +23,7 @@ extension PKServiceExpressExtension on PKService {
 
   void onRoomUserUpdate(ZegoRoomUserListUpdateEvent event) {
     if (event.updateType == ZegoUpdateType.Delete) {
-      if (ZegoLiveStreamingManager().hostNotifier.value == null && pkStateNotifier.value == RoomPKState.isStartPK) {
+      if (cohostService?.hostNotifier.value == null && pkStateNotifier.value == RoomPKState.isStartPK) {
         pkStateNotifier.value = RoomPKState.isNoPK;
         onPKEndStreamCtrl.add(null);
         cancelTime();

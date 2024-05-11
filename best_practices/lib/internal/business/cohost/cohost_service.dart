@@ -77,7 +77,7 @@ class CoHostService {
   void onRoomUserListUpdate(ZegoRoomUserListUpdateEvent event) {
     for (final user in event.userList) {
       if (event.updateType == ZegoUpdateType.Delete) {
-        coHostUserListNotifier.removeWhere((element) => element.userID == ZEGOSDKManager().currentUser!.userID);
+        coHostUserListNotifier.removeWhere((coHost) => coHost.userID == user.userID);
         if (hostNotifier.value?.userID == user.userID) {
           hostNotifier.value = null;
         }
