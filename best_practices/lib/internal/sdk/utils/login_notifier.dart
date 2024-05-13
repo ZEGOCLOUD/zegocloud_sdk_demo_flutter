@@ -27,9 +27,19 @@ class ZegoRoomLoginNotifier {
     }
   }
 
+  @override
+  String toString() {
+    return 'ZegoRoomLoginNotifier{'
+        'room id:$_targetRoomID, '
+        'result:${_result}, '
+        'value:${notifier.value}, '
+        '}';
+  }
+
   final notifier = ValueNotifier<bool>(false);
 
   bool get value => notifier.value;
+  String get targetRoomID => _targetRoomID;
 
   bool _withExpress = true;
   bool _withZIM = true;
@@ -67,20 +77,25 @@ class ZegoRoomLoginNotifier {
       return;
     }
 
-    _result[_expressResultIndex] = expressService.currentRoomID == _targetRoomID &&
-        ZegoRoomStateChangedReason.Logined == expressService.currentRoomState;
+    _result[_expressResultIndex] = expressService.currentRoomID == _targetRoomID && ZegoRoomStateChangedReason.Logined == expressService.currentRoomState;
+
+    // debugPrint('login notifier($_targetRoomID), check express(${expressService.currentRoomID}), '
+    //     'result:$_result, ');
+
     _syncResult();
 
-    if (expressService.currentRoomID != _targetRoomID ||
-        ZegoRoomStateChangedReason.Logined != expressService.currentRoomState) {
+    if (expressService.currentRoomID != _targetRoomID || ZegoRoomStateChangedReason.Logined != expressService.currentRoomState) {
       _expressSubscription?.cancel();
       _expressSubscription = expressService.roomStateChangedStreamCtrl.stream.listen(_onExpressRoomStateChanged);
     }
   }
 
   void _onExpressRoomStateChanged(ZegoRoomStateEvent event) {
-    _result[_expressResultIndex] =
-        expressService.currentRoomID == _targetRoomID && ZegoRoomStateChangedReason.Logined == event.reason;
+    _result[_expressResultIndex] = expressService.currentRoomID == _targetRoomID && ZegoRoomStateChangedReason.Logined == event.reason;
+
+    // debugPrint('login notifier($_targetRoomID), express(${expressService.currentRoomID}), '
+    //     'result:$_result, '
+    //     'event:$event, ');
 
     if (_result[_expressResultIndex]) {
       _expressSubscription?.cancel();
@@ -96,8 +111,11 @@ class ZegoRoomLoginNotifier {
       return;
     }
 
-    _result[_zimResultIndex] =
-        _targetRoomID == zimService.currentRoomID && ZIMRoomState.connected == zimService.currentRoomState;
+    _result[_zimResultIndex] = _targetRoomID == zimService.currentRoomID && ZIMRoomState.connected == zimService.currentRoomState;
+
+    // debugPrint('login notifier($_targetRoomID), check zim(${zimService.currentRoomID}), '
+    //     'result:$_result, ');
+
     _syncResult();
 
     if (_targetRoomID != zimService.currentRoomID || ZIMRoomState.connected != zimService.currentRoomState) {
@@ -109,8 +127,11 @@ class ZegoRoomLoginNotifier {
   void _onZIMRoomStateChanged(
     ZIMServiceRoomStateChangedEvent event,
   ) {
-    _result[_zimResultIndex] =
-        _targetRoomID == zimService.currentRoomID && ZIMRoomState.connected == zimService.currentRoomState;
+    _result[_zimResultIndex] = _targetRoomID == zimService.currentRoomID && ZIMRoomState.connected == zimService.currentRoomState;
+
+    // debugPrint('login notifier($_targetRoomID), zim(${zimService.currentRoomID}), '
+    //     'result:$_result, '
+    //     'event:$event, ');
 
     if (_result[_zimResultIndex]) {
       _zimSubscription?.cancel();

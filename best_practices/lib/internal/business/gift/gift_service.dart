@@ -7,7 +7,6 @@ mixin GiftService {
 
 class GiftServiceImpl {
   late int _appID;
-  late String _liveID;
   late String _localUserID;
   late String _localUserName;
 
@@ -15,9 +14,8 @@ class GiftServiceImpl {
 
   final recvNotifier = ValueNotifier<ZegoGiftCommand?>(null);
 
-  void init({required int appID, required String liveID, required String localUserID, required String localUserName}) {
+  void init({required int appID, required String localUserID, required String localUserName}) {
     _appID = appID;
-    _liveID = liveID;
     _localUserID = localUserID;
     _localUserName = localUserName;
 
@@ -36,7 +34,7 @@ class GiftServiceImpl {
   Future<bool> sendGift({required String giftName}) async {
     final data = ZegoGiftCommand(
       appID: _appID,
-      liveID: _liveID,
+      liveID: ZEGOSDKManager().expressService.currentRoomID,
       localUserID: _localUserID,
       localUserName: _localUserName,
       giftName: giftName,

@@ -6,7 +6,6 @@ extension ZegoLivePageStateGiftExtension on AudioRoomPageState {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       ZegoGiftController().service.init(
             appID: SDKKeyCenter.appID,
-            liveID: widget.roomID,
             localUserID: ZEGOSDKManager().currentUser!.userID,
             localUserName: 'user_${ZEGOSDKManager().currentUser!.userID}',
           );

@@ -116,6 +116,10 @@ class ExpressService {
   Future<ZegoRoomLoginResult> loginRoom(String roomID, {String? token}) async {
     assert(!kIsWeb || token != null, 'token is required for web platform!');
 
+    debugPrint('express service, ready loginRoom, '
+        'current room id:$currentRoomID, '
+        'target room id:$roomID, ');
+
     currentRoomID = roomID;
 
     final joinRoomResult = await ZegoExpressEngine.instance.loginRoom(
@@ -132,11 +136,14 @@ class ExpressService {
   }
 
   Future<ZegoRoomLogoutResult> logoutRoom([String roomID = '']) async {
-    final leaveResult = await ZegoExpressEngine.instance.logoutRoom(roomID.isNotEmpty ? roomID : currentRoomID);
-    debugPrint('express service, logoutRoom, id:$currentRoomID, result:${leaveResult.errorCode}');
-    if (leaveResult.errorCode == 0) {
-      clearRoomData();
-    }
+    debugPrint('express service, ready logoutRoom, room id:$currentRoomID');
+
+    final targetRoomID = roomID.isNotEmpty ? roomID : currentRoomID;
+    clearRoomData();
+
+    final leaveResult = await ZegoExpressEngine.instance.logoutRoom();
+    debugPrint('express service, logoutRoom, id:$targetRoomID, result:${leaveResult.errorCode}');
+
     return leaveResult;
   }
 
@@ -305,6 +312,10 @@ class ExpressService {
     Map<String, dynamic> extendedData,
   ) {
     currentRoomState = reason;
+
+    debugPrint('express service, onRoomStateChanged, '
+        'room id:$roomID, '
+        'reason:$reason, ');
 
     roomStateChangedStreamCtrl.add(ZegoRoomStateEvent(roomID, reason, errorCode, extendedData));
   }
