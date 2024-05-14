@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../internal/business/call/call_data.dart';
+import '../../zego_call_manager.dart';
 import 'zego_accept_button.dart';
 import 'zego_defines.dart';
 import 'zego_reject_button.dart';

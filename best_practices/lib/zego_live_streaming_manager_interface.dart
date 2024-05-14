@@ -1,4 +1,3 @@
-import 'internal/business/pk/pk_define.dart';
 import 'zego_sdk_manager.dart';
 
 abstract class ZegoLiveStreamingManagerInterface {
@@ -21,8 +20,8 @@ abstract class ZegoLiveStreamingManagerInterface {
 
   Future<ZegoMixerStartResult> mutePKUser(List<String> muteUserList, bool mute);
 
-  void leaveRoom();
-  void clearData();
+  Future<void> leaveRoom();
+  Future<void> clearData();
   void stopPKBattle();
 
   bool iamHost();

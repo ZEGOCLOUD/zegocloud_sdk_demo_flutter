@@ -8,13 +8,12 @@ import 'package:flutter/material.dart';
 
 import '../../internal_defines.dart';
 import 'express_service.dart';
-import 'express_service_media.dart';
 
-export 'package:pkbattles/internal/business/business_define.dart';
 export 'package:zego_express_engine/zego_express_engine.dart';
 
 export '../../internal_defines.dart';
 
+part 'express_service_media.dart';
 part 'express_service_mixer.dart';
 part 'express_service_room_extra_info.dart';
 part 'express_service_sei.dart';
@@ -22,12 +21,15 @@ part 'express_service_stream.dart';
 
 class ExpressService {
   ExpressService._internal();
+
   factory ExpressService() => instance;
   static final ExpressService instance = ExpressService._internal();
 
   String currentRoomID = '';
+  ZegoRoomStateChangedReason currentRoomState = ZegoRoomStateChangedReason.Logout;
   ZegoSDKUser? currentUser;
   List<ZegoSDKUser> userInfoList = [];
+  var remoteStreamUserInfoListNotifier = ValueNotifier<List<ZegoSDKUser>>([]);
   Map<String, String> streamMap = {};
   ZegoMixerTask? currentMixerTask;
   ValueNotifier<Widget?> mixerStreamNotifier = ValueNotifier(null);
@@ -37,7 +39,9 @@ class ExpressService {
   void clearRoomData() {
     currentScenario = ZegoScenario.Default;
     currentRoomID = '';
+    currentRoomState = ZegoRoomStateChangedReason.Logout;
     userInfoList.clear();
+    // remoteStreamUserInfoListNotifier.value = <ZegoSDKUser>[];
     clearLocalUserData();
     streamMap.clear();
     currentMixerTask = null;
@@ -59,8 +63,11 @@ class ExpressService {
     if (Platform.isIOS) {
       profile.enablePlatformView = true;
     }
+
     currentScenario = scenario;
     await ZegoExpressEngine.createEngineWithProfile(profile);
+    ZegoExpressEngine.instance.enableHardwareEncoder(true);
+    ZegoExpressEngine.instance.enableHardwareDecoder(true);
     ZegoExpressEngine.setEngineConfig(ZegoEngineConfig(advancedConfig: {
       'notify_remote_device_unknown_status': 'true',
       'notify_remote_device_init_status': 'true',
@@ -87,6 +94,17 @@ class ExpressService {
         return user;
       }
     }
+
+    return null;
+  }
+
+  ZegoSDKUser? getRemoteUser(String userID) {
+    for (final user in remoteStreamUserInfoListNotifier.value) {
+      if (user.userID == userID) {
+        return user;
+      }
+    }
+
     return null;
   }
 
@@ -97,28 +115,41 @@ class ExpressService {
 
   Future<ZegoRoomLoginResult> loginRoom(String roomID, {String? token}) async {
     assert(!kIsWeb || token != null, 'token is required for web platform!');
+
+    debugPrint('express service, ready loginRoom, '
+        'current room id:$currentRoomID, '
+        'target room id:$roomID, ');
+
+    currentRoomID = roomID;
+
     final joinRoomResult = await ZegoExpressEngine.instance.loginRoom(
       roomID,
       ZegoUser(currentUser!.userID, currentUser!.userName),
       config: ZegoRoomConfig(0, true, token ?? ''),
     );
-    if (joinRoomResult.errorCode == 0) {
-      currentRoomID = roomID;
+    debugPrint('express service, loginRoom, id:$roomID, result:${joinRoomResult.errorCode}');
+    if (joinRoomResult.errorCode != 0) {
+      currentRoomID = '';
     }
+
     return joinRoomResult;
   }
 
   Future<ZegoRoomLogoutResult> logoutRoom([String roomID = '']) async {
-    final leaveResult = await ZegoExpressEngine.instance.logoutRoom(roomID.isNotEmpty ? roomID : currentRoomID);
-    if (leaveResult.errorCode == 0) {
-      clearRoomData();
-    }
+    debugPrint('express service, ready logoutRoom, room id:$currentRoomID');
+
+    final targetRoomID = roomID.isNotEmpty ? roomID : currentRoomID;
+    clearRoomData();
+
+    final leaveResult = await ZegoExpressEngine.instance.logoutRoom();
+    debugPrint('express service, logoutRoom, id:$targetRoomID, result:${leaveResult.errorCode}');
+
     return leaveResult;
   }
 
   void clearLocalUserData() {
     currentUser!.streamID = null;
-    currentUser!.isCamerOnNotifier.value = false;
+    currentUser!.isCameraOnNotifier.value = false;
     currentUser!.isMicOnNotifier.value = false;
     currentUser!.isUsingFrontCameraNotifier.value = true;
     currentUser!.isUsingSpeaker.value = true;
@@ -153,7 +184,7 @@ class ExpressService {
   }
 
   void turnCameraOn(bool isOn) {
-    currentUser!.isCamerOnNotifier.value = isOn;
+    currentUser!.isCameraOnNotifier.value = isOn;
     updateStreamExtraInfo();
     ZegoExpressEngine.instance.enableCamera(isOn);
   }
@@ -164,8 +195,7 @@ class ExpressService {
     ZegoExpressEngine.instance.mutePublishStreamAudio(!isOn);
   }
 
-  Future<void> startPlayingStream(String streamID,
-      {ZegoViewMode viewMode = ZegoViewMode.AspectFill, ZegoPlayerConfig? config}) async {
+  Future<void> startPlayingStream(String streamID, {ZegoViewMode viewMode = ZegoViewMode.AspectFill, ZegoPlayerConfig? config}) async {
     final userID = streamMap[streamID];
     final userInfo = getUser(userID ?? '');
     if (currentScenario == ZegoScenario.HighQualityChatroom ||
@@ -180,20 +210,18 @@ class ExpressService {
       }
     }
     if (userInfo != null) {
-      await ZegoExpressEngine.instance.createCanvasView((viewID) async {
-        userInfo.viewID = viewID;
-        final canvas = ZegoCanvas(
-          userInfo.viewID,
-          viewMode: streamPlayViewMode,
-        );
-        await ZegoExpressEngine.instance.startPlayingStream(
-          streamID,
-          canvas: canvas,
-          config: config,
-        );
-      }).then((videoViewWidget) {
-        userInfo.videoViewNotifier.value = videoViewWidget;
-      });
+      if (userInfo.viewID != -1) {
+        final canvas = ZegoCanvas(userInfo.viewID, viewMode: streamPlayViewMode);
+        await ZegoExpressEngine.instance.startPlayingStream(streamID, canvas: canvas, config: config);
+      } else {
+        await ZegoExpressEngine.instance.createCanvasView((viewID) async {
+          userInfo.viewID = viewID;
+          final canvas = ZegoCanvas(userInfo.viewID, viewMode: streamPlayViewMode);
+          await ZegoExpressEngine.instance.startPlayingStream(streamID, canvas: canvas, config: config);
+        }).then((videoViewWidget) {
+          userInfo.videoViewNotifier.value = videoViewWidget;
+        });
+      }
     }
   }
 
@@ -207,6 +235,7 @@ class ExpressService {
   final recvSEICtrl = StreamController<ZegoRecvSEIEvent>.broadcast();
   final mixerSoundLevelUpdateCtrl = StreamController<ZegoMixerSoundLevelUpdateEvent>.broadcast();
   final onMediaPlayerStateUpdateCtrl = StreamController<ZegoPlayerStateChangeEvent>.broadcast();
+  final onMediaPlayerFirstFrameEventCtrl = StreamController<ZegoMediaPlayerFirstFrameEvent>.broadcast();
 
   void uninitEventHandle() {
     ZegoExpressEngine.onRoomStreamUpdate = null;
@@ -239,6 +268,7 @@ class ExpressService {
     ZegoExpressEngine.onRoomExtraInfoUpdate = ExpressService().onRoomExtraInfoUpdate;
     ZegoExpressEngine.onPublisherStateUpdate = ExpressService().onPublisherStateUpdate;
     ZegoExpressEngine.onMediaPlayerStateUpdate = ExpressService().onMediaPlayerStateUpdate;
+    ZegoExpressEngine.onMediaPlayerFirstFrameEvent = ExpressService().onMediaPlayerFirstFrameEvent;
   }
 
   void onRoomUserUpdate(
@@ -248,9 +278,17 @@ class ExpressService {
   ) {
     if (updateType == ZegoUpdateType.Add) {
       for (final user in userList) {
-        final userInfo = getUser(user.userID);
+        var userInfo = getUser(user.userID);
         if (userInfo == null) {
-          userInfoList.add(ZegoSDKUser(userID: user.userID, userName: user.userName));
+          userInfo = getRemoteUser(user.userID);
+          if (userInfo == null) {
+            userInfoList.add(ZegoSDKUser(userID: user.userID, userName: user.userName));
+          } else {
+            ///  sync from remote user
+            userInfo
+              ..userID = user.userID
+              ..userName = user.userName;
+          }
         } else {
           userInfo
             ..userID = user.userID
@@ -268,7 +306,17 @@ class ExpressService {
   }
 
   void onRoomStateChanged(
-      String roomID, ZegoRoomStateChangedReason reason, int errorCode, Map<String, dynamic> extendedData) {
+    String roomID,
+    ZegoRoomStateChangedReason reason,
+    int errorCode,
+    Map<String, dynamic> extendedData,
+  ) {
+    currentRoomState = reason;
+
+    debugPrint('express service, onRoomStateChanged, '
+        'room id:$roomID, '
+        'reason:$reason, ');
+
     roomStateChangedStreamCtrl.add(ZegoRoomStateEvent(roomID, reason, errorCode, extendedData));
   }
 }

@@ -1,12 +1,12 @@
 import '../../../zego_sdk_manager.dart';
-import 'pk_define.dart';
 
 abstract class PKServiceInterface {
   void addListener();
+  void init(CoHostService cohostService);
   void uninit();
   void removeUserFromPKBattle(String userID);
-  void stopPKBattle();
-  Future<PKInviteSentResult> invitePKbattle(List<String> targetUserIDList, bool autoAccept);
+  Future<void> stopPKBattle();
+  Future<PKInviteSentResult> invitePKBattle(List<String> targetUserIDList, bool autoAccept);
   Future<void> acceptPKBattle(String requestID);
   Future<ZIMCallQuitSentResult> quitPKBattle(String requestID);
   Future<ZIMCallEndSentResult> endPKBattle(String requestID);

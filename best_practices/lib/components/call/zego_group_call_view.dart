@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../internal/business/call/call_user_info.dart';
 import '../../zego_sdk_manager.dart';
 import '../common/zego_audio_video_view.dart';
 

@@ -1,4 +1,3 @@
-import 'internal/business/call/call_data.dart';
 import 'zego_sdk_manager.dart';
 
 abstract class ZegoCallManagerInterface {

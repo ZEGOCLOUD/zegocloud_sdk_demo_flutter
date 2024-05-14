@@ -1,11 +1,12 @@
 import 'dart:async';
 
-import 'internal/business/call/call_data.dart';
-import 'internal/business/call/call_extended_data.dart';
-import 'internal/business/call/call_user_info.dart';
 import 'zego_call_manager_extension.dart';
 import 'zego_call_manager_interface.dart';
 import 'zego_sdk_manager.dart';
+
+export 'zego_call_manager_extension.dart';
+export 'zego_call_manager_interface.dart';
+export 'zego_sdk_manager.dart';
 
 class ZegoCallManager implements ZegoCallManagerInterface {
   ZegoCallManager._internal();

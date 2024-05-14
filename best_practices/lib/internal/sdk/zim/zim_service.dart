@@ -7,9 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../zego_sdk_manager.dart';
-import '../utils/flutter_extension.dart';
-import 'Define/zim_define.dart';
-import 'Define/zim_room_request.dart';
 
 part 'zim_service_avatar.dart';
 part 'zim_service_room_attributes.dart';
@@ -18,6 +15,7 @@ part 'zim_service_user_request.dart';
 
 class ZIMService {
   ZIMService._internal();
+
   factory ZIMService() => instance;
   static final ZIMService instance = ZIMService._internal();
 
@@ -28,9 +26,12 @@ class ZIMService {
 
   ZIMUserInfo? currentZimUserInfo;
   String? currentRoomID;
+  ZIMRoomState currentRoomState = ZIMRoomState.disconnected;
 
   void clearRoomData() {
+    debugPrint('zim service, clearRoomData, currentRoomID:$currentRoomID');
     currentRoomID = null;
+    currentRoomState = ZIMRoomState.disconnected;
     roomAttributesMap.clear();
     roomRequestMapNoti.clear();
   }
@@ -126,9 +127,38 @@ class ZIMService {
   }
 
   Future<void> disconnectUser() async {
+    debugPrint('zim service, disconnectUser, currentRoomID:$currentRoomID');
     ZIM.getInstance()!.logout();
     clearRoomData();
     currentZimUserInfo = null;
+  }
+
+  Future<ZegoRoomLoginResult> _loginRoom({
+    required String roomID,
+  }) async {
+    debugPrint('zim service, ready loginRoom(join), '
+        'current room id:$currentRoomID, '
+        'target room id:$roomID, ');
+
+    final result = ZegoRoomLoginResult(0, {});
+
+    await ZIM.getInstance()!.joinRoom(roomID).then((zimResult) {
+      debugPrint('zim service, loginRoom(join), room id:$currentRoomID');
+      result.errorCode = 0;
+    }).catchError((error) {
+      debugPrint('zim service, loginRoom(join), room id:$currentRoomID, error:$error');
+
+      result.extendedData['error'] = error;
+      if (error is PlatformException) {
+        result.errorCode = int.tryParse(error.code) ?? -1;
+        result.extendedData['errorMessage'] = error.message;
+      } else {
+        result.errorCode = -2;
+        result.extendedData['errorMessage'] = '$error';
+      }
+    });
+
+    return result;
   }
 
   Future<ZegoRoomLoginResult> loginRoom(
@@ -137,9 +167,13 @@ class ZIMService {
     Map<String, String> roomAttributes = const {},
     int roomDestroyDelayTime = 0,
   }) async {
+    debugPrint('zim service, ready loginRoom, '
+        'current room id:$currentRoomID, '
+        'target room id:$roomID, ');
+
     currentRoomID = roomID;
 
-    final result = ZegoRoomLoginResult(0, {});
+    var result = ZegoRoomLoginResult(0, {});
 
     await ZIM
         .getInstance()!
@@ -151,24 +185,43 @@ class ZIMService {
               ..roomAttributes = roomAttributes
               ..roomDestroyDelayTime = roomDestroyDelayTime)
         .then((value) {
+      debugPrint('zim service, loginRoom, room id:$currentRoomID');
       result.errorCode = 0;
-    }).catchError((error) {
-      result.extendedData['error'] = error;
-      if (error is PlatformException) {
-        result.errorCode = int.tryParse(error.code) ?? -1;
-        result.extendedData['errorMessage'] = error.message;
+    }).catchError((error) async {
+      if (error is PlatformException && int.parse(error.code) == ZIMErrorCode.roomModuleTheRoomAlreadyExists) {
+        /// room is exist, just call join room
+        result = await _loginRoom(roomID: roomID);
       } else {
-        result.errorCode = -2;
-        result.extendedData['errorMessage'] = '$error';
+        debugPrint('zim service, loginRoom, room id:$currentRoomID, error:$error');
+
+        result.extendedData['error'] = error;
+        if (error is PlatformException) {
+          result.errorCode = int.tryParse(error.code) ?? -1;
+          result.extendedData['errorMessage'] = error.message;
+        } else {
+          result.errorCode = -2;
+          result.extendedData['errorMessage'] = '$error';
+        }
       }
     });
+
     return result;
   }
 
   Future<ZIMRoomLeftResult> logoutRoom() async {
+    debugPrint('zim service, ready logoutRoom, room id:$currentRoomID');
+
     if (currentRoomID != null) {
-      final ret = await ZIM.getInstance()!.leaveRoom(currentRoomID!);
+      final targetRoomID = currentRoomID!;
       clearRoomData();
+
+      final ret = await ZIM.getInstance()!.leaveRoom(targetRoomID).then((value) {
+        debugPrint('zim service, logoutRoom, room id:$targetRoomID');
+        return value;
+      }).catchError((error) {
+        debugPrint('zim service, logoutRoom, room id:$targetRoomID, error:$error');
+      });
+      debugPrint('zim service, logoutRoom, currentRoomID:$targetRoomID');
       return ret;
     } else {
       debugPrint('currentRoomID is null');
@@ -181,6 +234,9 @@ class ZIMService {
   }
 
   void onRoomStateChanged(_, ZIMRoomState state, ZIMRoomEvent event, Map extendedData, String roomID) {
+    currentRoomState = state;
+
+    debugPrint('zim service, onRoomStateChanged, room id:$roomID, state:$state');
     roomStateChangedStreamCtrl.add(ZIMServiceRoomStateChangedEvent(roomID, state, event, extendedData));
   }
 

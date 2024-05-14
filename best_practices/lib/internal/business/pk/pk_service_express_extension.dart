@@ -3,10 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../../../zego_live_streaming_manager.dart';
-import '../../../zego_sdk_manager.dart';
-import '../coHost/cohost_service.dart';
-import 'pk_service.dart';
-import 'pk_service_zim_extension.dart';
 
 extension PKServiceExpressExtension on PKService {
   // express
@@ -27,8 +23,8 @@ extension PKServiceExpressExtension on PKService {
 
   void onRoomUserUpdate(ZegoRoomUserListUpdateEvent event) {
     if (event.updateType == ZegoUpdateType.Delete) {
-      if (ZegoLiveStreamingManager().hostNotifier.value == null && pkStateNoti.value == RoomPKState.isStartPK) {
-        pkStateNoti.value = RoomPKState.isNoPK;
+      if (cohostService?.hostNotifier.value == null && pkStateNotifier.value == RoomPKState.isStartPK) {
+        pkStateNotifier.value = RoomPKState.isNoPK;
         onPKEndStreamCtrl.add(null);
         cancelTime();
       }
@@ -38,14 +34,14 @@ extension PKServiceExpressExtension on PKService {
   void onReceiveAudioFirstFrame(ZegoRecvAudioFirstFrameEvent event) {
     if (event.streamID.endsWith('_mix')) {
       muteMainStream();
-      onPKViewAvaliableNoti.value = true;
+      onPKViewAvailableNotifier.value = true;
     }
   }
 
   void onReceiveVideoFirstFrame(ZegoRecvVideoFirstFrameEvent event) {
     if (event.streamID.endsWith('_mix')) {
       muteMainStream();
-      onPKViewAvaliableNoti.value = true;
+      onPKViewAvailableNotifier.value = true;
     }
   }
 
@@ -70,16 +66,16 @@ extension PKServiceExpressExtension on PKService {
       final pkuser = getPKUser(pkInfo!, senderID);
       if (pkInfo != null && pkuser != null) {
         final micChanged = pkuser.sdkUser.isMicOnNotifier.value != isMicOpen;
-        final camChanged = pkuser.sdkUser.isCamerOnNotifier.value != isCameraOpen;
+        final camChanged = pkuser.sdkUser.isCameraOnNotifier.value != isCameraOpen;
         if (micChanged) {
           pkuser.sdkUser.isMicOnNotifier.value = isMicOpen;
         }
         if (camChanged) {
-          pkuser.sdkUser.isCamerOnNotifier.value = isCameraOpen;
+          pkuser.sdkUser.isCameraOnNotifier.value = isCameraOpen;
         }
       }
     } catch (e) {
-      debugPrint('onReceiveSEIEvent.data: ${event.data}.');
+      // debugPrint('onReceiveSEIEvent.data: ${event.data}.');
     }
   }
 

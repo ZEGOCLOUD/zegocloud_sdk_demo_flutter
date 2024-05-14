@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../internal/business/pk/pk_user.dart';
 import '../../zego_sdk_manager.dart';
 
 class PKMixerView extends StatefulWidget {
@@ -83,7 +82,7 @@ class _PKMixerViewState extends State<PKMixerView> {
 
   Widget backGroundView(PKUser user) {
     return ValueListenableBuilder(
-        valueListenable: user.sdkUser.isCamerOnNotifier,
+        valueListenable: user.sdkUser.isCameraOnNotifier,
         builder: (context, bool isCameraOn, _) {
           if (isCameraOn) {
             return IgnorePointer(

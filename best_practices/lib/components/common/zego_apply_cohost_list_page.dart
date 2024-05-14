@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../../internal/sdk/zim/Define/zim_room_request.dart';
 import '../../zego_sdk_manager.dart';
 
 class RoomRequestListView {

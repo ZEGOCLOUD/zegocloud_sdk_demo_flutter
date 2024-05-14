@@ -2,21 +2,20 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import 'internal/business/coHost/cohost_service.dart';
-import 'internal/business/pk/pk_define.dart';
-import 'internal/business/pk/pk_info.dart';
-import 'internal/business/pk/pk_service.dart';
-import 'internal/sdk/utils/flutter_extension.dart';
 import 'utils/zegocloud_token.dart';
 import 'zego_live_streaming_manager_extension.dart';
 import 'zego_live_streaming_manager_interface.dart';
 import 'zego_sdk_key_center.dart';
 import 'zego_sdk_manager.dart';
 
+export 'zego_live_streaming_manager_extension.dart';
+export 'zego_live_streaming_manager_interface.dart';
+export 'zego_sdk_manager.dart';
+
 class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
-  ZegoLiveStreamingManager._internal();
-  factory ZegoLiveStreamingManager() => instance;
-  static final ZegoLiveStreamingManager instance = ZegoLiveStreamingManager._internal();
+  ZegoLiveStreamingManager() {
+    debugPrint('ZegoLiveStreamingManager create');
+  }
 
   List<ZegoMixerInput> Function(List<String> streamIDList, ZegoMixerVideoConfig videoConfig)? setMixerLayout;
 
@@ -26,20 +25,19 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
 
   PKInfo? get pkInfo => pkService?.pkInfo;
 
-  ValueNotifier<ZegoSDKUser?> get hostNotifier => cohostService?.hostNoti ?? ValueNotifier(null);
+  ValueNotifier<ZegoSDKUser?> get hostNotifier => cohostService?.hostNotifier ?? ValueNotifier(null);
 
-  ListNotifier<ZegoSDKUser> get coHostUserListNotifier => cohostService?.coHostUserListNoti ?? ListNotifier([]);
+  ListNotifier<ZegoSDKUser> get coHostUserListNotifier => cohostService?.coHostUserListNotifier ?? ListNotifier([]);
 
-  ValueNotifier<RoomPKState> get pkStateNotifier => pkService?.pkStateNoti ?? ValueNotifier(RoomPKState.isNoPK);
+  ValueNotifier<RoomPKState> get pkStateNotifier => pkService?.pkStateNotifier ?? ValueNotifier(RoomPKState.isNoPK);
 
-  ValueNotifier<bool> get isMuteAnotherAudioNotifier => pkService?.isMuteAnotherAudioNoti ?? ValueNotifier(false);
+  ValueNotifier<bool> get isMuteAnotherAudioNotifier => pkService?.isMuteAnotherAudioNotifier ?? ValueNotifier(false);
 
-  ValueNotifier<bool> get onPKViewAvailableNotifier => pkService?.onPKViewAvaliableNoti ?? ValueNotifier(false);
+  ValueNotifier<bool> get onPKViewAvailableNotifier => pkService?.onPKViewAvailableNotifier ?? ValueNotifier(false);
 
   ZegoSDKUser? get pkUser => pkService?.pkUser;
 
-  StreamController<PKBattleReceivedEvent> get onPKBattleReceived =>
-      pkService?.onPKBattleReceived ?? StreamController<PKBattleReceivedEvent>.broadcast();
+  StreamController<PKBattleReceivedEvent> get onPKBattleReceived => pkService?.onPKBattleReceived ?? StreamController<PKBattleReceivedEvent>.broadcast();
 
   StreamController<PKBattleCancelledEvent> get onPKBattleCancelStreamCtrl =>
       pkService?.onPKBattleCancelStreamCtrl ?? StreamController<PKBattleCancelledEvent>.broadcast();
@@ -50,8 +48,7 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
   StreamController<PKBattleAcceptedEvent> get onPKBattleAcceptedCtrl =>
       pkService?.onPKBattleAcceptedCtrl ?? StreamController<PKBattleAcceptedEvent>.broadcast();
 
-  StreamController<PKBattleUserJoinEvent> get onPKUserJoinCtrl =>
-      pkService?.onPKUserJoinCtrl ?? StreamController<PKBattleUserJoinEvent>.broadcast();
+  StreamController<PKBattleUserJoinEvent> get onPKUserJoinCtrl => pkService?.onPKUserJoinCtrl ?? StreamController<PKBattleUserJoinEvent>.broadcast();
 
   StreamController<PKBattleUserQuitEvent> get onPKBattleUserQuitCtrl =>
       pkService?.onPKBattleUserQuitCtrl ?? StreamController<PKBattleUserQuitEvent>.broadcast();
@@ -70,15 +67,24 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
       pkService?.incomingPKRequestTimeoutStreamCtrl ?? StreamController<IncomingPKRequestTimeoutEvent>.broadcast();
 
   StreamController<OutgoingPKRequestTimeoutEvent> get outgoingPKRequestAnsweredTimeoutStreamCtrl =>
-      pkService?.outgoingPKRequestAnsweredTimeoutStreamCtrl ??
-      StreamController<OutgoingPKRequestTimeoutEvent>.broadcast();
+      pkService?.outgoingPKRequestAnsweredTimeoutStreamCtrl ?? StreamController<OutgoingPKRequestTimeoutEvent>.broadcast();
 
+  bool hadInit = false;
   PKService? pkService;
   CoHostService? cohostService;
 
   @override
   void init() {
+    if (hadInit) {
+      debugPrint('live streaming manager, init, but had init');
+      return;
+    }
+    debugPrint('live streaming manager, init');
+    hadInit = true;
+
+    cohostService = CoHostService();
     pkService = PKService()
+      ..init(cohostService!)
       ..addListener()
       ..setMixerLayout = (streamIDList, videoConfig) {
         if (setMixerLayout != null) {
@@ -87,7 +93,6 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
           return [];
         }
       };
-    cohostService = CoHostService();
     final expressService = ZEGOSDKManager().expressService;
     subscriptions.addAll([
       expressService.streamListUpdateStreamCtrl.stream.listen(onStreamListUpdate),
@@ -100,6 +105,13 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
 
   @override
   void uninit() {
+    if (!hadInit) {
+      debugPrint('live streaming manager, uninit, but not init');
+      return;
+    }
+    debugPrint('live streaming manager, uninit');
+    hadInit = false;
+
     pkService?.uninit();
     for (final subscription in subscriptions) {
       subscription.cancel();
@@ -113,8 +125,7 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
     if (kIsWeb) {
       // ! ** Warning: ZegoTokenUtils is only for use during testing. When your application goes live,
       // ! ** tokens must be generated by the server side. Please do not generate tokens on the client side!
-      token = ZegoTokenUtils.generateToken(
-          SDKKeyCenter.appID, SDKKeyCenter.serverSecret, ZEGOSDKManager().currentUser!.userID);
+      token = ZegoTokenUtils.generateToken(SDKKeyCenter.appID, SDKKeyCenter.serverSecret, ZEGOSDKManager().currentUser!.userID);
     }
     final result = await ZEGOSDKManager().loginRoom(roomID, ZegoScenario.Broadcast, token: token);
     return result;
@@ -159,74 +170,82 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
   }
 
   @override
-  void leaveRoom() {
+  Future<void> leaveRoom() async {
     if (iamHost()) {
-      quitPKBattle();
+      await quitPKBattle();
     }
+
     isLivingNotifier.value = false;
-    ZEGOSDKManager().logoutRoom();
-    clearData();
+    await clearData();
+
+    await ZEGOSDKManager().logoutRoom();
   }
 
   @override
-  void clearData() {
+  Future<void> clearData() async {
     cohostService?.clearData();
-    pkService?.clearData();
+    await pkService?.clearData();
   }
 
   @override
   String hostStreamID() {
-    return '${ZEGOSDKManager().expressService.currentRoomID}_${ZEGOSDKManager().currentUser!.userID}_main_host';
+    return hostStreamIDFormat(
+      ZEGOSDKManager().expressService.currentRoomID,
+      ZEGOSDKManager().currentUser!.userID,
+    );
   }
 
   @override
   String coHostStreamID() {
-    return '${ZEGOSDKManager().expressService.currentRoomID}_${ZEGOSDKManager().currentUser!.userID}_main_cohost';
+    return coHostStreamIDFormat(
+      ZEGOSDKManager().expressService.currentRoomID,
+      ZEGOSDKManager().currentUser!.userID,
+    );
   }
 
   @override
   bool isPKUser(String userID) {
-    return pkService!.isPKUser(userID);
+    return pkService?.isPKUser(userID) ?? false;
   }
 
   @override
   bool isPKUserMuted(String userID) {
-    return pkService!.isPKUserMuted(userID);
+    return pkService?.isPKUserMuted(userID) ?? false;
   }
 
   @override
   Future<PKInviteSentResult> startPKBattle(String anotherHostID) async {
-    return pkService!.invitePKbattle([anotherHostID], true);
+    return await pkService?.invitePKBattle([anotherHostID], true) ?? PKInviteSentResult(requestID: '-1', errorUserList: []);
   }
 
   @override
   Future<PKInviteSentResult> startPKBattleWith(List<String> anotherHostIDList) async {
-    return pkService!.invitePKbattle(anotherHostIDList, true);
+    return await pkService?.invitePKBattle(anotherHostIDList, true) ?? PKInviteSentResult(requestID: '-1', errorUserList: []);
   }
 
   @override
   Future<PKInviteSentResult> invitePKBattle(String targetUserID) async {
-    return pkService!.invitePKbattle([targetUserID], false);
+    return await pkService?.invitePKBattle([targetUserID], false) ?? PKInviteSentResult(requestID: '-1', errorUserList: []);
   }
 
   @override
   Future<PKInviteSentResult> invitePKBattleWith(List<String> targetUserIDList) async {
-    return pkService!.invitePKbattle(targetUserIDList, false);
+    return await pkService?.invitePKBattle(targetUserIDList, false) ?? PKInviteSentResult(requestID: '-1', errorUserList: []);
   }
 
   @override
   Future<void> acceptPKStartRequest(String requestID) async {
-    pkService!.acceptPKBattle(requestID);
+    pkService?.acceptPKBattle(requestID);
   }
 
   @override
   Future<void> rejectPKStartRequest(String requestID) async {
-    pkService!.rejectPKBattle(requestID);
+    pkService?.rejectPKBattle(requestID);
   }
 
   @override
   Future<void> cancelPKBattleRequest(String requestID, String targetUserID) async {
-    pkService!.cancelPKBattle(requestID, targetUserID);
+    pkService?.cancelPKBattle(requestID, targetUserID);
   }
 
   @override
@@ -242,7 +261,7 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
           index++;
         }
       }
-      return pkService!.mutePKUser(muteIndex, mute);
+      return await pkService?.mutePKUser(muteIndex, mute) ?? ZegoMixerStartResult(-9999, {});
     }
     return ZegoMixerStartResult(-9999, {});
   }
@@ -250,27 +269,35 @@ class ZegoLiveStreamingManager implements ZegoLiveStreamingManagerInterface {
   @override
   Future<void> quitPKBattle() async {
     if (pkService?.pkInfo != null) {
-      pkService!.stopPlayAnotherHostStream();
-      pkService!.quitPKBattle(pkService?.pkInfo!.requestID ?? '');
-      pkService!.stopPKBattle();
+      await pkService?.stopPlayAnotherHostStream();
+      await pkService?.quitPKBattle(pkService?.pkInfo!.requestID ?? '');
+      await pkService?.stopPKBattle();
     }
   }
 
   @override
   Future<void> endPKBattle() async {
     if (pkService?.pkInfo != null) {
-      pkService!.endPKBattle(pkService?.pkInfo!.requestID ?? '');
+      pkService?.endPKBattle(pkService?.pkInfo!.requestID ?? '');
       pkService?.stopPKBattle();
     }
   }
 
   @override
   void removeUserFromPKBattle(String userID) {
-    pkService!.removeUserFromPKBattle(userID);
+    pkService?.removeUserFromPKBattle(userID);
   }
 
   @override
   void stopPKBattle() {
-    pkService!.stopPKBattle();
+    pkService?.stopPKBattle();
   }
+}
+
+String hostStreamIDFormat(String roomID, String userID) {
+  return '${roomID}_${userID}_main_host';
+}
+
+String coHostStreamIDFormat(String roomID, String userID) {
+  return '${roomID}_${userID}_main_cohost';
 }
