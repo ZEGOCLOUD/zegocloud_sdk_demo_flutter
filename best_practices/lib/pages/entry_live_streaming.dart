@@ -64,11 +64,19 @@ class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
   Widget audienceJoinLivePageButton() {
     return ElevatedButton(
       onPressed: () {
-        // final normalAudiencePage = ZegoLivePage(
-        //   roomID: roomIDController.text,
-        //   role: ZegoLiveStreamingRole.audience,
-        // );
+        final normalAudiencePage = ZegoLivePage(
+          roomID: roomIDController.text,
+          role: ZegoLiveStreamingRole.audience,
+        );
 
+        /// when enable swiping, you must be responsible for maintaining the LIVE list yourself.
+        ///
+        /// When there is a change(when swiping), [onPageChanged] will be thrown. At this time, you can update your LIVE list or
+        /// update the index of LIVE list.
+        ///
+        /// Request LIVE info will pass through [requiredCurrentLive], [requiredPreviousLive],
+        /// [requiredNextLive], which refers to the current LIVE, the previous LIVE, and the next LIVE.
+        /// Because it is necessary to perform pre-play previous or next video streaming of LIVE, it is also necessary to know the ID of the host
         final swipingAudiencePage = ZegoLivePage(
           swipingConfig: ZegoLiveSwipingConfig(
             onPageChanged: (int pageIndex) {
@@ -95,7 +103,8 @@ class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => swipingAudiencePage,
+            builder: (context) => normalAudiencePage,
+            // builder: (context) => swipingAudiencePage,
           ),
         );
       },
