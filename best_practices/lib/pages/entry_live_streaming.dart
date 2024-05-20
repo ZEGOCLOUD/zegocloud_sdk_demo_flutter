@@ -17,6 +17,10 @@ class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
   void initState() {
     super.initState();
 
+    /// How to support swiping, step 1
+    ///
+    /// when enable swiping, you must be responsible for maintaining the LIVE list yourself.
+    ///
     for (var i = 0; i < 6; i++) {
       swipingRoomInfoList.add(ZegoSwipingPageRoomInfo(
         roomID: (200 + i).toString(),
@@ -69,7 +73,7 @@ class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
           role: ZegoLiveStreamingRole.audience,
         );
 
-        /// when enable swiping, you must be responsible for maintaining the LIVE list yourself.
+        /// How to support swiping, step 2
         ///
         /// When there is a change(when swiping), [onPageChanged] will be thrown. At this time, you can update your LIVE list or
         /// update the index of LIVE list.
@@ -104,6 +108,10 @@ class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
           context,
           MaterialPageRoute(
             builder: (context) => normalAudiencePage,
+
+            /// How to support swiping, step 3
+            ///
+            /// Replace normalAudiencePage with swipingAudiencePage
             // builder: (context) => swipingAudiencePage,
           ),
         );
