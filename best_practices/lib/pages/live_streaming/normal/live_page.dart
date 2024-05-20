@@ -614,10 +614,13 @@ extension ZegoLivePageStateSwiping on ZegoNormalLivePageState {
 
   void onRemoteStreamUserUpdated() {
     if (!mounted) return;
-    final previewUser = expressService.getRemoteUser(widget.previewHostID!);
-    if (null != previewUser) {
-      /// remote user's stream start playing
-      swipingData.hostNotifier.value = previewUser;
+
+    if (widget.previewHostID != null) {
+      final previewUser = expressService.getRemoteUser(widget.previewHostID!);
+      if (null != previewUser) {
+        /// remote user's stream start playing
+        swipingData.hostNotifier.value = previewUser;
+      }
     }
   }
 
