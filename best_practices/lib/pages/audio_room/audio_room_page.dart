@@ -3,19 +3,27 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:zego_overlay/zego_overlay.dart';
 
 import '../../components/components.dart';
 import '../../live_audio_room_manager.dart';
 import '../../utils/zegocloud_token.dart';
 import '../../zego_sdk_key_center.dart';
+import 'overlay/defines.dart';
 
 part 'audio_room_gift.dart';
 
 class AudioRoomPage extends StatefulWidget {
-  const AudioRoomPage({super.key, required this.roomID, required this.role});
+  const AudioRoomPage({
+    super.key,
+    required this.roomID,
+    required this.role,
+    this.fromOverlay,
+  });
 
   final String roomID;
   final ZegoLiveAudioRoomRole role;
+  final bool? fromOverlay;
 
   @override
   State<AudioRoomPage> createState() => AudioRoomPageState();
@@ -53,7 +61,10 @@ class AudioRoomPageState extends State<AudioRoomPage> {
       ),
     ]);
 
-    loginRoom();
+    if (!(widget.fromOverlay ?? false)) {
+      /// overlay:not need login if from overlay
+      loginRoom();
+    }
 
     initGift();
   }
@@ -85,8 +96,15 @@ class AudioRoomPageState extends State<AudioRoomPage> {
   @override
   void dispose() {
     super.dispose();
+
     uninitGift();
-    ZegoLiveAudioRoomManager().logoutRoom();
+
+    if (ZegoOverlayPageState.overlaying !=
+        audioRoomOverlayController.pageStateNotifier.value) {
+      /// overlay:not logout if overlaying
+      ZegoLiveAudioRoomManager().logoutRoom();
+    }
+
     for (final subscription in subscriptions) {
       subscription.cancel();
     }
@@ -127,10 +145,24 @@ class AudioRoomPageState extends State<AudioRoomPage> {
             Positioned(top: 30, right: 20, child: leaveButton()),
             Positioned(top: 150, child: seatListView()),
             Positioned(bottom: 20, left: 0, right: 0, child: bottomView()),
-            giftForeground()
+            giftForeground(),
+            Positioned(top: 30, left: 20, child: overlayButton()),
           ],
         ),
       ),
+    );
+  }
+
+  Widget overlayButton() {
+    return ZegoOverlayButton(
+      buttonSize: const Size(30, 30),
+      controller: audioRoomOverlayController,
+      dataQuery: () {
+        return AudioRoomOverlayData(
+          roomID: widget.roomID,
+          role: widget.role,
+        );
+      },
     );
   }
 

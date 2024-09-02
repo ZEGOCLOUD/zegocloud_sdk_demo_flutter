@@ -4,9 +4,11 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:zego_overlay/zego_overlay.dart';
 
 import '../zego_live_streaming_manager.dart';
 import 'audio_room/audio_room.dart';
+import 'audio_room/overlay/defines.dart';
 import 'call/call.dart';
 import 'live_streaming/live_page.dart';
 import 'live_streaming/live_streaming.dart';
@@ -22,35 +24,37 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Home Page'),
-          actions: [
-            avatar(),
-            Text('ID:${ZEGOSDKManager().currentUser!.userID}'),
-            const SizedBox(width: 10),
-          ],
-        ),
-        body: const Padding(
-          padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
-          child: CustomScrollView(slivers: [
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Column(
-                children: [
-                  Divider(),
-                  CallEntry(),
-                  Divider(),
-                  LiveStreamingEntry(),
-                  Divider(),
-                  AudioRoomEntry(),
-                  Divider(),
-                ],
+    return ZegoOverlayPopScope(
+      child: SafeArea(
+        top: false,
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Home Page'),
+            actions: [
+              avatar(),
+              Text('ID:${ZEGOSDKManager().currentUser!.userID}'),
+              const SizedBox(width: 10),
+            ],
+          ),
+          body: const Padding(
+            padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
+            child: CustomScrollView(slivers: [
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Column(
+                  children: [
+                    Divider(),
+                    CallEntry(),
+                    Divider(),
+                    LiveStreamingEntry(),
+                    Divider(),
+                    AudioRoomEntry(),
+                    Divider(),
+                  ],
+                ),
               ),
-            ),
-          ]),
+            ]),
+          ),
         ),
       ),
     );

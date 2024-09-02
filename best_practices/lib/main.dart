@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'pages/audio_room/overlay/page.dart';
 import 'pages/login_page.dart';
-
 
 GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -31,6 +31,14 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: const LoginPage(title: 'Login Page'),
+      builder: (BuildContext context, Widget? child) {
+        return Stack(
+          children: [
+            child!,
+            AudioRoomOverlayPage(navigatorKey: navigatorKey),
+          ],
+        );
+      },
     );
   }
 }

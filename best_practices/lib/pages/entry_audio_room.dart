@@ -43,10 +43,23 @@ class _AudioRoomEntryState extends State<AudioRoomEntry> {
 
   Widget liveAudioRoomButton(ZegoLiveAudioRoomRole role) {
     return ElevatedButton(
-      onPressed: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => AudioRoomPage(roomID: roomIDController.text, role: role)),
-      ),
+      onPressed: () {
+        if (ZegoOverlayPageState.overlaying ==
+            audioRoomOverlayController.pageStateNotifier.value) {
+          /// overlay:in overlaying, restore content page directly
+          audioRoomOverlayController.restore(context);
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AudioRoomPage(
+                roomID: roomIDController.text,
+                role: role,
+              ),
+            ),
+          );
+        }
+      },
       child: role == ZegoLiveAudioRoomRole.host
           ? const Text('Host enter')
           : const Text('Audience enter'),
