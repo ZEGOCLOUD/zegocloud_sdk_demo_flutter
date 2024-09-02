@@ -64,7 +64,8 @@ class HomePage extends StatelessWidget {
             ? CachedNetworkImage(
                 imageUrl: avatarUrl!,
                 fit: BoxFit.cover,
-                progressIndicatorBuilder: (context, url, _) => const CupertinoActivityIndicator(),
+                progressIndicatorBuilder: (context, url, _) =>
+                    const CupertinoActivityIndicator(),
                 errorWidget: (context, url, error) => const SizedBox.shrink(),
               )
             : const SizedBox.shrink();

@@ -5,14 +5,19 @@ import 'package:flutter/material.dart';
 import '../../live_audio_room_manager.dart';
 
 class ZegoSeatItemView extends StatelessWidget {
-  const ZegoSeatItemView({super.key, required this.onPressed, required this.seatIndex});
+  const ZegoSeatItemView({
+    super.key,
+    required this.onPressed,
+    required this.seatIndex,
+  });
   final int seatIndex;
   final void Function() onPressed;
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<ZegoSDKUser?>(
-      valueListenable: ZegoLiveAudioRoomManager().seatList[seatIndex].currentUser,
+      valueListenable:
+          ZegoLiveAudioRoomManager().seatList[seatIndex].currentUser,
       builder: (context, user, _) {
         if (user != null) {
           return userSeatView(user);
@@ -27,12 +32,17 @@ class ZegoSeatItemView extends StatelessWidget {
     return GestureDetector(
       onTap: onPressed,
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           userAvatar(userInfo),
-          const SizedBox(height: 5),
+          const SizedBox(height: 2),
           Text(
             userInfo.userName,
-            style: const TextStyle(color: Colors.black, fontSize: 10),
+            style: const TextStyle(
+              color: Colors.black,
+              fontSize: 10,
+              decoration: TextDecoration.none,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -53,14 +63,18 @@ class ZegoSeatItemView extends StatelessWidget {
                 ? CachedNetworkImage(
                     imageUrl: avatarUrl,
                     fit: BoxFit.cover,
-                    progressIndicatorBuilder: (context, url, _) => const CupertinoActivityIndicator(),
+                    progressIndicatorBuilder: (context, url, _) =>
+                        const CupertinoActivityIndicator(),
                     errorWidget: (context, url, error) => child!,
                   )
                 : child,
           );
         },
         child: Container(
-          decoration: const BoxDecoration(color: Colors.grey, border: Border(bottom: BorderSide.none)),
+          decoration: const BoxDecoration(
+            color: Colors.grey,
+            border: Border(bottom: BorderSide.none),
+          ),
           child: Center(
             child: SizedBox(
               height: 20,
@@ -83,21 +97,31 @@ class ZegoSeatItemView extends StatelessWidget {
 
   Widget emptySeatView() {
     return ValueListenableBuilder<bool>(
-        valueListenable: ZegoLiveAudioRoomManager().isLockSeat,
-        builder: (context, isLock, _) {
-          return GestureDetector(
-            onTap: isLock ? null : onPressed,
-            child: Column(children: [
+      valueListenable: ZegoLiveAudioRoomManager().isLockSeat,
+      builder: (context, isLock, _) {
+        return GestureDetector(
+          onTap: isLock ? null : onPressed,
+          child: Column(
+            children: [
               SizedBox(
                 width: 60,
                 height: 60,
                 child: isLock
-                    ? Image.asset('assets/icons/seat_lock_icon.png', fit: BoxFit.fill)
-                    : Image.asset('assets/icons/seat_icon_normal.png', fit: BoxFit.fill),
+                    ? Image.asset(
+                        'assets/icons/seat_lock_icon.png',
+                        fit: BoxFit.fill,
+                        height: 60,
+                      )
+                    : Image.asset(
+                        'assets/icons/seat_icon_normal.png',
+                        fit: BoxFit.fill,
+                        height: 60,
+                      ),
               ),
-              const Text(''),
-            ]),
-          );
-        });
+            ],
+          ),
+        );
+      },
+    );
   }
 }

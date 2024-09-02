@@ -8,20 +8,34 @@ class AudioRoomEntry extends StatefulWidget {
 }
 
 class _AudioRoomEntryState extends State<AudioRoomEntry> {
-  final roomIDController = TextEditingController(text: Random().nextInt(9999999).toString());
+  final roomIDController =
+      TextEditingController(text: Random().nextInt(9999999).toString());
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-          Text('LiveAudioRoom Demo:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400)),
-        ]),
+        const Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Text(
+              'LiveAudioRoom Demo:',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
         roomIDTextField(roomIDController),
         const SizedBox(height: 20),
-        Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-          liveAudioRoomButton(ZegoLiveAudioRoomRole.host),
-          liveAudioRoomButton(ZegoLiveAudioRoomRole.audience),
-        ]),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            liveAudioRoomButton(ZegoLiveAudioRoomRole.host),
+            liveAudioRoomButton(ZegoLiveAudioRoomRole.audience),
+          ],
+        ),
         const SizedBox(height: 30),
       ],
     );
@@ -33,7 +47,9 @@ class _AudioRoomEntryState extends State<AudioRoomEntry> {
         context,
         MaterialPageRoute(builder: (context) => AudioRoomPage(roomID: roomIDController.text, role: role)),
       ),
-      child: role == ZegoLiveAudioRoomRole.host ? const Text('Host enter') : const Text('Audience enter'),
+      child: role == ZegoLiveAudioRoomRole.host
+          ? const Text('Host enter')
+          : const Text('Audience enter'),
     );
   }
 }
