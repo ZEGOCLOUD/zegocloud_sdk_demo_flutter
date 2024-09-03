@@ -56,7 +56,7 @@ class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
   Widget hostJoinLivePageButton() {
     return ElevatedButton(
       onPressed: () {
-        if (ZegoOverlayPageState.overlaying ==
+        if (XOverlayPageState.overlaying ==
             audioRoomOverlayController.pageStateNotifier.value) {
           /// overlay:audio room in overlaying, ignore
           debugPrint('Audio Room Overlaying');
@@ -80,7 +80,7 @@ class _LiveStreamingEntryState extends State<LiveStreamingEntry> {
   Widget audienceJoinLivePageButton() {
     return ElevatedButton(
       onPressed: () {
-        if (ZegoOverlayPageState.overlaying ==
+        if (XOverlayPageState.overlaying ==
             audioRoomOverlayController.pageStateNotifier.value) {
           /// overlay:audio room in overlaying, ignore
           debugPrint('Audio Room Overlaying');

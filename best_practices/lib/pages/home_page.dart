@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:zego_overlay/zego_overlay.dart';
+import 'package:x_overlay/x_overlay.dart';
 
 import '../zego_live_streaming_manager.dart';
 import 'audio_room/audio_room.dart';
@@ -24,7 +24,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ZegoOverlayPopScope(
+    return XOverlayPopScope(
       child: SafeArea(
         top: false,
         child: Scaffold(

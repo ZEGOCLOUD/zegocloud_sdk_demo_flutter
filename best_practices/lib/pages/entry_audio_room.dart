@@ -44,7 +44,7 @@ class _AudioRoomEntryState extends State<AudioRoomEntry> {
   Widget liveAudioRoomButton(ZegoLiveAudioRoomRole role) {
     return ElevatedButton(
       onPressed: () {
-        if (ZegoOverlayPageState.overlaying ==
+        if (XOverlayPageState.overlaying ==
             audioRoomOverlayController.pageStateNotifier.value) {
           /// overlay:in overlaying, restore content page directly
           audioRoomOverlayController.restore(context);

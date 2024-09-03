@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:zego_overlay/zego_overlay.dart';
+import 'package:x_overlay/x_overlay.dart';
 
 import '../../components/components.dart';
 import '../../live_audio_room_manager.dart';
@@ -99,7 +99,7 @@ class AudioRoomPageState extends State<AudioRoomPage> {
 
     uninitGift();
 
-    if (ZegoOverlayPageState.overlaying !=
+    if (XOverlayPageState.overlaying !=
         audioRoomOverlayController.pageStateNotifier.value) {
       /// overlay:not logout if overlaying
       ZegoLiveAudioRoomManager().logoutRoom();
@@ -154,7 +154,7 @@ class AudioRoomPageState extends State<AudioRoomPage> {
   }
 
   Widget overlayButton() {
-    return ZegoOverlayButton(
+    return XOverlayButton(
       buttonSize: const Size(30, 30),
       controller: audioRoomOverlayController,
       dataQuery: () {

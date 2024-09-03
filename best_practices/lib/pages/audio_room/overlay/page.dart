@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:pkbattles/pages/audio_room/overlay/widget.dart';
-import 'package:zego_overlay/zego_overlay.dart';
+import 'package:x_overlay/x_overlay.dart';
 
 import '../audio_room_page.dart';
 import 'defines.dart';
@@ -20,14 +20,14 @@ class AudioRoomOverlayPage extends StatefulWidget {
 class AudioRoomOverlayPageState extends State<AudioRoomOverlayPage> {
   @override
   Widget build(BuildContext context) {
-    return ZegoOverlayPage(
+    return XOverlayPage(
       size: const Size(160, 150),
       controller: audioRoomOverlayController,
       contextQuery: () {
         return widget.navigatorKey.currentState!.context;
       },
       restoreWidgetQuery: (
-        ZegoOverlayData data,
+        XOverlayData data,
       ) {
         late AudioRoomOverlayData audioRoomOverlayData;
         if (data is AudioRoomOverlayData) {
@@ -42,7 +42,7 @@ class AudioRoomOverlayPageState extends State<AudioRoomOverlayPage> {
           fromOverlay: true,
         );
       },
-      builder: (ZegoOverlayData data) {
+      builder: (XOverlayData data) {
         late AudioRoomOverlayData audioRoomOverlayData;
         if (data is AudioRoomOverlayData) {
           audioRoomOverlayData = data;

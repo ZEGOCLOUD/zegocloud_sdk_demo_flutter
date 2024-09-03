@@ -68,7 +68,7 @@ class _CallEntryState extends State<CallEntry> {
   }
 
   Future<void> startCall(ZegoCallType callType) async {
-    if (ZegoOverlayPageState.overlaying ==
+    if (XOverlayPageState.overlaying ==
         audioRoomOverlayController.pageStateNotifier.value) {
       /// overlay:audio room in overlaying, ignore
       debugPrint('Audio Room Overlaying');
@@ -143,7 +143,7 @@ class _CallEntryState extends State<CallEntry> {
   }
 
   void pushToCallWaitingPage() {
-    if (ZegoOverlayPageState.overlaying ==
+    if (XOverlayPageState.overlaying ==
         audioRoomOverlayController.pageStateNotifier.value) {
       /// overlay:audio room in overlaying, ignore
       debugPrint('Audio Room Overlaying');
@@ -162,7 +162,7 @@ class _CallEntryState extends State<CallEntry> {
   }
 
   void pushToCallingPage() {
-    if (ZegoOverlayPageState.overlaying ==
+    if (XOverlayPageState.overlaying ==
         audioRoomOverlayController.pageStateNotifier.value) {
       /// overlay:audio room in overlaying, ignore
       debugPrint('Audio Room Overlaying');

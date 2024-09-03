@@ -1,10 +1,10 @@
-import 'package:zego_overlay/zego_overlay.dart';
+import 'package:x_overlay/x_overlay.dart';
 
 import '../../../internal/business/business_define.dart';
 
-final audioRoomOverlayController = ZegoOverlayController();
+final audioRoomOverlayController = XOverlayController();
 
-class AudioRoomOverlayData extends ZegoOverlayData {
+class AudioRoomOverlayData extends XOverlayData {
   final String roomID;
   final ZegoLiveAudioRoomRole role;
 
