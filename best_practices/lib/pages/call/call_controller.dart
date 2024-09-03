@@ -25,22 +25,37 @@ class ZegoCallController {
   void initService() {
     final callManager = ZegoCallManager();
     subscriptions.addAll([
-      callManager.incomingCallInvitationReceivedStreamCtrl.stream.listen(onIncomingCallInvitationReceived),
-      callManager.incomingCallInvitationTimeoutStreamCtrl.stream.listen(onIncomingCallInvitationTimeout),
+      callManager.incomingCallInvitationReceivedStreamCtrl.stream.listen(
+        onIncomingCallInvitationReceived,
+      ),
+      callManager.incomingCallInvitationTimeoutStreamCtrl.stream.listen(
+        onIncomingCallInvitationTimeout,
+      ),
       callManager.onCallStartStreamCtrl.stream.listen(onCallStart),
       callManager.onCallEndStreamCtrl.stream.listen(onCallEnd),
     ]);
   }
 
-  void onIncomingCallInvitationReceived(IncomingCallInvitationReceivedEvent event) {
+  void onIncomingCallInvitationReceived(
+    IncomingCallInvitationReceivedEvent event,
+  ) {
     final extendedData = jsonDecode(event.info.extendedData);
     if (extendedData is Map && extendedData.containsKey('type')) {
       final callType = extendedData['type'];
       if (ZegoCallManager().isCallBusiness(callType)) {
         final inRoom = ZEGOSDKManager().expressService.currentRoomID.isNotEmpty;
-        if (inRoom || (ZegoCallManager().currentCallData?.callID != event.callID)) {
-          final rejectExtendedData = {'type': callType, 'reason': 'busy', 'callID': event.callID};
-          ZegoCallManager().rejectCallInvitationCauseBusy(event.callID, jsonEncode(rejectExtendedData), callType);
+        if (inRoom ||
+            (ZegoCallManager().currentCallData?.callID != event.callID)) {
+          final rejectExtendedData = {
+            'type': callType,
+            'reason': 'busy',
+            'callID': event.callID
+          };
+          ZegoCallManager().rejectCallInvitationCauseBusy(
+            event.callID,
+            jsonEncode(rejectExtendedData),
+            ZegoCallTypeExtension.fromInt(callType),
+          );
           return;
         }
         dialogIsShowing = true;
@@ -62,31 +77,34 @@ class ZegoCallController {
 
   void onIncomingCallInvitationTimeout(IncomingUserRequestTimeoutEvent event) {
     hideIncomingCallDialog();
-    hidenWatingPage();
+    hideWaitingPage();
   }
 
   void onCallStart(dynamic event) {
-    hidenWatingPage();
+    hideWaitingPage();
     pushToCallingPage();
   }
 
   void onCallEnd(dynamic event) {
     hideIncomingCallDialog();
-    hidenWatingPage();
-    hidenCallingPage();
+    hideWaitingPage();
+    hideCallingPage();
   }
 
   Future<void> acceptCall() async {
     hideIncomingCallDialog();
-    ZegoCallManager().acceptCallInvitation(ZegoCallManager().currentCallData!.callID);
+    ZegoCallManager()
+        .acceptCallInvitation(ZegoCallManager().currentCallData!.callID);
   }
 
   Future<void> rejectCall() async {
     hideIncomingCallDialog();
-    ZegoCallManager().rejectCallInvitation(ZegoCallManager().currentCallData!.callID);
+    ZegoCallManager()
+        .rejectCallInvitation(ZegoCallManager().currentCallData!.callID);
   }
 
-  Future<T?> showTopModalSheet<T>(BuildContext context, Widget widget, {bool barrierDismissible = true}) {
+  Future<T?> showTopModalSheet<T>(BuildContext context, Widget widget,
+      {bool barrierDismissible = true}) {
     return showGeneralDialog<T?>(
       context: context,
       barrierDismissible: barrierDismissible,
@@ -102,8 +120,11 @@ class ZegoCallController {
       )),
       transitionBuilder: (context, animation, secondaryAnimation, child) {
         return SlideTransition(
-          position: CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)
-              .drive(Tween<Offset>(begin: const Offset(0, -1.0), end: Offset.zero)),
+          position:
+              CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)
+                  .drive(
+            Tween<Offset>(begin: const Offset(0, -1.0), end: Offset.zero),
+          ),
           child: child,
         );
       },
@@ -130,12 +151,14 @@ class ZegoCallController {
       context,
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (context) => CallWaitingPage(callData: ZegoCallManager().currentCallData!),
+        builder: (context) => CallWaitingPage(
+          callData: ZegoCallManager().currentCallData!,
+        ),
       ),
     );
   }
 
-  void hidenWatingPage() {
+  void hideWaitingPage() {
     if (waitingPageIsShowing) {
       waitingPageIsShowing = false;
       final context = navigatorKey.currentState!.overlay!.context;
@@ -150,13 +173,15 @@ class ZegoCallController {
         context,
         MaterialPageRoute(
           fullscreenDialog: true,
-          builder: (context) => CallingPage(callData: ZegoCallManager().currentCallData!),
+          builder: (context) => CallingPage(
+            callData: ZegoCallManager().currentCallData!,
+          ),
         ),
       );
     }
   }
 
-  void hidenCallingPage() {
+  void hideCallingPage() {
     if (callingPageIsShowing) {
       callingPageIsShowing = false;
       final context = navigatorKey.currentState!.overlay!.context;

@@ -31,7 +31,10 @@ class _CallEntryState extends State<CallEntry> {
     return Column(
       children: [
         const Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-          Text('Call Demo:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400)),
+          Text(
+            'Call Demo:',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
+          ),
         ]),
         Row(
           children: [
@@ -40,7 +43,9 @@ class _CallEntryState extends State<CallEntry> {
             Expanded(
               child: TextField(
                 controller: inviteeIDController,
-                decoration: const InputDecoration(labelText: 'input invitee userID'),
+                decoration: const InputDecoration(
+                  labelText: 'input invitee userID',
+                ),
               ),
             ),
           ],
@@ -49,8 +54,12 @@ class _CallEntryState extends State<CallEntry> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            ElevatedButton(onPressed: () => startCall(ZegoCallType.voice), child: const Text('voice call')),
-            ElevatedButton(onPressed: () => startCall(ZegoCallType.video), child: const Text('video call'))
+            ElevatedButton(
+                onPressed: () => startCall(ZegoCallType.voice),
+                child: const Text('voice call')),
+            ElevatedButton(
+                onPressed: () => startCall(ZegoCallType.video),
+                child: const Text('video call'))
           ],
         ),
         const SizedBox(height: 30),
@@ -59,17 +68,35 @@ class _CallEntryState extends State<CallEntry> {
   }
 
   Future<void> startCall(ZegoCallType callType) async {
-    final userIDList = inviteeIDController.text.split(',');
+    if (ZegoOverlayPageState.overlaying ==
+        audioRoomOverlayController.pageStateNotifier.value) {
+      /// overlay:audio room in overlaying, ignore
+      debugPrint('Audio Room Overlaying');
+      return;
+    }
+
+    final userIDList = inviteeIDController.text.split(',')
+      ..removeWhere((e) => e.isEmpty);
+    if (userIDList.isEmpty) {
+      return;
+    }
+
     if (callType == ZegoCallType.video) {
       if (userIDList.length > 1) {
-        ZegoCallManager().sendGroupVideoCallInvitation(userIDList).then((value) {}).catchError((error) {
+        ZegoCallManager()
+            .sendGroupVideoCallInvitation(userIDList)
+            .then((value) {})
+            .catchError((error) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('send call invitation failed: $error')),
           );
         });
       } else {
-        ZegoCallManager().sendVideoCallInvitation(inviteeIDController.text).then((value) {
-          final errorInvitees = value.info.errorInvitees.map((e) => e.userID).toList();
+        ZegoCallManager()
+            .sendVideoCallInvitation(inviteeIDController.text)
+            .then((value) {
+          final errorInvitees =
+              value.info.errorInvitees.map((e) => e.userID).toList();
           if (errorInvitees.contains(inviteeIDController.text)) {
             ZegoCallManager.instance.clearCallData();
             ScaffoldMessenger.of(context).showSnackBar(
@@ -87,10 +114,16 @@ class _CallEntryState extends State<CallEntry> {
       }
     } else {
       if (userIDList.length > 1) {
-        ZegoCallManager().sendGroupVoiceCallInvitation(userIDList).then((value) {}).catchError((error) {});
+        ZegoCallManager()
+            .sendGroupVoiceCallInvitation(userIDList)
+            .then((value) {})
+            .catchError((error) {});
       } else {
-        ZegoCallManager().sendVoiceCallInvitation(inviteeIDController.text).then((value) {
-          final errorInvitees = value.info.errorInvitees.map((e) => e.userID).toList();
+        ZegoCallManager()
+            .sendVoiceCallInvitation(inviteeIDController.text)
+            .then((value) {
+          final errorInvitees =
+              value.info.errorInvitees.map((e) => e.userID).toList();
           if (errorInvitees.contains(inviteeIDController.text)) {
             ZegoCallManager.instance.clearCallData();
             ScaffoldMessenger.of(context).showSnackBar(
@@ -110,22 +143,40 @@ class _CallEntryState extends State<CallEntry> {
   }
 
   void pushToCallWaitingPage() {
+    if (ZegoOverlayPageState.overlaying ==
+        audioRoomOverlayController.pageStateNotifier.value) {
+      /// overlay:audio room in overlaying, ignore
+      debugPrint('Audio Room Overlaying');
+      return;
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (context) => CallWaitingPage(callData: ZegoCallManager().currentCallData!),
+        builder: (context) => CallWaitingPage(
+          callData: ZegoCallManager().currentCallData!,
+        ),
       ),
     );
   }
 
   void pushToCallingPage() {
+    if (ZegoOverlayPageState.overlaying ==
+        audioRoomOverlayController.pageStateNotifier.value) {
+      /// overlay:audio room in overlaying, ignore
+      debugPrint('Audio Room Overlaying');
+      return;
+    }
+
     if (ZegoCallManager().currentCallData != null) {
       Navigator.push(
         context,
         MaterialPageRoute(
           fullscreenDialog: true,
-          builder: (context) => CallingPage(callData: ZegoCallManager().currentCallData!),
+          builder: (context) => CallingPage(
+            callData: ZegoCallManager().currentCallData!,
+          ),
         ),
       );
     }

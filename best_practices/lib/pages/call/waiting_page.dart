@@ -56,7 +56,8 @@ class _CallWaitingPageState extends State<CallWaitingPage> {
 
   Widget headView() {
     CallUserInfo? user;
-    if (widget.callData.inviter.userID == ZEGOSDKManager().currentUser?.userID) {
+    if (widget.callData.inviter.userID ==
+        ZEGOSDKManager().currentUser?.userID) {
       user = widget.callData.inviter;
     } else {
       user = widget.callData.callUserList
@@ -88,7 +89,10 @@ class _CallWaitingPageState extends State<CallWaitingPage> {
                 child: Text(
                   (user.userName != null) ? user.userName![0] : user.userID[0],
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 )),
           ),
         ),
@@ -106,10 +110,12 @@ class _CallWaitingPageState extends State<CallWaitingPage> {
   }
 
   Widget buttonView() {
-    if (widget.callData.inviter.userID == ZEGOSDKManager().currentUser!.userID) {
+    if (widget.callData.inviter.userID ==
+        ZEGOSDKManager().currentUser!.userID) {
       return LayoutBuilder(builder: (context, containers) {
         return Padding(
-          padding: EdgeInsets.only(left: 0, right: 0, top: containers.maxHeight - 70),
+          padding: EdgeInsets.only(
+              left: 0, right: 0, top: containers.maxHeight - 70),
           child: Container(
             padding: EdgeInsets.zero,
             height: 70,
@@ -125,7 +131,8 @@ class _CallWaitingPageState extends State<CallWaitingPage> {
     } else {
       return LayoutBuilder(builder: (context, containers) {
         return Padding(
-          padding: EdgeInsets.only(left: 0, right: 0, top: containers.maxHeight - 70),
+          padding: EdgeInsets.only(
+              left: 0, right: 0, top: containers.maxHeight - 70),
           child: Container(
             padding: EdgeInsets.zero,
             height: 70,
@@ -169,7 +176,7 @@ class _CallWaitingPageState extends State<CallWaitingPage> {
 
   Future<void> endCall() async {
     ZegoCallManager().endCall(widget.callData.callID);
-    ZegoCallController().hidenWatingPage();
+    ZegoCallController().hideWaitingPage();
   }
 
   Widget acceptCallButton() {
@@ -188,7 +195,9 @@ class _CallWaitingPageState extends State<CallWaitingPage> {
   }
 
   Future<void> acceptCall() async {
-    ZegoCallManager().acceptCallInvitation(widget.callData.callID).then((value) {
+    ZegoCallManager()
+        .acceptCallInvitation(widget.callData.callID)
+        .then((value) {
       ZEGOSDKManager().expressService.stopPreview();
     }).catchError((error) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -207,6 +216,6 @@ class _CallWaitingPageState extends State<CallWaitingPage> {
 
   Future<void> declineCall() async {
     ZegoCallManager().rejectCallInvitation(widget.callData.callID);
-    ZegoCallController().hidenWatingPage();
+    ZegoCallController().hideWaitingPage();
   }
 }

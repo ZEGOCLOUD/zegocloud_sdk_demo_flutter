@@ -14,6 +14,15 @@ enum ZegoCallType {
   video,
 }
 
+extension ZegoCallTypeExtension on ZegoCallType {
+  static ZegoCallType fromInt(int callType) {
+    if (callType == VIDEO_Call) {
+      return ZegoCallType.video;
+    }
+    return ZegoCallType.voice;
+  }
+}
+
 const VOICE_Call = 10001;
 const VIDEO_Call = 10000;
 
