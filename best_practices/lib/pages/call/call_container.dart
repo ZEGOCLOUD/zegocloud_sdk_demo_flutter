@@ -14,7 +14,7 @@ class CallContainer extends StatefulWidget {
 }
 
 class CallContainerState extends State<CallContainer> {
-  ListNotifier<CallUserInfo> enableShowUserNoti = ListNotifier([]);
+  ListNotifier<CallUserInfo> enableShowUserNotifier = ListNotifier([]);
 
   List<StreamSubscription> subscriptions = [];
 
@@ -32,14 +32,15 @@ class CallContainerState extends State<CallContainer> {
     final callManager = ZegoCallManager();
     subscriptions.addAll([
       callManager.onCallUserQuitStreamCtrl.stream.listen(onCallUserQuit),
-      callManager.outgoingCallInvitationTimeoutStreamCtrl.stream.listen(onOutgoingCallTimeOut),
+      callManager.outgoingCallInvitationTimeoutStreamCtrl.stream
+          .listen(onOutgoingCallTimeOut),
       callManager.onCallUserUpdateStreamCtrl.stream.listen(onCallUserUpdate)
     ]);
 
     if (ZegoCallManager().currentCallData != null) {
       for (final callUser in ZegoCallManager().currentCallData!.callUserList) {
         if (callUser.isWaiting.value || callUser.hasAccepted.value) {
-          enableShowUserNoti.add(callUser);
+          enableShowUserNotifier.add(callUser);
         }
       }
     }
@@ -71,21 +72,25 @@ class CallContainerState extends State<CallContainer> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<List<CallUserInfo>>(
-        valueListenable: enableShowUserNoti,
-        builder: (context, enableShowUsers, _) {
-          final userList = seatingArrangement(enableShowUsers);
-          if (enableShowUsers.length > 2) {
-            return groupCallView(userList);
-          } else {
-            return oneOnoneView(userList);
-          }
-        });
+      valueListenable: enableShowUserNotifier,
+      builder: (context, enableShowUsers, _) {
+        final userList = seatingArrangement(enableShowUsers);
+        if (enableShowUsers.length > 2) {
+          return groupCallView(userList);
+        } else {
+          return oneOnOneView(userList);
+        }
+      },
+    );
   }
 
-  Widget oneOnoneView(List<CallUserInfo> userList) {
+  Widget oneOnOneView(List<CallUserInfo> userList) {
     if (userList.length == 2) {
       return Stack(
-        children: [largetVideoView(userList.last), smallVideoView(userList.first)],
+        children: [
+          largeVideoView(userList.last),
+          smallVideoView(userList.first)
+        ],
       );
     } else {
       return Container();
@@ -93,12 +98,20 @@ class CallContainerState extends State<CallContainer> {
   }
 
   Widget groupCallView(List<CallUserInfo> userList) {
-    return LayoutBuilder(builder: (context, constraints) {
-      return Stack(children: getGroupCallChildViews(userList, constraints));
-    });
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Stack(
+          children: getGroupCallChildViews(
+            userList,
+            constraints,
+          ),
+        );
+      },
+    );
   }
 
-  List<Positioned> getGroupCallChildViews(List<CallUserInfo> userList, BoxConstraints constraints) {
+  List<Positioned> getGroupCallChildViews(
+      List<CallUserInfo> userList, BoxConstraints constraints) {
     final containerViewWidth = constraints.maxWidth;
     final containerViewHeight = constraints.maxWidth * (16 / 18);
     final views = <Positioned>[];
@@ -108,11 +121,12 @@ class CallContainerState extends State<CallContainer> {
         double left = i == 0 ? 0 : containerViewWidth / 2;
         double top = i == 2 ? containerViewHeight / 2 : 0;
         final positionedView = Positioned(
-            top: top,
-            left: left,
-            width: containerViewWidth / 2,
-            height: i == 0 ? containerViewHeight : containerViewHeight / 2,
-            child: GroupCallView(callUserInfo: callUser));
+          top: top,
+          left: left,
+          width: containerViewWidth / 2,
+          height: i == 0 ? containerViewHeight : containerViewHeight / 2,
+          child: GroupCallView(callUserInfo: callUser),
+        );
         views.add(positionedView);
       }
     } else if (userList.length == 4) {
@@ -127,7 +141,12 @@ class CallContainerState extends State<CallContainer> {
         top = cellHeight * (i < column ? 0 : 1);
         final callUser = userList[i];
         final positionedView = Positioned(
-            top: top, left: left, width: cellWidth, height: cellHeight, child: GroupCallView(callUserInfo: callUser));
+          top: top,
+          left: left,
+          width: cellWidth,
+          height: cellHeight,
+          child: GroupCallView(callUserInfo: callUser),
+        );
         views.add(positionedView);
       }
     } else if (userList.length == 5) {
@@ -142,11 +161,19 @@ class CallContainerState extends State<CallContainer> {
         double top = i > 1 ? height : 0;
         final callUser = userList[i];
         final positionedView = Positioned(
-            top: top, left: left, width: width, height: height, child: GroupCallView(callUserInfo: callUser));
+          top: top,
+          left: left,
+          width: width,
+          height: height,
+          child: GroupCallView(callUserInfo: callUser),
+        );
         views.add(positionedView);
       }
     } else if (userList.length > 5) {
-      int row = (userList.length % 3 == 0 ? (userList.length / 3) : (userList.length / 3) + 1).toInt();
+      int row = (userList.length % 3 == 0
+              ? (userList.length / 3)
+              : (userList.length / 3) + 1)
+          .toInt();
       int column = 3;
       double cellWidth = containerViewWidth / column;
       double cellHeight = containerViewHeight / row;
@@ -157,30 +184,36 @@ class CallContainerState extends State<CallContainer> {
         top = cellHeight * (i ~/ column);
         final callUser = userList[i];
         final positionedView = Positioned(
-            top: top, left: left, width: cellWidth, height: cellHeight, child: GroupCallView(callUserInfo: callUser));
+          top: top,
+          left: left,
+          width: cellWidth,
+          height: cellHeight,
+          child: GroupCallView(callUserInfo: callUser),
+        );
         views.add(positionedView);
       }
     }
     return views;
   }
 
-  Widget largetVideoView(CallUserInfo callUser) {
+  Widget largeVideoView(CallUserInfo callUser) {
     return ValueListenableBuilder(
-        valueListenable: callUser.sdkUserNoti,
-        builder: (context, ZegoSDKUser? sdkUser, _) {
-          if (sdkUser != null) {
-            return Container(
-              padding: EdgeInsets.zero,
-              color: Colors.black,
-              child: ZegoAudioVideoView(userInfo: sdkUser),
-            );
-          } else {
-            return Container(
-              padding: EdgeInsets.zero,
-              color: Colors.black,
-            );
-          }
-        });
+      valueListenable: callUser.sdkUserNoti,
+      builder: (context, ZegoSDKUser? sdkUser, _) {
+        if (sdkUser != null) {
+          return Container(
+            padding: EdgeInsets.zero,
+            color: Colors.black,
+            child: ZegoAudioVideoView(userInfo: sdkUser),
+          );
+        } else {
+          return Container(
+            padding: EdgeInsets.zero,
+            color: Colors.black,
+          );
+        }
+      },
+    );
   }
 
   Widget smallVideoView(CallUserInfo callUser) {
@@ -190,14 +223,18 @@ class CallContainerState extends State<CallContainer> {
           return LayoutBuilder(builder: (context, constraints) {
             if (sdkUser != null) {
               return Container(
-                margin: EdgeInsets.only(top: 100, left: constraints.maxWidth - 95.0 - 20),
+                margin: EdgeInsets.only(
+                  top: 100,
+                  left: constraints.maxWidth - 95.0 - 20,
+                ),
                 width: 95.0,
                 height: 164.0,
                 child: ZegoAudioVideoView(userInfo: sdkUser),
               );
             } else {
               return Container(
-                margin: EdgeInsets.only(top: 100, left: constraints.maxWidth - 95.0 - 20),
+                margin: EdgeInsets.only(
+                    top: 100, left: constraints.maxWidth - 95.0 - 20),
                 width: 95.0,
                 height: 164.0,
                 color: Colors.black,
@@ -208,21 +245,25 @@ class CallContainerState extends State<CallContainer> {
   }
 
   void onCallUserQuit(CallUserQuitEvent event) {
-    enableShowUserNoti.removeWhere((element) => element.userID == event.userID);
+    enableShowUserNotifier.removeWhere(
+      (element) => element.userID == event.userID,
+    );
   }
 
   void onOutgoingCallTimeOut(OutgoingCallTimeoutEvent event) {
-    enableShowUserNoti.removeWhere((element) => element.userID == event.userID);
+    enableShowUserNotifier.removeWhere(
+      (element) => element.userID == event.userID,
+    );
   }
 
   void onCallUserUpdate(OnCallUserUpdateEvent event) {
     debugPrint('onCallUserUpdate:$event');
     var isFindUser = false;
-    for (final user in enableShowUserNoti.value) {
+    for (final user in enableShowUserNotifier.value) {
       if (user.userID == event.userID) {
         isFindUser = true;
         if (!user.isWaiting.value && !user.hasAccepted.value) {
-          enableShowUserNoti.remove(user);
+          enableShowUserNotifier.remove(user);
           break;
         }
       }
@@ -230,7 +271,7 @@ class CallContainerState extends State<CallContainer> {
     if (!isFindUser) {
       for (final user in ZegoCallManager().currentCallData!.callUserList) {
         if (user.userID == event.userID) {
-          enableShowUserNoti.add(user);
+          enableShowUserNotifier.add(user);
           break;
         }
       }

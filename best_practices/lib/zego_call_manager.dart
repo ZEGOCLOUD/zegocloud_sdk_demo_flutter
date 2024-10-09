@@ -23,14 +23,22 @@ class ZegoCallManager implements ZegoCallManagerInterface {
 
   ZegoSDKUser? get localUser => ZEGOSDKManager().currentUser;
 
-  final incomingCallInvitationReceivedStreamCtrl = StreamController<IncomingCallInvitationReceivedEvent>.broadcast();
-  final incomingCallInvitationTimeoutStreamCtrl = StreamController<IncomingUserRequestTimeoutEvent>.broadcast();
-  final outgoingCallInvitationTimeoutStreamCtrl = StreamController<OutgoingCallTimeoutEvent>.broadcast();
-  final outgoingCallInvitationRejectedStreamCtrl = StreamController<OutgoingCallInvitationRejectedEvent>.broadcast();
-  final onOutgoingCallInvitationAccepted = StreamController<OnOutgoingCallAcceptedEvent>.broadcast();
-  final onCallUserQuitStreamCtrl = StreamController<CallUserQuitEvent>.broadcast();
-  final onCallUserInfoUpdateStreamCtrl = StreamController<OnCallUserInfoUpdateEvent>.broadcast();
-  final onCallUserUpdateStreamCtrl = StreamController<OnCallUserUpdateEvent>.broadcast();
+  final incomingCallInvitationReceivedStreamCtrl =
+      StreamController<IncomingCallInvitationReceivedEvent>.broadcast();
+  final incomingCallInvitationTimeoutStreamCtrl =
+      StreamController<IncomingUserRequestTimeoutEvent>.broadcast();
+  final outgoingCallInvitationTimeoutStreamCtrl =
+      StreamController<OutgoingCallTimeoutEvent>.broadcast();
+  final outgoingCallInvitationRejectedStreamCtrl =
+      StreamController<OutgoingCallInvitationRejectedEvent>.broadcast();
+  final onOutgoingCallInvitationAccepted =
+      StreamController<OnOutgoingCallAcceptedEvent>.broadcast();
+  final onCallUserQuitStreamCtrl =
+      StreamController<CallUserQuitEvent>.broadcast();
+  final onCallUserInfoUpdateStreamCtrl =
+      StreamController<OnCallUserInfoUpdateEvent>.broadcast();
+  final onCallUserUpdateStreamCtrl =
+      StreamController<OnCallUserUpdateEvent>.broadcast();
 
   final onCallStartStreamCtrl = StreamController.broadcast();
   final onCallEndStreamCtrl = StreamController.broadcast();
@@ -39,11 +47,15 @@ class ZegoCallManager implements ZegoCallManagerInterface {
     final zimService = ZEGOSDKManager().zimService;
     final expressService = ZEGOSDKManager().expressService;
     subscriptions.addAll([
-      expressService.roomUserListUpdateStreamCtrl.stream.listen(onRoomUserListUpdate),
-      zimService.incomingUserRequestReceivedStreamCtrl.stream.listen(onInComingUserRequestReceived),
-      zimService.userRequestStateChangeStreamCtrl.stream.listen(onUserRequestStateChanged),
+      expressService.roomUserListUpdateStreamCtrl.stream
+          .listen(onRoomUserListUpdate),
+      zimService.incomingUserRequestReceivedStreamCtrl.stream
+          .listen(onInComingUserRequestReceived),
+      zimService.userRequestStateChangeStreamCtrl.stream
+          .listen(onUserRequestStateChanged),
       zimService.userRequestEndStreamCtrl.stream.listen(onUserRequestEnded),
-      zimService.incomingUserRequestTimeoutStreamCtrl.stream.listen(onInComingUserRequestTimeout)
+      zimService.incomingUserRequestTimeoutStreamCtrl.stream
+          .listen(onInComingUserRequestTimeout)
     ]);
   }
 
@@ -52,40 +64,53 @@ class ZegoCallManager implements ZegoCallManagerInterface {
     currentCallData = null;
   }
 
-  CallExtendedData getCallExtendata(ZegoCallType type) {
+  CallExtendedData getCallExtendData(ZegoCallType type) {
     final callType = type == ZegoCallType.video ? VIDEO_Call : VOICE_Call;
     final extendedData = CallExtendedData()..type = callType;
     return extendedData;
   }
 
-  Future<ZIMCallAcceptanceSentResult> acceptUserRequest(String requestID, String extendedData) async {
+  Future<ZIMCallAcceptanceSentResult> acceptUserRequest(
+      String requestID, String extendedData) async {
     final config = ZIMCallAcceptConfig()..extendedData = extendedData;
-    final result = await ZEGOSDKManager().zimService.acceptUserRequest(requestID, config: config);
+    final result = await ZEGOSDKManager()
+        .zimService
+        .acceptUserRequest(requestID, config: config);
     return result;
   }
 
-  Future<ZIMCallEndSentResult> endUserRequest(String requestID, String extendedData) async {
+  Future<ZIMCallEndSentResult> endUserRequest(
+      String requestID, String extendedData) async {
     final config = ZIMCallEndConfig()..extendedData = extendedData;
-    final result = await ZEGOSDKManager().zimService.endUserRequest(requestID, config);
+    final result =
+        await ZEGOSDKManager().zimService.endUserRequest(requestID, config);
     return result;
   }
 
-  Future<ZIMCallRejectionSentResult> refuseUserRequest(String requestID, String extendedData) async {
+  Future<ZIMCallRejectionSentResult> refuseUserRequest(
+      String requestID, String extendedData) async {
     final config = ZIMCallRejectConfig()..extendedData = extendedData;
-    final result = await ZEGOSDKManager().zimService.rejectUserRequest(requestID, config: config);
+    final result = await ZEGOSDKManager()
+        .zimService
+        .rejectUserRequest(requestID, config: config);
     return result;
   }
 
-  Future<ZIMCallQuitSentResult> quitUserRequest(String requestID, String extendedData) async {
+  Future<ZIMCallQuitSentResult> quitUserRequest(
+      String requestID, String extendedData) async {
     final config = ZIMCallQuitConfig()..extendedData = extendedData;
-    final result = await ZEGOSDKManager().zimService.quitUserRequest(requestID, config);
+    final result =
+        await ZEGOSDKManager().zimService.quitUserRequest(requestID, config);
     return result;
   }
 
-  Future<ZIMCallingInvitationSentResult> addUserToRequest(List<String> userList, String requestID) async {
+  Future<ZIMCallingInvitationSentResult> addUserToRequest(
+      List<String> userList, String requestID) async {
     await ZEGOSDKManager().zimService.queryUsersInfo(userList);
     final config = ZIMCallingInviteConfig();
-    final result = await ZEGOSDKManager().zimService.addUserToRequest(userList, requestID, config);
+    final result = await ZEGOSDKManager()
+        .zimService
+        .addUserToRequest(userList, requestID, config);
     return result;
   }
 
@@ -97,10 +122,13 @@ class ZegoCallManager implements ZegoCallManagerInterface {
       ..mode = ZIMCallInvitationMode.advanced
       ..extendedData = extendedData
       ..timeout = 60;
-    final result = await ZEGOSDKManager().zimService.sendUserRequest(userList, config: config);
+    final result = await ZEGOSDKManager()
+        .zimService
+        .sendUserRequest(userList, config: config);
     final errorUser = result.info.errorUserList.map((e) => e.userID).toList();
-    final sucessUsers = userList.where((element) => !errorUser.contains(element));
-    if (sucessUsers.isNotEmpty) {
+    final successUsers =
+        userList.where((element) => !errorUser.contains(element));
+    if (successUsers.isNotEmpty) {
       currentCallData!
         ..callID = result.callID
         ..inviter = CallUserInfo(userID: localUser?.userID ?? '')
@@ -114,17 +142,23 @@ class ZegoCallManager implements ZegoCallManagerInterface {
 
   //MARK - invitation
   @override
-  Future<ZIMCallAcceptanceSentResult> acceptCallInvitation(String requestID) async {
-    final extendedData =
-        getCallExtendata(currentCallData?.callType == VIDEO_Call ? ZegoCallType.video : ZegoCallType.voice);
-    final result = await acceptUserRequest(requestID, extendedData.toJsonString());
+  Future<ZIMCallAcceptanceSentResult> acceptCallInvitation(
+      String requestID) async {
+    final extendedData = getCallExtendData(
+        currentCallData?.callType == VIDEO_Call
+            ? ZegoCallType.video
+            : ZegoCallType.voice);
+    final result =
+        await acceptUserRequest(requestID, extendedData.toJsonString());
     return result;
   }
 
   @override
   Future<ZIMCallEndSentResult> endCall(String requestID) async {
-    final extendedData =
-        getCallExtendata(currentCallData?.callType == VIDEO_Call ? ZegoCallType.video : ZegoCallType.voice);
+    final extendedData = getCallExtendData(
+        currentCallData?.callType == VIDEO_Call
+            ? ZegoCallType.video
+            : ZegoCallType.voice);
     final result = await endUserRequest(requestID, extendedData.toJsonString());
     leaveRoom();
     clearCallData();
@@ -137,8 +171,10 @@ class ZegoCallManager implements ZegoCallManagerInterface {
   }
 
   @override
-  Future<ZIMCallingInvitationSentResult> inviteUserToJoinCall(List<String> targetUserIDs) async {
-    final result = await addUserToRequest(targetUserIDs, currentCallData?.callID ?? '');
+  Future<ZIMCallingInvitationSentResult> inviteUserToJoinCall(
+      List<String> targetUserIDs) async {
+    final result =
+        await addUserToRequest(targetUserIDs, currentCallData?.callID ?? '');
     return result;
   }
 
@@ -150,9 +186,12 @@ class ZegoCallManager implements ZegoCallManagerInterface {
   @override
   Future<void> quitCall() async {
     if (currentCallData != null) {
-      final extendedData =
-          getCallExtendata(currentCallData?.callType == VIDEO_Call ? ZegoCallType.video : ZegoCallType.voice);
-      await quitUserRequest(currentCallData!.callID, extendedData.toJsonString());
+      final extendedData = getCallExtendData(
+          currentCallData?.callType == VIDEO_Call
+              ? ZegoCallType.video
+              : ZegoCallType.voice);
+      await quitUserRequest(
+          currentCallData!.callID, extendedData.toJsonString());
       stopCall();
     }
   }
@@ -160,47 +199,58 @@ class ZegoCallManager implements ZegoCallManagerInterface {
   @override
   Future<void> rejectCallInvitation(String requestID) async {
     if (currentCallData != null && requestID == currentCallData!.callID) {
-      final extendedData =
-          getCallExtendata(currentCallData?.callType == VIDEO_Call ? ZegoCallType.video : ZegoCallType.voice);
+      final extendedData = getCallExtendData(
+          currentCallData?.callType == VIDEO_Call
+              ? ZegoCallType.video
+              : ZegoCallType.voice);
       await refuseUserRequest(requestID, extendedData.toJsonString());
       clearCallData();
     }
   }
 
   @override
-  Future<void> rejectCallInvitationCauseBusy(String requestID, String extendedData, ZegoCallType type) async {
+  Future<void> rejectCallInvitationCauseBusy(
+      String requestID, String extendedData, ZegoCallType type) async {
     await refuseUserRequest(requestID, extendedData);
   }
 
   @override
-  Future<ZIMCallInvitationSentResult> sendGroupVideoCallInvitation(targetUserIDs) async {
+  Future<ZIMCallInvitationSentResult> sendGroupVideoCallInvitation(
+      targetUserIDs) async {
     const callType = ZegoCallType.video;
-    final extendedData = getCallExtendata(callType);
-    final result = await sendUserRequest(targetUserIDs, extendedData.toJsonString(), callType);
+    final extendedData = getCallExtendData(callType);
+    final result = await sendUserRequest(
+        targetUserIDs, extendedData.toJsonString(), callType);
     return result;
   }
 
   @override
-  Future<ZIMCallInvitationSentResult> sendGroupVoiceCallInvitation(List<String> targetUserIDs) async {
+  Future<ZIMCallInvitationSentResult> sendGroupVoiceCallInvitation(
+      List<String> targetUserIDs) async {
     const callType = ZegoCallType.voice;
-    final extendedData = getCallExtendata(callType);
-    final result = await sendUserRequest(targetUserIDs, extendedData.toJsonString(), callType);
+    final extendedData = getCallExtendData(callType);
+    final result = await sendUserRequest(
+        targetUserIDs, extendedData.toJsonString(), callType);
     return result;
   }
 
   @override
-  Future<ZIMCallInvitationSentResult> sendVideoCallInvitation(String targetUserID) async {
+  Future<ZIMCallInvitationSentResult> sendVideoCallInvitation(
+      String targetUserID) async {
     const callType = ZegoCallType.video;
-    final extendedData = getCallExtendata(callType);
-    final result = await sendUserRequest([targetUserID], extendedData.toJsonString(), callType);
+    final extendedData = getCallExtendData(callType);
+    final result = await sendUserRequest(
+        [targetUserID], extendedData.toJsonString(), callType);
     return result;
   }
 
   @override
-  Future<ZIMCallInvitationSentResult> sendVoiceCallInvitation(String targetUserID) async {
+  Future<ZIMCallInvitationSentResult> sendVoiceCallInvitation(
+      String targetUserID) async {
     const callType = ZegoCallType.voice;
-    final extendedData = getCallExtendata(callType);
-    final result = await sendUserRequest([targetUserID], extendedData.toJsonString(), callType);
+    final extendedData = getCallExtendData(callType);
+    final result = await sendUserRequest(
+        [targetUserID], extendedData.toJsonString(), callType);
     return result;
   }
 
@@ -234,7 +284,8 @@ class ZegoCallManager implements ZegoCallManagerInterface {
 class IncomingCallInvitationReceivedEvent {
   final String callID;
   final ZegoCallInvitationReceivedInfo info;
-  IncomingCallInvitationReceivedEvent({required this.callID, required this.info});
+  IncomingCallInvitationReceivedEvent(
+      {required this.callID, required this.info});
 
   @override
   String toString() {
@@ -245,7 +296,8 @@ class IncomingCallInvitationReceivedEvent {
 class OutgoingCallInvitationRejectedEvent {
   final String userID;
   final String extendedData;
-  OutgoingCallInvitationRejectedEvent({required this.userID, required this.extendedData});
+  OutgoingCallInvitationRejectedEvent(
+      {required this.userID, required this.extendedData});
 
   @override
   String toString() {
@@ -278,7 +330,8 @@ class OutgoingCallTimeoutEvent {
 class OnOutgoingCallAcceptedEvent {
   final String userID;
   final String extendedData;
-  OnOutgoingCallAcceptedEvent({required this.userID, required this.extendedData});
+  OnOutgoingCallAcceptedEvent(
+      {required this.userID, required this.extendedData});
 
   @override
   String toString() {
