@@ -221,22 +221,29 @@ class CallContainerState extends State<CallContainer> {
         valueListenable: callUser.sdkUserNoti,
         builder: (context, ZegoSDKUser? sdkUser, _) {
           return LayoutBuilder(builder: (context, constraints) {
+            final width = constraints.maxWidth * 0.3;
+            final height = 16 * width / 9;
+            final top = constraints.maxHeight * 0.1;
+            final right = constraints.maxWidth * 0.01;
+            final left = constraints.maxWidth - width - right;
             if (sdkUser != null) {
               return Container(
                 margin: EdgeInsets.only(
-                  top: 100,
-                  left: constraints.maxWidth - 95.0 - 20,
+                  top: top,
+                  left: left,
                 ),
-                width: 95.0,
-                height: 164.0,
+                width: width,
+                height: height,
                 child: ZegoAudioVideoView(userInfo: sdkUser),
               );
             } else {
               return Container(
                 margin: EdgeInsets.only(
-                    top: 100, left: constraints.maxWidth - 95.0 - 20),
-                width: 95.0,
-                height: 164.0,
+                  top: top,
+                  left: left,
+                ),
+                width: width,
+                height: height,
                 color: Colors.black,
               );
             }

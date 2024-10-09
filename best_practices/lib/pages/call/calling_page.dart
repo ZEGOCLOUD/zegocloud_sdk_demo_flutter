@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:floating/floating.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../components/common/zego_pip_button.dart';
 import '../../components/components.dart';
+import '../../internal/business/pip.dart';
 import '../../utils/zegocloud_token.dart';
 import '../../zego_call_manager.dart';
 import '../../zego_sdk_key_center.dart';
@@ -97,15 +99,29 @@ class _CallingPageState extends State<CallingPage> {
       },
       child: Scaffold(
         body: SafeArea(
-          child: Stack(
-            children: [
-              const CallContainer(),
-              bottomBar(),
-            ],
+          child: PiPSwitcher(
+            floating: ZegoPIPController().floating,
+            childWhenDisabled: Stack(
+              children: [
+                const CallContainer(),
+                topBar(),
+                bottomBar(),
+              ],
+            ),
+            childWhenEnabled: const CallContainer(),
           ),
         ),
       ),
     );
+  }
+
+  Widget topBar() {
+    return LayoutBuilder(builder: (context, containers) {
+      return Padding(
+        padding: const EdgeInsets.only(left: 0, right: 0, top: 10),
+        child: topView(),
+      );
+    });
   }
 
   Widget bottomBar() {
@@ -116,6 +132,15 @@ class _CallingPageState extends State<CallingPage> {
         child: buttonView(),
       );
     });
+  }
+
+  Widget topView() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        pipButton(),
+      ],
+    );
   }
 
   Widget buttonView() {
@@ -162,6 +187,14 @@ class _CallingPageState extends State<CallingPage> {
           ZegoCallManager().quitCall();
         },
       ),
+    );
+  }
+
+  Widget pipButton() {
+    return const SizedBox(
+      width: 50,
+      height: 50,
+      child: ZegoPIPButton(),
     );
   }
 

@@ -23,6 +23,7 @@ dependencies:
   flutter_cache_manager: ^3.3.1
   path_provider: ^2.1.2
   x_overlay: ^1.0.0
+  floating: ^4.0.1
 
 dev_dependencies:
   flutter_test:
