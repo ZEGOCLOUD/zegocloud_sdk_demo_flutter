@@ -170,10 +170,11 @@ class PKService implements PKServiceInterface {
       }
       if (timeoutQuitUsers.isNotEmpty) {
         for (final timeoutQuitUser in timeoutQuitUsers) {
-          final callUserInfo = ZIMCallUserInfo()
-            ..userID = timeoutQuitUser.userID
-            ..extendedData = timeoutQuitUser.extendedData
-            ..state = timeoutQuitUser.callUserState;
+          final callUserInfo = ZIMCallUserInfo(
+            userID: timeoutQuitUser.userID,
+            state: timeoutQuitUser.callUserState,
+            extendedData: timeoutQuitUser.extendedData,
+          );
           onReceivePKUserQuit(pkInfo!.requestID ?? '', callUserInfo);
         }
       }
